@@ -1,0 +1,14 @@
+tmp/
+.venv/
+__pycache__/
+.ruff_cache/
+uploads/
+.python-version
+.vscode/
+.env
+.env.dev
+test_data/
+transcribe/
+translate/
+node_modules/
+.vite/
