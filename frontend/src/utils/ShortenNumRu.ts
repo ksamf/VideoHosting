@@ -1,4 +1,4 @@
-export function shortenNumRu(value, precision = 1) {
+export function shortenNumRu(value: number, precision: number = 1): string {
   if (typeof value !== "number" || !Number.isFinite(value)) {
     throw new TypeError("Value must be a finite number");
   }
@@ -22,6 +22,6 @@ export function shortenNumRu(value, precision = 1) {
   return value.toString();
 }
 
-function removeTrailingZero(num) {
+function removeTrailingZero(num: string): string {
   return num.replace(/\.0$/, "");
 }
