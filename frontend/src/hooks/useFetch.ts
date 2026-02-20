@@ -1,9 +1,9 @@
 import { useState, useEffect, useCallback } from "react";
 
-export default function useFetch(fetchFn) {
-  const [data, setData] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+export default function useFetch<T>(fetchFn: () => Promise<T>) {
+  const [data, setData] = useState<T | null>(null);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     let isActive = true;
@@ -16,9 +16,9 @@ export default function useFetch(fetchFn) {
         if (isActive) {
           setData(result);
         }
-      } catch (err) {
+      } catch (err: unknown) {
         if (isActive) {
-          setError(err.message || "Ошибка при загрузке данных");
+          setError(err instanceof Error ? err.message : "Ошибка при загрузке данных");
         }
       } finally {
         if (isActive) {
@@ -40,8 +40,8 @@ export default function useFetch(fetchFn) {
     try {
       const result = await fetchFn();
       setData(result);
-    } catch (err) {
-      setError(err.message || "Ошибка при загрузке данных");
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : "Ошибка при загрузке данных");
     } finally {
       setLoading(false);
     }

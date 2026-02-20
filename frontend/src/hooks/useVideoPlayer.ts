@@ -13,12 +13,22 @@ const UPDATE_THROTTLE_MS = 250;
 const SAVE_PROGRESS_INTERVAL = 3000;
 const VIEW_THRESHOLD_SECONDS = 30;
 
+type PlayerState = {
+    playing: boolean;
+    progress: number;
+    duration: number;
+    currentTime: number;
+    buffering: boolean;
+};
 
-export default function useVideoPlayer(videoId) {
-    const videoRef = useRef(null);
-    const containerRef = useRef(null);
-    const hideTimerRef = useRef(null);
-    const bufferingTimer = useRef(null);
+type ShortcutHandler = (event: KeyboardEvent) => void;
+
+
+export default function useVideoPlayer(videoId: string) {
+    const videoRef = useRef<HTMLVideoElement | null>(null);
+    const containerRef = useRef<HTMLDivElement | null>(null);
+    const hideTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+    const bufferingTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
     const lastUpdateRef = useRef(0);
     const lastVolumeRef = useRef(1);
     const viewSentRef = useRef(false);
@@ -27,7 +37,7 @@ export default function useVideoPlayer(videoId) {
     const [playbackRate, setPlaybackRate] = useLocalStorage(`video-playback-rate`, 1);
     const [volume, setVolume] = useLocalStorage("video-volume", 1);
 
-    const [player, setPlayer] = useState({
+    const [player, setPlayer] = useState<PlayerState>({
         playing: false,
         progress: 0,
         duration: 0,
@@ -41,7 +51,7 @@ export default function useVideoPlayer(videoId) {
     const { duration, currentTime, buffering } = player;
     const effectiveControlsVisible = controlsVisible || buffering;
 
-    const updatePlayer = useCallback((patch) => {
+    const updatePlayer = useCallback((patch: Partial<PlayerState>) => {
         setPlayer((prev) => ({ ...prev, ...patch }));
     }, []);
     const tryCountView = useCallback(async () => {
@@ -70,7 +80,7 @@ export default function useVideoPlayer(videoId) {
 
         const interval = setInterval(() => {
             if (videoRef.current) {
-                localStorage.setItem(`video-progress-${videoId}`, videoRef.current.currentTime);
+                localStorage.setItem(`video-progress-${videoId}`, String(videoRef.current.currentTime));
             }
         }, SAVE_PROGRESS_INTERVAL);
 
@@ -81,9 +91,19 @@ export default function useVideoPlayer(videoId) {
         if (!videoId || !videoRef.current) return;
         const saved = localStorage.getItem(`video-progress-${videoId}`);
         if (saved) {
-            videoRef.current.currentTime = Number(saved);
+            const parsed = Number(saved);
+            if (!Number.isNaN(parsed)) {
+                videoRef.current.currentTime = parsed;
+            }
         }
     }, [videoId]);
+
+    useEffect(() => {
+        return () => {
+            if (hideTimerRef.current) clearTimeout(hideTimerRef.current);
+            if (bufferingTimer.current) clearTimeout(bufferingTimer.current);
+        };
+    }, []);
 
     useEffect(() => {
         if (videoRef.current) videoRef.current.volume = volume;
@@ -95,7 +115,9 @@ export default function useVideoPlayer(videoId) {
 
     const showControls = useCallback(() => {
         setControlsVisible(true);
-        clearTimeout(hideTimerRef.current);
+        if (hideTimerRef.current) {
+            clearTimeout(hideTimerRef.current);
+        }
 
         hideTimerRef.current = setTimeout(() => {
             if (videoRef.current && !videoRef.current.paused) {
@@ -124,12 +146,14 @@ export default function useVideoPlayer(videoId) {
             video.pause();
             updatePlayer({ playing: false });
             setControlsVisible(true);
-            clearTimeout(hideTimerRef.current);
+            if (hideTimerRef.current) {
+                clearTimeout(hideTimerRef.current);
+            }
         }
     }, [buffering, updatePlayer, showControls]);
 
     const changeSpeed = useCallback(
-        (direction) => {
+        (direction: number) => {
             const idx = SPEEDS.indexOf(playbackRate);
             const next = SPEEDS[idx + direction];
             if (next == null) return;
@@ -143,13 +167,13 @@ export default function useVideoPlayer(videoId) {
     );
 
     const changeVolume = useCallback(
-        (delta) => {
+        (delta: number) => {
             setVolume((v) => Math.max(0, Math.min(1, v + delta)));
         },
         [setVolume]
     );
 
-    const seek = useCallback((time) => {
+    const seek = useCallback((time: number) => {
         if (videoRef.current) {
             videoRef.current.currentTime = Math.max(0, Math.min(time, duration));
         }
@@ -206,13 +230,16 @@ export default function useVideoPlayer(videoId) {
 
         const saved = localStorage.getItem(`video-progress-${videoId}`);
         if (saved) {
-            const restore = Math.min(Number(saved), video.duration - 0.2);
-            if (restore > 0) {
-                video.currentTime = restore;
-                updatePlayer({
-                    currentTime: restore,
-                    progress: (restore / video.duration) * 100,
-                });
+            const parsed = Number(saved);
+            if (!Number.isNaN(parsed)) {
+                const restore = Math.min(parsed, video.duration - 0.2);
+                if (restore > 0) {
+                    video.currentTime = restore;
+                    updatePlayer({
+                        currentTime: restore,
+                        progress: (restore / video.duration) * 100,
+                    });
+                }
             }
         }
 
@@ -220,26 +247,31 @@ export default function useVideoPlayer(videoId) {
     }, [videoId, playbackRate, updatePlayer]);
 
     const startBuffering = useCallback(() => {
+        if (bufferingTimer.current) {
+            clearTimeout(bufferingTimer.current);
+        }
         bufferingTimer.current = setTimeout(() => {
             updatePlayer({ buffering: true });
         }, BUFFERING_DELAY);
     }, [updatePlayer]);
 
     const stopBuffering = useCallback(() => {
-        clearTimeout(bufferingTimer.current);
+        if (bufferingTimer.current) {
+            clearTimeout(bufferingTimer.current);
+        }
         updatePlayer({ buffering: false });
     }, [updatePlayer]);
 
-    const formatTime = (seconds) => {
+    const formatTime = (seconds: number): string => {
         if (!isFinite(seconds)) return "0:00";
         const minutes = Math.floor(seconds / 60);
         const secs = Math.floor(seconds % 60);
         return `${minutes}:${secs.toString().padStart(2, "0")}`;
     };
 
-    const shortcuts = useMemo(
+    const shortcuts = useMemo<Record<string, ShortcutHandler>>(
         () => ({
-            " ": (e) => {
+            " ": (e: KeyboardEvent) => {
                 e.preventDefault();
                 togglePlay();
             },

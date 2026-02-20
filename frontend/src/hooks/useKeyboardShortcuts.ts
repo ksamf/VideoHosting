@@ -1,13 +1,20 @@
 import { useEffect } from "react";
 
-export default function useKeyboardShortcuts(shortcuts, containerRef = null) {
+type ShortcutHandler = (event: KeyboardEvent) => void;
+type ShortcutsMap = Record<string, ShortcutHandler>;
+
+export default function useKeyboardShortcuts(
+    shortcuts: ShortcutsMap,
+    containerRef: React.RefObject<HTMLElement | null> | null = null
+) {
     useEffect(() => {
-        const handleKey = (e) => {
+        const handleKey = (e: KeyboardEvent) => {
             if (containerRef?.current && !containerRef.current.contains(document.activeElement)) {
                 return;
             }
 
-            if (["INPUT", "TEXTAREA"].includes(e.target.tagName)) {
+            const target = e.target as HTMLElement | null;
+            if (target && ["INPUT", "TEXTAREA"].includes(target.tagName)) {
                 return;
             }
 

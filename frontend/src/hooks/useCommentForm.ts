@@ -1,10 +1,13 @@
 import { useState } from "react";
 import { addComment } from "../api/videos";
 
-export default function useCommentForm(videoId, onCommentAdded) {
-    const [commentText, setCommentText] = useState("");
-    const [sendingComment, setSendingComment] = useState(false);
-    const [error, setError] = useState(null);
+export default function useCommentForm(
+    videoId: string,
+    onCommentAdded: (newComment: string, rawText: string) => void
+) {
+    const [commentText, setCommentText] = useState<string>("");
+    const [sendingComment, setSendingComment] = useState<boolean>(false);
+    const [error, setError] = useState<string | null>(null);
 
     const isDisabledSend = commentText.trim().length === 0;
 
@@ -19,9 +22,9 @@ export default function useCommentForm(videoId, onCommentAdded) {
             onCommentAdded?.(newComment, commentText);
 
             setCommentText("");
-        } catch (err) {
+        } catch (err: unknown) {
             console.error("Ошибка отправки комментария", err);
-            setError(err.message || "Не удалось отправить комментарий");
+            setError(err instanceof Error ? err.message : "Не удалось отправить комментарий");
         } finally {
             setSendingComment(false);
         }

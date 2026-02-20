@@ -1,9 +1,10 @@
 import { useEffect, useState } from "react";
 import { getMe } from "../api/auth";
+import type { User } from "../types/user";
 
 export default function useAuth() {
-    const [user, setUser] = useState(null);
-    const [loading, setLoading] = useState(true);
+    const [user, setUser] = useState<User | null>(null);
+    const [loading, setLoading] = useState<boolean>(true);
 
     useEffect(() => {
         let isActive = true;
