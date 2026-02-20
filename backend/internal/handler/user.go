@@ -270,7 +270,7 @@ func (h *UserHandler) ViewVideo(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to process view"})
 		return
 	}
-	c.JSON(http.StatusOK, gin.H{})
+	c.JSON(http.StatusOK, gin.H{"message": "successful"})
 }
 
 func (h *UserHandler) GetRecommendation(c *gin.Context) {
