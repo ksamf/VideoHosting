@@ -1,7 +1,7 @@
 import { Modal, Box, Typography, Input, Button, IconButton, Stack } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
 import { useNavigate } from "react-router-dom";
-import { useState } from "react";
+import { useState, type FormEvent } from "react";
 import { register } from "../../api/auth";
 import useFormAuth from "../../hooks/useFormAuth";
 import { useTheme } from "@mui/material/styles";
@@ -10,19 +10,19 @@ export default function RegisterModal() {
     const navigate = useNavigate();
     const theme = useTheme();
 
-    const [userName, setUserName] = useState("");
-    const [email, setEmail] = useState("");
-    const [password, setPassword] = useState("");
+    const [userName, setUserName] = useState<string>("");
+    const [email, setEmail] = useState<string>("");
+    const [password, setPassword] = useState<string>("");
 
     const isValid =
         userName.trim() !== "" && email.trim() !== "" && password.length >= 6;
 
-    const { loading, error, handleSubmit } = useFormAuth(async () => {
-        await register(email.trim(), password, userName.trim());
+    const { loading, error, handleSubmit } = useFormAuth(async (formData: { userName: string; email: string; password: string }) => {
+        await register(formData.email.trim(), formData.password, formData.userName.trim());
         return true;
     });
 
-    const onSubmit = async (e) => {
+    const onSubmit = async (e: FormEvent<HTMLElement>) => {
         e.preventDefault();
         if (!isValid) return;
         await handleSubmit({ email, password, userName });
@@ -54,7 +54,7 @@ export default function RegisterModal() {
             >
                 <Stack direction="row" justifyContent="space-between" alignItems="center" mb={1}>
                     <Typography variant="h6">Регистрация</Typography>
-                    <IconButton onClick={() => navigate(-2)} sx={(theme) => ({ color: theme.palette.text.secondary })}>
+                    <IconButton onClick={() => navigate(-1)} sx={(theme) => ({ color: theme.palette.text.secondary })}>
                         <CloseIcon />
                     </IconButton>
                 </Stack>
@@ -100,7 +100,7 @@ export default function RegisterModal() {
                             bgcolor: theme.palette.text.primary,
                             color: "#1a1a1a",
                             "&:hover": { bgcolor: theme.palette.text.secondary },
-                            "&.Mui-disabled": { bgcolor: theme.palette.muted.main, color: "#999" },
+                            "&.Mui-disabled": { bgcolor: "#555555", color: "#999" },
                         })}
                     >
                         {loading ? "Загрузка..." : "Регистрация"}

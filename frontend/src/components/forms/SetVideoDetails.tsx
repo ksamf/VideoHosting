@@ -4,14 +4,19 @@ import {
     TextField,
     Button,
     Stack,
-    Paper
+    Paper,
 } from "@mui/material";
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, type ChangeEvent } from "react";
 import { uploadVideo } from "../../api/videos";
 import { useNavigate } from "react-router-dom";
 
+type SetVideoDetailsProps = {
+    file: File;
+    defaultPreview: File | null;
+    defaultPreviewUrl: string;
+};
 
-export default function VideoDetailsStep({ file, defaultPreview, defaultPreviewUrl }) {
+export default function VideoDetailsStep({ file, defaultPreview, defaultPreviewUrl }: SetVideoDetailsProps) {
     const navigate = useNavigate();
 
     const videoUrl = useMemo(() => {
@@ -23,11 +28,12 @@ export default function VideoDetailsStep({ file, defaultPreview, defaultPreviewU
     );
 
     const [description, setDescription] = useState("");
-    const [tags, setTags] = useState([""]);
-    const [preview, setPreview] = useState(null);
-    const [previewUrl, setPreviewUrl] = useState(null);
+    const [tags, setTags] = useState<string[]>([""]);
+    const [preview, setPreview] = useState<File | null>(null);
+    const [previewUrl, setPreviewUrl] = useState<string | null>(null);
     const [aspectRatio, setAspectRatio] = useState("16 / 9");
-    const [videoPreview, setVideoPreview] = useState(defaultPreviewUrl)
+    const [videoPreview, setVideoPreview] = useState<string>(defaultPreviewUrl);
+    const [uploading, setUploading] = useState(false);
 
 
     useEffect(() => {
@@ -37,7 +43,7 @@ export default function VideoDetailsStep({ file, defaultPreview, defaultPreviewU
         };
     }, [videoUrl, previewUrl]);
 
-    const handleTagChange = (value, index) => {
+    const handleTagChange = (value: string, index: number) => {
         const updated = [...tags];
         updated[index] = value;
 
@@ -47,11 +53,15 @@ export default function VideoDetailsStep({ file, defaultPreview, defaultPreviewU
 
         setTags(updated);
     };
-    const handleCustomPreview = (file) => {
+    const handleCustomPreview = (file?: File) => {
         if (!file) return;
+        if (previewUrl) {
+            URL.revokeObjectURL(previewUrl);
+        }
+        const nextPreviewUrl = URL.createObjectURL(file);
         setPreview(file);
-        setPreviewUrl(URL.createObjectURL(file));
-        setVideoPreview(URL.createObjectURL(file))
+        setPreviewUrl(nextPreviewUrl);
+        setVideoPreview(nextPreviewUrl);
     };
 
 
@@ -61,27 +71,38 @@ export default function VideoDetailsStep({ file, defaultPreview, defaultPreviewU
         description.length > 5000;
 
     const handleUpload = async () => {
+        if (uploading) return;
+
         const formData = new FormData();
 
         formData.append("video", file);
         formData.append("name", name);
         formData.append("description", description);
-        formData.append("default_preview", defaultPreview);
+        if (defaultPreview) {
+            formData.append("default_preview", defaultPreview);
+        }
         if (preview) formData.append("preview", preview);
 
         tags.filter(Boolean).forEach(tag =>
             formData.append("tags[]", tag)
         );
 
-        await uploadVideo(formData);
-        navigate("/studio");
+        try {
+            setUploading(true);
+            await uploadVideo(formData);
+            navigate("/studio");
+        } catch (error) {
+            console.error(error);
+            alert("Не удалось загрузить видео");
+        } finally {
+            setUploading(false);
+        }
     };
 
-    const handleLoadedMetadata = (e) => {
+    const handleLoadedMetadata = (e: ChangeEvent<HTMLVideoElement>) => {
         const v = e.currentTarget;
         setAspectRatio(`${v.videoWidth} / ${v.videoHeight}`);
     };
-
 
     return (
         <>
@@ -92,7 +113,7 @@ export default function VideoDetailsStep({ file, defaultPreview, defaultPreviewU
                         value={name}
                         onChange={(e) => setName(e.target.value)}
                         fullWidth
-                        slotProps={{ maxLength: 100 }}
+                        inputProps={{ maxLength: 100 }}
                         helperText={`${name.length}/100`}
                         error={name.length < 1 || name.length > 100}
                         sx={{
@@ -113,7 +134,7 @@ export default function VideoDetailsStep({ file, defaultPreview, defaultPreviewU
                         value={description}
                         onChange={(e) => setDescription(e.target.value)}
                         fullWidth
-                        slotProps={{ maxLength: 5000 }}
+                        inputProps={{ maxLength: 5000 }}
                         helperText={`${description.length}/5000`}
                         error={description.length > 5000}
                         sx={{
@@ -167,9 +188,10 @@ export default function VideoDetailsStep({ file, defaultPreview, defaultPreviewU
                                 type="file"
                                 hidden
                                 accept="image/*"
-                                onChange={(e) =>
-                                    handleCustomPreview(e.target.files?.[0])
-                                }
+                                onChange={(e) => {
+                                    handleCustomPreview(e.target.files?.[0]);
+                                    e.currentTarget.value = "";
+                                }}
                             />
 
                         </Paper>
@@ -211,7 +233,7 @@ export default function VideoDetailsStep({ file, defaultPreview, defaultPreviewU
                             value={tag}
                             onChange={(e) => handleTagChange(e.target.value, i)}
                             fullWidth
-                            slotProps={{ maxLength: 50 }}
+                            inputProps={{ maxLength: 50 }}
                             helperText={`${tag.length}/50`}
                             error={tag.length > 50}
                             sx={{
@@ -248,8 +270,8 @@ export default function VideoDetailsStep({ file, defaultPreview, defaultPreviewU
                             poster={videoPreview ?? undefined}
                             controls
                             width="100%"
-                            display="block"
                             height="100%"
+                            style={{ display: "block" }}
                         />
                     </Paper>
                 </Box>
@@ -259,7 +281,7 @@ export default function VideoDetailsStep({ file, defaultPreview, defaultPreviewU
                 <Button
                     variant="contained"
                     onClick={handleUpload}
-                    disabled={isInvalid}
+                    disabled={isInvalid || uploading}
                     sx={{
                         borderRadius: "50px",
                         textTransform: "none",
@@ -272,7 +294,7 @@ export default function VideoDetailsStep({ file, defaultPreview, defaultPreviewU
                         },
                     }}
                 >
-                    Опубликовать
+                    {uploading ? "Публикация..." : "Опубликовать"}
                 </Button>
             </Stack>
         </>

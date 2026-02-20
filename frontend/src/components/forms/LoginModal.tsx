@@ -1,7 +1,7 @@
 import { Modal, Box, Typography, Input, Button, IconButton, Stack } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
 import { Link, useNavigate } from "react-router-dom";
-import { useState } from "react";
+import { useState, type FormEvent } from "react";
 import { login } from "../../api/auth";
 import useFormAuth from "../../hooks/useFormAuth";
 import { useTheme } from "@mui/material/styles";
@@ -10,17 +10,17 @@ export default function LoginModal() {
     const navigate = useNavigate();
     const theme = useTheme();
 
-    const [email, setEmail] = useState("");
-    const [password, setPassword] = useState("");
+    const [email, setEmail] = useState<string>("");
+    const [password, setPassword] = useState<string>("");
 
     const isFormValid = email.trim() !== "" && password.trim() !== "";
 
-    const { loading, error, handleSubmit } = useFormAuth(async () => {
-        await login(email.trim(), password);
+    const { loading, error, handleSubmit } = useFormAuth(async (formData: { email: string; password: string }) => {
+        await login(formData.email.trim(), formData.password);
         return true;
     });
 
-    const onSubmit = async (e) => {
+    const onSubmit = async (e: FormEvent<HTMLElement>) => {
         e.preventDefault();
         if (!isFormValid) return;
         await handleSubmit({ email, password });
@@ -90,18 +90,18 @@ export default function LoginModal() {
                             bgcolor: theme.palette.text.primary,
                             color: theme.palette.background.default,
                             "&:hover": { bgcolor: theme.palette.text.secondary },
-                            "&.Mui-disabled": { bgcolor: theme.palette.muted.main, color: "#999" },
+                            "&.Mui-disabled": { bgcolor: "#555555", color: "#999" },
                         })}
                     >
                         {loading ? "Загрузка..." : "Вход"}
                     </Button>
                     <Button
-                        type="submit"
+                        type="button"
                         component={Link}
                         to="/register"
                         sx={(theme) => ({
                             bgcolor: theme.palette.divider,
-                            color: theme.palette.text.muted,
+                            color: "#777777",
                             "&:hover": {
                                 bgcolor: theme.palette.text.primary,
                                 color: theme.palette.background.default,

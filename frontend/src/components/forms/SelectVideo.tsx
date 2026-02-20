@@ -1,23 +1,22 @@
-import Button from "@mui/material/Button"
-import FileUploadIcon from '@mui/icons-material/FileUpload';
-import Modal from "@mui/material/Modal";
-import Box from "@mui/material/Box"
-import Typography from "@mui/material/Typography"
-import CloseIcon from '@mui/icons-material/Close';
+import Button from "@mui/material/Button";
+import FileUploadIcon from "@mui/icons-material/FileUpload";
+import Typography from "@mui/material/Typography";
 import IconButton from "@mui/material/IconButton";
 import Paper from "@mui/material/Paper";
-import Input from "@mui/material/Input";
-import { useRef } from 'react'
+import { useRef, type DragEvent } from "react";
 
+type SelectVideoProps = {
+    onSelect: (file: File) => void;
+};
 
-export default function SelectVideo({ onSelect }) {
-    const handleDrop = (e) => {
+export default function SelectVideo({ onSelect }: SelectVideoProps) {
+    const handleDrop = (e: DragEvent<HTMLDivElement>) => {
         e.preventDefault();
         const file = e.dataTransfer.files[0];
         if (file) onSelect(file);
     };
-    const inputRef = useRef(null);
-    const handleDragOver = (e) => {
+    const inputRef = useRef<HTMLInputElement | null>(null);
+    const handleDragOver = (e: DragEvent<HTMLDivElement>) => {
         e.preventDefault();
     };
 
@@ -34,6 +33,7 @@ export default function SelectVideo({ onSelect }) {
                 onChange={(e) => {
                     const file = e.target.files?.[0];
                     if (file) onSelect(file);
+                    e.currentTarget.value = "";
                 }}
             />
             <Paper
@@ -49,7 +49,6 @@ export default function SelectVideo({ onSelect }) {
                 }}>
 
                 <IconButton
-                    variant="contained"
                     sx={{
                         display: 'block',
                         m: "100px auto",
