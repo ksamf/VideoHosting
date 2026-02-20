@@ -5,6 +5,7 @@ import VideoGrid from "../components/video/VideoGrid";
 import useFetch from "../hooks/useFetch";
 import { searchVideos } from "../api/videos";
 import { PageError, PageLoading } from "../components/common/PageState";
+import { pageSx } from "../styles/theme";
 
 export default function Search() {
   const [params] = useSearchParams();
@@ -27,16 +28,16 @@ export default function Search() {
   }
 
   return (
-    <Box sx={{ p: 2 }}>
-      <Typography variant="h6" sx={{ mb: 1 }}>
+    <Box sx={pageSx.searchContainer}>
+      <Typography variant="h6" sx={pageSx.searchTitle}>
         Результаты поиска: {query || "пустой запрос"}
       </Typography>
       {query.length < 2 ? (
-        <Typography sx={{ color: "text.secondary" }}>
+        <Typography sx={pageSx.searchMuted}>
           Введите минимум 2 символа.
         </Typography>
       ) : videos.length === 0 ? (
-        <Typography sx={{ color: "text.secondary" }}>
+        <Typography sx={pageSx.searchMuted}>
           Ничего не найдено.
         </Typography>
       ) : (

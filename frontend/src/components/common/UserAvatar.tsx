@@ -1,4 +1,5 @@
 import { Avatar } from "@mui/material";
+import { commonSx } from "../../styles/theme";
 
 type UserAvatarProps = {
     username?: string;
@@ -19,14 +20,7 @@ export default function UserAvatar({ username, avatar_url, size = 40, cacheKey =
             alt={username ?? "user"}
             src={avatar128}
             srcSet={hasAvatar ? `${avatar64} 64w, ${avatar128} 128w, ${avatar256} 256w` : undefined}
-            sx={{
-                width: size,
-                height: size,
-                fontSize: Math.round(size * 0.42),
-                lineHeight: 1,
-                color: "#fff",
-                bgcolor: "#aaa",
-            }}
+            sx={commonSx.userAvatar(size)}
         >
             {!hasAvatar ? username?.[0]?.toUpperCase() : null}
         </Avatar>

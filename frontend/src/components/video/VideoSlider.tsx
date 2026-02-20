@@ -1,5 +1,6 @@
 import { useState, useRef, type Dispatch, type RefObject, type SetStateAction } from "react";
 import { Box, Typography, Slider } from "@mui/material";
+import { videoSx } from "../../styles/theme";
 
 type VideoSliderProps = {
     videoRef: RefObject<HTMLVideoElement | null>;
@@ -42,67 +43,31 @@ export default function VideoSlider({
     return (
         <>
             {buffering && (
-                <Box
-                    sx={{
-                        position: "absolute",
-                        inset: 0,
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        bgcolor: "rgba(0,0,0,0.3)",
-                        zIndex: 2,
-                        pointerEvents: "none",
-                    }}
-                >
-                    <Box
-                        sx={{
-                            width: 48,
-                            height: 48,
-                            border: "4px solid rgba(255,255,255,0.3)",
-                            borderTop: (theme) => `4px solid ${theme.palette.text.primary}`,
-                            borderRadius: "50%",
-                            animation: "spin 1s linear infinite",
-                        }}
-                    />
+                <Box sx={videoSx.sliderBufferOverlay}>
+                    <Box sx={videoSx.sliderSpinner} />
                 </Box>
             )}
 
             {previewImg && hoverTime !== null && (
                 <Box
-                    sx={{
-                        position: "absolute",
-                        bottom: "70px",
-                        left: hoverX - 80,
-                        bgcolor: (theme) => theme.palette.common.black,
-                        borderRadius: 1,
-                        overflow: "hidden",
-                        p: 0.5,
-                        pointerEvents: "none",
-                    }}
+                    sx={{ ...videoSx.sliderPreviewBox, left: hoverX - 80 }}
                 >
                     <img
                         src={previewImg}
                         alt="preview"
-                        style={{ width: 160, display: "block" }}
+                        style={videoSx.sliderPreviewImage}
                     />
-                    <Typography
-                        sx={{
-                            color: (theme) => theme.palette.text.primary,
-                            fontSize: 11,
-                            textAlign: "center",
-                            mt: 0.3,
-                        }}
-                    >
+                    <Typography sx={videoSx.sliderPreviewTime}>
                         {formatTime(hoverTime)}
                     </Typography>
                 </Box>
             )}
 
-            <Slider
+                <Slider
                 value={progress}
                 onChange={handleSeek}
                 size="small"
-                sx={(theme) => ({ color: theme.palette.text.primary })}
+                sx={videoSx.slider}
                 disabled={!duration}
                 onMouseMove={(e) => {
                     const rect = e.currentTarget.getBoundingClientRect();
@@ -123,7 +88,7 @@ export default function VideoSlider({
 
             <canvas
                 ref={previewCanvasRef}
-                style={{ display: "none" }}
+                style={videoSx.hiddenCanvas}
             />
         </>
     );

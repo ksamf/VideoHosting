@@ -18,6 +18,7 @@ import SubscribeButton from "./SubscribeButton";
 import { Link } from "react-router-dom";
 import type { VideoDetails } from "../../types/video";
 import type { User } from "../../types/user";
+import { videoSx } from "../../styles/theme";
 
 TimeAgo.addLocale(ru);
 
@@ -47,12 +48,7 @@ export default function VideoInfo({ video, channel, user, isAuth }: VideoInfoPro
     }
     return (
         <Box
-            sx={{
-                maxWidth: 1200,
-                width: "100%",
-                mt: 2,
-                px: 1,
-            }}
+            sx={videoSx.videoInfoContainer}
         >
             <Typography color="white" fontSize={22} fontWeight={600} mb={1}>
                 {video.name}
@@ -60,16 +56,16 @@ export default function VideoInfo({ video, channel, user, isAuth }: VideoInfoPro
 
             <Stack direction="row" alignItems="center" spacing={2}>
                 <Stack direction="row" alignItems="center">
-                    <Button component={Link} to={`/channel/${channel.user_id}`} sx={{ p: 0, "&:hover": { backgroundColor: 'transparent' } }} >
+                    <Button component={Link} to={`/channel/${channel.user_id}`} sx={videoSx.videoInfoChannelButton} >
                         <UserAvatar
                             username={channel.username}
                             avatar_url={channel.avatar_url}
                         />
                         <Stack>
-                            <Typography color="white" fontSize={14} fontWeight={500} sx={{ ml: 1 }}>
+                            <Typography color="white" fontSize={14} fontWeight={500} sx={videoSx.videoInfoChannelText}>
                                 {channel.username}
                             </Typography>
-                            <Typography color="#aaa" fontSize={12} sx={{ ml: 1 }}>
+                            <Typography fontSize={12} sx={videoSx.videoInfoSubsText}>
                                 {shortenNumRu(subscriptionsCount || 0)} подписчиков
                             </Typography>
                         </Stack>

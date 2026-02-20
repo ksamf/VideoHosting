@@ -7,6 +7,7 @@ import { getUserById, getUserVideos } from "../api/users";
 import ChannelHeader from "../components/common/ChannelHeader";
 import useFetch from "../hooks/useFetch";
 import { PageError, PageLoading } from "../components/common/PageState";
+import { pageSx } from "../styles/theme";
 
 export default function Channel() {
     const { id: channelId } = useParams();
@@ -50,7 +51,7 @@ export default function Channel() {
     }, [safeVideos, sortBy]);
 
     if (!channelId) {
-        return <Typography color="error" sx={{ px: 3, py: 2 }}>Некорректный id канала</Typography>;
+        return <Typography color="error" sx={pageSx.mutedMessage}>Некорректный id канала</Typography>;
     }
 
 
@@ -62,17 +63,11 @@ export default function Channel() {
         return <PageError error={error} />;
     }
     if (!channel) {
-        return <Typography sx={(theme) => ({ color: theme.palette.text.secondary, px: 3, py: 2 })}>Канал не найден</Typography>;
+        return <Typography sx={pageSx.mutedMessage}>Канал не найден</Typography>;
     }
     return (
 
-        <Box
-            sx={{
-                px: { xs: 2, md: 3 },
-                pb: 3,
-                mt: 2,
-            }}
-        >
+        <Box sx={pageSx.channelContainer}>
             <Stack
                 direction={{ xs: "column", md: "row" }}
                 spacing={2}
@@ -80,28 +75,26 @@ export default function Channel() {
             >
                 <ChannelHeader channel={channel} authUser={authUser} isAuth={isAuth} countVideos={safeVideos.length} />
 
-                <Stack sx={{ flex: 1, width: "100%" }}>
-                    <Stack
-                        sx={{ display: "flex", flexDirection: "row", p: 1 }}
-                    >
+                <Stack sx={pageSx.channelContent}>
+                    <Stack sx={pageSx.channelSortRow}>
                         <Button
                             onClick={() => setSortBy("new")}
                             variant={sortBy === "new" ? "contained" : "text"}
-                            sx={{ borderRadius: 6, mr: 1 }}
+                            sx={pageSx.channelSortButton}
                         >
                             Новые
                         </Button>
                         <Button
                             onClick={() => setSortBy("popular")}
                             variant={sortBy === "popular" ? "contained" : "text"}
-                            sx={{ borderRadius: 6, mr: 1 }}
+                            sx={pageSx.channelSortButton}
                         >
                             Популярные
                         </Button>
                         <Button
                             onClick={() => setSortBy("old")}
                             variant={sortBy === "old" ? "contained" : "text"}
-                            sx={{ borderRadius: 6, mr: 1 }}
+                            sx={pageSx.channelSortButton}
                         >
                             Старые
                         </Button>

@@ -5,6 +5,7 @@ import { getUserLikedVideo } from "../api/users";
 import useAuth from "../hooks/useAuth";
 import useFetch from "../hooks/useFetch";
 import { PageError, PageLoading } from "../components/common/PageState";
+import { pageSx } from "../styles/theme";
 
 
 export default function Liked() {
@@ -34,7 +35,7 @@ export default function Liked() {
     return (
         <>
             {Array.isArray(userLikedVideos) && userLikedVideos.length === 0 ? "Нет понравившихся" :
-                <Grid container spacing={2} sx={{ p: 2 }}>
+                <Grid container spacing={2} sx={pageSx.gridSection}>
                     <VideoGrid videos={Array.isArray(userLikedVideos) ? userLikedVideos : []} />
                 </Grid >}
         </>

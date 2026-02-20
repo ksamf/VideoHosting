@@ -14,6 +14,7 @@ import Button from "@mui/material/Button";
 import VideoCallIcon from "@mui/icons-material/VideoCall";
 import PersonIcon from "@mui/icons-material/Person";
 import { Link } from "react-router-dom";
+import { commonSx } from "../../styles/theme";
 
 export default function NavBar() {
     const { user, loading, isAuth } = useAuth();
@@ -25,26 +26,13 @@ export default function NavBar() {
 
     return (
         <>
-            <AppBar sx={{ bgcolor: "#0f0f0f" }}>
+            <AppBar sx={commonSx.navBarAppBar}>
                 <Container maxWidth="xl">
                     <Toolbar
                         disableGutters
-                        sx={{
-                            minHeight: 64,
-                            display: "grid",
-                            gridTemplateColumns: "auto minmax(0, 720px) auto",
-                            alignItems: "center",
-                            columnGap: { xs: 1, md: 2 },
-                        }}
+                        sx={commonSx.navBarToolbar}
                     >
-                        <Box
-                            sx={{
-                                display: "flex",
-                                alignItems: "center",
-                                gap: 1,
-                                minWidth: 0,
-                            }}
-                        >
+                        <Box sx={commonSx.navBarLeft}>
                             {isAuth && user && (
                                 <IconButton
                                     color="inherit"
@@ -57,32 +45,17 @@ export default function NavBar() {
                             <Logo />
                         </Box>
 
-                        <Box
-                            sx={{
-                                width: "100%",
-                                minWidth: 0,
-                                justifySelf: "center",
-                            }}
-                        >
+                        <Box sx={commonSx.navBarSearchWrap}>
                             <SearchField />
                         </Box>
 
-                        <Box
-                            sx={{
-                                marginLeft: "auto",
-                                display: "flex",
-                                alignItems: "center",
-                                gap: { xs: 1, sm: 2 },
-                                flexShrink: 0,
-                                minWidth: 0,
-                            }}
-                        >
+                        <Box sx={commonSx.navBarRight}>
                             <Button
                                 variant="contained"
                                 startIcon={<VideoCallIcon />}
                                 component={Link}
                                 to={isAuth ? "/studio/upload" : "/login"}
-                                sx={{ px: { xs: 1.2, sm: 2 }, whiteSpace: "nowrap" }}
+                                sx={commonSx.navBarUploadButton}
                             >
                                 Загрузить
                             </Button>
@@ -98,7 +71,7 @@ export default function NavBar() {
                                     to="/login"
                                     variant="contained"
                                     startIcon={<PersonIcon />}
-                                    sx={{ whiteSpace: "nowrap" }}
+                                    sx={commonSx.navBarLoginButton}
                                 >
                                     Войти
                                 </Button>

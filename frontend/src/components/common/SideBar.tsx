@@ -18,6 +18,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { getUserSubscriptions } from "../../api/users";
 import { logout } from "../../api/auth";
 import type { User } from "../../types/user";
+import { commonSx } from "../../styles/theme";
 
 type SideBarProps = {
     user: User | null;
@@ -77,26 +78,17 @@ export default function SideBar({ user, open, setOpen }: SideBarProps) {
         <Drawer
             open={open}
             onClose={() => setOpen(false)}
-            sx={{
-                "& .MuiDrawer-paper": {
-                    width: 260,
-                    top: 64,
-                    height: "calc(100% - 64px)",
-                    bgcolor: "#0f0f0f",
-                    borderRight: "1px solid #222",
-                    backgroundImage: "none",
-                },
-            }}
+            sx={commonSx.sideBarDrawer}
         >
-            <Box sx={{ display: "flex", flexDirection: "column", height: "100%" }}>
-                <List sx={{ flexGrow: 1, overflowY: "auto" }}>
+            <Box sx={commonSx.sideBarRoot}>
+                <List sx={commonSx.sideBarList}>
                     <ListItem>
                         <ListItemButton
                             component={Link}
                             to={user?.user_id ? `/user/${user.user_id}/sub` : "/"}
                             onClick={() => setOpen(false)}
                         >
-                            <SubscriptionsIcon sx={{ mr: 1, color: "#fff" }} />
+                            <SubscriptionsIcon sx={commonSx.sideBarPrimaryIcon} />
                             <ListItemText primary="Подписки" />
                         </ListItemButton>
                     </ListItem>
@@ -115,10 +107,10 @@ export default function SideBar({ user, open, setOpen }: SideBarProps) {
 
                                 <ListItemText
                                     primary={channel.username}
-                                    sx={{ ml: 1 }}
+                                    sx={commonSx.sideBarChannelText}
                                     slotProps={{
                                         primary: {
-                                            sx: { color: "#ddd", fontSize: 14 },
+                                            sx: commonSx.sideBarChannelPrimary,
                                         },
                                     }}
                                 />
@@ -135,7 +127,7 @@ export default function SideBar({ user, open, setOpen }: SideBarProps) {
                                     primary={showAllSubs ? "Свернуть" : "Показать все"}
                                     slotProps={{
                                         primary: {
-                                            sx: { color: "#aaa", fontSize: 13 },
+                                            sx: commonSx.sideBarTogglePrimary,
                                         },
                                     }}
                                 />
@@ -143,18 +135,18 @@ export default function SideBar({ user, open, setOpen }: SideBarProps) {
                         </ListItem>
                     )}
 
-                    <Divider sx={{ my: 1, borderColor: "#222" }} />
+                    <Divider sx={commonSx.sideBarDivider} />
 
                     <ListItem disablePadding>
                         <ListItemButton component={Link} to="/watched" onClick={() => setOpen(false)}>
-                            <HistoryIcon sx={{ mr: 1 }} />
+                            <HistoryIcon sx={commonSx.sideBarIcon} />
                             <ListItemText primary="Просмотренные" />
                         </ListItemButton>
                     </ListItem>
 
                     <ListItem disablePadding>
                         <ListItemButton component={Link} to="/liked" onClick={() => setOpen(false)}>
-                            <ThumbUpAltIcon sx={{ mr: 1 }} />
+                            <ThumbUpAltIcon sx={commonSx.sideBarIcon} />
                             <ListItemText primary="Понравившиеся" />
                         </ListItemButton>
                     </ListItem>
@@ -165,14 +157,14 @@ export default function SideBar({ user, open, setOpen }: SideBarProps) {
                             to={user?.user_id ? `/channel/${user.user_id}` : "/"}
                             onClick={() => setOpen(false)}
                         >
-                            <PersonIcon sx={{ mr: 1 }} />
+                            <PersonIcon sx={commonSx.sideBarIcon} />
                             <ListItemText primary="Ваш канал" />
                         </ListItemButton>
                     </ListItem>
 
                     <ListItem disablePadding>
                         <ListItemButton component={Link} to="/studio" onClick={() => setOpen(false)}>
-                            <HandymanIcon sx={{ mr: 1 }} />
+                            <HandymanIcon sx={commonSx.sideBarIcon} />
                             <ListItemText primary="Студия" />
                         </ListItemButton>
                     </ListItem>
@@ -182,7 +174,7 @@ export default function SideBar({ user, open, setOpen }: SideBarProps) {
                             onClick={handleLogout}
                             disabled={logoutLoading}
                         >
-                            <LogoutIcon sx={{ mr: 1 }} />
+                            <LogoutIcon sx={commonSx.sideBarIcon} />
                             <ListItemText primary="Выйти" />
                         </ListItemButton>
                     </ListItem>

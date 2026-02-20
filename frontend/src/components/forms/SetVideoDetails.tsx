@@ -9,6 +9,7 @@ import {
 import { useState, useEffect, useMemo, type ChangeEvent } from "react";
 import { uploadVideo } from "../../api/videos";
 import { useNavigate } from "react-router-dom";
+import { formSx } from "../../styles/theme";
 
 type SetVideoDetailsProps = {
     file: File;
@@ -107,7 +108,7 @@ export default function VideoDetailsStep({ file, defaultPreview, defaultPreviewU
     return (
         <>
             <Stack direction="row" spacing={3}>
-                <Box sx={{ flex: 2 }}>
+                <Box sx={formSx.setDetailsLeft}>
                     <TextField
                         label="Название (обязательное поле)"
                         value={name}
@@ -116,15 +117,7 @@ export default function VideoDetailsStep({ file, defaultPreview, defaultPreviewU
                         inputProps={{ maxLength: 100 }}
                         helperText={`${name.length}/100`}
                         error={name.length < 1 || name.length > 100}
-                        sx={{
-                            mb: 2,
-                            "& .MuiFormHelperText-root": {
-                                color:
-                                    name.length < 1 || name.length > 100
-                                        ? "#f44336"
-                                        : "#aaa",
-                            },
-                        }}
+                        sx={formSx.setDetailsHelper(name.length < 1 || name.length > 100)}
                     />
 
                     <TextField
@@ -137,52 +130,26 @@ export default function VideoDetailsStep({ file, defaultPreview, defaultPreviewU
                         inputProps={{ maxLength: 5000 }}
                         helperText={`${description.length}/5000`}
                         error={description.length > 5000}
-                        sx={{
-                            mb: 3,
-                            "& .MuiFormHelperText-root": {
-                                color:
-                                    description.length > 5000 ? "#f44336" : "#aaa",
-                            },
-                        }}
+                        sx={formSx.setDetailsDescription(description.length > 5000)}
                     />
 
-                    <Typography variant="subtitle2" sx={{ mb: 1 }}>
+                    <Typography variant="subtitle2" sx={formSx.setDetailsSectionTitle}>
                         Превью
                     </Typography>
-                    <Stack
-                        sx={{
-                            display: "flex",
-                            flexDirection: "row",
-                        }}>
+                    <Stack sx={formSx.setDetailsPreviewRow}>
                         <Paper
                             component="label"
-                            sx={{
-                                width: 240,
-                                aspectRatio,
-                                bgcolor: "#1f1f1f",
-                                border: "1px dashed #555",
-                                borderRadius: 2,
-                                cursor: "pointer",
-                                overflow: "hidden",
-                                display: "flex",
-                                alignItems: "center",
-                                justifyContent: "center",
-                                marginRight: "10px"
-                            }}
+                            sx={formSx.setDetailsPreviewCard(aspectRatio, true)}
                         >
                             {preview ? (
-                                <img
+                                <Box
+                                    component="img"
                                     src={previewUrl}
                                     alt="preview"
-                                    style={{
-                                        width: "100%",
-                                        height: "100%",
-                                        objectFit: "contain",
-                                        display: "block",
-                                    }}
+                                    sx={formSx.setDetailsPreviewContain}
                                 />
                             ) : (
-                                <Typography color="#aaa">Загрузить</Typography>
+                                <Typography sx={formSx.setDetailsUploadHint}>Загрузить</Typography>
                             )}
                             <input
                                 type="file"
@@ -197,33 +164,19 @@ export default function VideoDetailsStep({ file, defaultPreview, defaultPreviewU
                         </Paper>
                         <Paper
                             component="label"
-                            sx={{
-                                width: 240,
-                                aspectRatio,
-                                bgcolor: "#1f1f1f",
-                                border: "1px dashed #555",
-                                borderRadius: 2,
-                                cursor: "pointer",
-                                overflow: "hidden",
-                                display: "flex",
-                                alignItems: "center",
-                                justifyContent: "center",
-                            }}
+                            sx={formSx.setDetailsPreviewCard(aspectRatio)}
                             onClick={() => setVideoPreview(defaultPreviewUrl)}
 
                         >
-                            <img
+                            <Box
+                                component="img"
                                 src={defaultPreviewUrl}
                                 alt="preview"
-                                style={{
-                                    width: "100%",
-                                    height: "100%",
-                                    objectFit: "cover",
-                                }}
+                                sx={formSx.setDetailsPreviewCover}
                             />
                         </Paper>
                     </Stack>
-                    <Typography variant="subtitle2" sx={{ mt: 3, mb: 1 }}>
+                    <Typography variant="subtitle2" sx={formSx.setDetailsTagsTitle}>
                         Теги
                     </Typography>
 
@@ -236,63 +189,37 @@ export default function VideoDetailsStep({ file, defaultPreview, defaultPreviewU
                             inputProps={{ maxLength: 50 }}
                             helperText={`${tag.length}/50`}
                             error={tag.length > 50}
-                            sx={{
-                                mb: 1,
-                                "& .MuiFormHelperText-root": {
-                                    color:
-                                        tag.length > 50
-                                            ? "#f44336"
-                                            : "#aaa",
-                                },
-                            }}
+                            sx={formSx.setDetailsTagField(tag.length > 50)}
                         />
                     ))}
                 </Box>
 
-                <Box sx={{ flex: 1 }}>
-                    <Typography variant="subtitle2" sx={{ mb: 1 }}>
+                <Box sx={formSx.setDetailsRight}>
+                    <Typography variant="subtitle2" sx={formSx.setDetailsSectionTitle}>
                         Предпросмотр
                     </Typography>
 
                     <Paper
-                        sx={{
-                            borderRadius: 2,
-                            overflow: "hidden",
-                            bgcolor: "#000",
-                            position: "relative",
-                            aspectRatio,
-                            width: "100%"
-                        }}
+                        sx={formSx.setDetailsPlayerPaper(aspectRatio)}
                     >
-                        <video
+                        <Box
+                            component="video"
                             src={videoUrl}
                             onLoadedMetadata={handleLoadedMetadata}
                             poster={videoPreview ?? undefined}
                             controls
-                            width="100%"
-                            height="100%"
-                            style={{ display: "block" }}
+                            sx={formSx.setDetailsPlayer}
                         />
                     </Paper>
                 </Box>
             </Stack >
 
-            <Stack direction="row" justifyContent="flex-end" sx={{ mt: 4 }}>
+            <Stack direction="row" justifyContent="flex-end" sx={formSx.setDetailsActions}>
                 <Button
                     variant="contained"
                     onClick={handleUpload}
                     disabled={isInvalid || uploading}
-                    sx={{
-                        borderRadius: "50px",
-                        textTransform: "none",
-                        backgroundColor: "#fff",
-                        color: "#555",
-                        "&:hover": { backgroundColor: "#909090" },
-                        "&.Mui-disabled": {
-                            color: "#fff !important",
-                            opacity: 0.6,
-                        },
-                    }}
+                    sx={formSx.setDetailsPublishButton}
                 >
                     {uploading ? "Публикация..." : "Опубликовать"}
                 </Button>

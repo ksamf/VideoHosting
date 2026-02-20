@@ -1,5 +1,6 @@
 import { useState, type Dispatch, type MouseEvent, type RefObject, type SetStateAction } from "react";
 import { Box, Menu, MenuItem } from "@mui/material";
+import { videoSx } from "../../styles/theme";
 
 type SelectSpeedProps = {
     playbackRate: number;
@@ -16,20 +17,7 @@ export default function SelectSpeed({ playbackRate, setPlaybackRate, videoRef }:
         <>
             <Box
                 onClick={(e: MouseEvent<HTMLElement>) => setSpeedAnchorEl(e.currentTarget)}
-                sx={{
-                    px: 1.5,
-                    py: 0.5,
-                    borderRadius: "20px",
-                    border: "1px solid #555",
-                    color: "#fff",
-                    cursor: "pointer",
-                    fontSize: 13,
-                    minWidth: 48,
-                    textAlign: "center",
-                    "&:hover": {
-                        bgcolor: "#222",
-                    },
-                }}
+                sx={videoSx.selectButton}
             >
                 {playbackRate}x
             </Box>
@@ -48,12 +36,7 @@ export default function SelectSpeed({ playbackRate, setPlaybackRate, videoRef }:
                 }}
                 slotProps={{
                     paper: {
-                        sx: {
-                            bgcolor: "#1f1f1f",
-                            color: "#fff",
-                            borderRadius: 2,
-                            minWidth: 80,
-                        },
+                        sx: videoSx.selectMenuPaper,
                     },
                 }}
             >
@@ -68,11 +51,7 @@ export default function SelectSpeed({ playbackRate, setPlaybackRate, videoRef }:
                             }
                             setSpeedAnchorEl(null);
                         }}
-                        sx={{
-                            justifyContent: "center",
-                            "&.Mui-selected": { bgcolor: "#333" },
-                            "&:hover": { bgcolor: "#444" },
-                        }}
+                        sx={videoSx.selectMenuItem}
                     >
                         {s}x
                     </MenuItem>

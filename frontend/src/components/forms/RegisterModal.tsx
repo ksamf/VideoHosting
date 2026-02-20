@@ -4,11 +4,10 @@ import { useNavigate } from "react-router-dom";
 import { useState, type FormEvent } from "react";
 import { register } from "../../api/auth";
 import useFormAuth from "../../hooks/useFormAuth";
-import { useTheme } from "@mui/material/styles";
+import { formSx } from "../../styles/theme";
 
 export default function RegisterModal() {
     const navigate = useNavigate();
-    const theme = useTheme();
 
     const [userName, setUserName] = useState<string>("");
     const [email, setEmail] = useState<string>("");
@@ -28,45 +27,24 @@ export default function RegisterModal() {
         await handleSubmit({ email, password, userName });
     };
 
-    const inputSx = (theme) => ({
-        color: theme.palette.text.primary,
-        caretColor: theme.palette.text.primary,
-        "&:before": { borderBottom: `1px solid ${theme.palette.muted.main}` },
-        "&:hover:not(.Mui-disabled):before": { borderBottom: `1px solid ${theme.palette.text.secondary}` },
-        "&.Mui-focused:after": { borderBottom: `2px solid ${theme.palette.text.primary}` },
-    });
-
     return (
         <Modal open onClose={() => navigate(-1)}>
-            <Box
-                sx={(theme) => ({
-                    color: theme.palette.text.secondary,
-                    position: "absolute",
-                    top: "50%",
-                    left: "50%",
-                    transform: "translate(-50%, -50%)",
-                    width: 400,
-                    bgcolor: theme.palette.background.paper,
-                    p: 2.5,
-                    borderRadius: 2,
-                    textAlign: "center",
-                })}
-            >
+            <Box sx={formSx.authModal}>
                 <Stack direction="row" justifyContent="space-between" alignItems="center" mb={1}>
                     <Typography variant="h6">Регистрация</Typography>
-                    <IconButton onClick={() => navigate(-1)} sx={(theme) => ({ color: theme.palette.text.secondary })}>
+                    <IconButton onClick={() => navigate(-1)} sx={formSx.authCloseButton}>
                         <CloseIcon />
                     </IconButton>
                 </Stack>
 
-                <Box component="form" onSubmit={onSubmit} sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
+                <Box component="form" onSubmit={onSubmit} sx={formSx.authForm}>
                     <Input
                         autoFocus
                         placeholder="Имя пользователя"
                         value={userName}
                         onChange={(e) => setUserName(e.target.value)}
                         disabled={loading}
-                        sx={inputSx(theme)}
+                        sx={formSx.authInput}
                     />
 
                     <Input
@@ -75,7 +53,7 @@ export default function RegisterModal() {
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
                         disabled={loading}
-                        sx={inputSx(theme)}
+                        sx={formSx.authInput}
                     />
 
                     <Input
@@ -84,7 +62,7 @@ export default function RegisterModal() {
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
                         disabled={loading}
-                        sx={inputSx(theme)}
+                        sx={formSx.authInput}
                     />
 
                     {error && (
@@ -96,12 +74,7 @@ export default function RegisterModal() {
                     <Button
                         type="submit"
                         disabled={!isValid || loading}
-                        sx={(theme) => ({
-                            bgcolor: theme.palette.text.primary,
-                            color: "#1a1a1a",
-                            "&:hover": { bgcolor: theme.palette.text.secondary },
-                            "&.Mui-disabled": { bgcolor: "#555555", color: "#999" },
-                        })}
+                        sx={formSx.authPrimaryButton}
                     >
                         {loading ? "Загрузка..." : "Регистрация"}
                     </Button>

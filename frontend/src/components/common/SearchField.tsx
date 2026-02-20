@@ -4,6 +4,7 @@ import InputAdornment from "@mui/material/InputAdornment";
 import IconButton from "@mui/material/IconButton";
 import SearchIcon from "@mui/icons-material/Search";
 import { useLocation, useNavigate } from "react-router-dom";
+import { commonSx } from "../../styles/theme";
 
 export default function SearchField() {
   const [query, setQuery] = useState<string>(() => {
@@ -34,22 +35,13 @@ export default function SearchField() {
         }
       }}
       placeholder="Поиск"
-      sx={{
-        width: "100%",
-        maxWidth: 500,
-        minWidth: 0,
-        "& .MuiInputBase-root": {
-          borderRadius: "40px",
-          height: { xs: 40, sm: 45 },
-          backgroundColor: "#121212",
-        },
-      }}
+      sx={commonSx.searchField}
       slotProps={{
         input: {
           startAdornment: (
             <InputAdornment position="start">
               <IconButton onClick={goToSearch} edge="start">
-                <SearchIcon sx={{ color: "#aaa" }} />
+                <SearchIcon sx={commonSx.searchIcon} />
               </IconButton>
             </InputAdornment>
           ),

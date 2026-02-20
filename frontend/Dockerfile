@@ -2,10 +2,16 @@ FROM node:24-alpine
 
 WORKDIR /frontend
 
-COPY ./package*.json ./
+COPY package*.json ./
+COPY tsconfig*.json ./
+COPY vite.config.* ./
+COPY eslint.config.* ./
+
+RUN npm ci
 
 COPY . .
-RUN npm install
+
+RUN npm run typecheck
 
 EXPOSE 5173
 

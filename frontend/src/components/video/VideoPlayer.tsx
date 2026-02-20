@@ -8,6 +8,7 @@ import SelectVolume from "./SelectVolume";
 import VideoSlider from "./VideoSlider";
 import useVideoPlayer from "../../hooks/useVideoPlayer";
 import { useEffect, useMemo } from "react";
+import { videoSx } from "../../styles/theme";
 
 type VideoPlayerProps = {
     src: string;
@@ -66,26 +67,14 @@ export default function VideoPlayer({ src, poster, qualities = [], videoId }: Vi
             onMouseMove={showControls}
             onMouseEnter={showControls}
             onMouseLeave={hideControls}
-            sx={{
-                width: "100%",
-                maxWidth: 1200,
-                backgroundColor: "#000",
-                borderRadius: 2,
-                overflow: "hidden",
-                position: "relative",
-                cursor: effectiveControlsVisible ? "default" : "none",
-            }}
+            sx={videoSx.playerContainer(effectiveControlsVisible)}
         >
             {videoSrc ? (
                 <video
                     ref={videoRef}
                     src={videoSrc}
                     poster={poster}
-                    style={{
-                        width: "100%",
-                        display: "block",
-                        position: "relative",
-                    }}
+                    style={{ width: "100%", display: "block", position: "relative" }}
                     onTimeUpdate={handleTimeUpdate}
                     onLoadedMetadata={handleLoadedMetadata}
                     onClick={togglePlay}
@@ -96,27 +85,14 @@ export default function VideoPlayer({ src, poster, qualities = [], videoId }: Vi
                     playsInline
                 />
             ) : (
-                <Box sx={(theme) => ({ color: theme.palette.text.secondary, p: 3, textAlign: "center" })}>
+                <Box sx={videoSx.playerUnavailable}>
                     Видео недоступно
                 </Box>
             )}
 
             {effectiveControlsVisible && (
                 <Box
-                    sx={{
-                        position: "absolute",
-                        left: 0,
-                        right: 0,
-                        bottom: 0,
-                        px: 1.5,
-                        py: 1,
-                        background: "linear-gradient(to top, rgba(0,0,0,0.7), rgba(0,0,0,0))",
-                        zIndex: 2,
-                        transition: "opacity 0.3s ease, transform 0.3s ease",
-                        opacity: effectiveControlsVisible ? 1 : 0,
-                        transform: effectiveControlsVisible ? "translateY(0)" : "translateY(100%)",
-                        pointerEvents: effectiveControlsVisible ? "auto" : "none",
-                    }}
+                    sx={videoSx.playerControls(effectiveControlsVisible)}
                 >
                     <VideoSlider
                         videoRef={videoRef}
@@ -128,8 +104,8 @@ export default function VideoPlayer({ src, poster, qualities = [], videoId }: Vi
                         formatTime={formatTime}
                     />
 
-                    <Stack direction="row" alignItems="center" spacing={1} sx={{ p: 1 }}>
-                        <IconButton onClick={togglePlay} sx={(theme) => ({ color: theme.palette.text.primary })}>
+                    <Stack direction="row" alignItems="center" spacing={1} sx={videoSx.playerControlsRow}>
+                        <IconButton onClick={togglePlay} sx={videoSx.playerActionIcon}>
                             {playing ? <PauseIcon /> : <PlayArrowIcon />}
                         </IconButton>
 
@@ -141,15 +117,9 @@ export default function VideoPlayer({ src, poster, qualities = [], videoId }: Vi
                             setHoveredVolume={setHoveredVolume}
                         />
 
-                        <Box
-                            sx={{
-                                width: hoveredVolume ? 110 : 0,
-                                transition: "width 0.2s ease",
-                                flexShrink: 0,
-                            }}
-                        />
+                        <Box sx={videoSx.playerHoveredVolumeSpacer(hoveredVolume)} />
 
-                        <Typography sx={(theme) => ({ color: theme.palette.text.primary, fontSize: 12 })}>
+                        <Typography sx={videoSx.playerTime}>
                             {formatTime(currentTime)} / {formatTime(duration)}
                         </Typography>
 
@@ -169,7 +139,7 @@ export default function VideoPlayer({ src, poster, qualities = [], videoId }: Vi
                             setPlaying={(v) => updatePlayer({ playing: v })}
                         />
 
-                        <IconButton onClick={handleFullscreen} sx={(theme) => ({ color: theme.palette.text.primary })}>
+                        <IconButton onClick={handleFullscreen} sx={videoSx.playerActionIcon}>
                             <FullscreenIcon />
                         </IconButton>
                     </Stack>

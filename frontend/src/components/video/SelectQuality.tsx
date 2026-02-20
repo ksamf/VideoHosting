@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState, type MouseEvent, type Dispatch, type SetStateAction, type RefObject } from "react";
 import { Box, Menu, MenuItem } from "@mui/material";
+import { videoSx } from "../../styles/theme";
 
 type SelectQualityProps = {
     qualities: number[];
@@ -80,20 +81,7 @@ export default function SelectQuality({ qualities, videoRef, setPlaying, selecte
                 <>
                     <Box
                         onClick={handleClickListItem}
-                        sx={{
-                            px: 1.5,
-                            py: 0.5,
-                            borderRadius: "20px",
-                            border: "1px solid #555",
-                            color: "#fff",
-                            cursor: "pointer",
-                            fontSize: 13,
-                            minWidth: 48,
-                            textAlign: "center",
-                            "&:hover": {
-                                bgcolor: "#222",
-                            },
-                        }}
+                        sx={videoSx.selectButton}
                     >
                         {qualities[selectedIndex]}p
                     </Box>
@@ -113,12 +101,7 @@ export default function SelectQuality({ qualities, videoRef, setPlaying, selecte
                         }}
                         slotProps={{
                             paper: {
-                                sx: {
-                                    bgcolor: "#1f1f1f",
-                                    color: "#fff",
-                                    borderRadius: 2,
-                                    minWidth: 80,
-                                },
+                                sx: videoSx.selectMenuPaper,
                             },
                         }}
                     >
@@ -127,15 +110,7 @@ export default function SelectQuality({ qualities, videoRef, setPlaying, selecte
                                 key={option}
                                 selected={index === selectedIndex}
                                 onClick={(event) => handleMenuItemClick(event, index)}
-                                sx={{
-                                    justifyContent: "center",
-                                    "&.Mui-selected": {
-                                        bgcolor: "#333",
-                                    },
-                                    "&:hover": {
-                                        bgcolor: "#444",
-                                    },
-                                }}
+                                sx={videoSx.selectMenuItem}
                             >
                                 {option}p
                             </MenuItem>

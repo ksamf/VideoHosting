@@ -4,8 +4,8 @@ import VideoGrid from "../components/video/VideoGrid";
 import { getUserWatchedVideo } from "../api/users";
 import useAuth from "../hooks/useAuth";
 import useFetch from "../hooks/useFetch";
-import { Typography } from "@mui/material";
 import { PageError, PageLoading } from "../components/common/PageState";
+import { pageSx } from "../styles/theme";
 
 
 export default function Watched() {
@@ -33,7 +33,7 @@ export default function Watched() {
     }
     return (
         <>{watchedVideos.length === 0 ? "Нет просмотренных" :
-            <Grid container spacing={2} sx={{ p: 2 }}>
+            <Grid container spacing={2} sx={pageSx.gridSection}>
                 <VideoGrid videos={watchedVideos} />
             </Grid >}
 

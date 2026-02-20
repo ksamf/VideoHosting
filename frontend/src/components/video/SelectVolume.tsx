@@ -2,6 +2,7 @@ import { Box, Slider } from "@mui/material";
 import VolumeOffIcon from "@mui/icons-material/VolumeOff";
 import VolumeUpIcon from "@mui/icons-material/VolumeUp";
 import type { Dispatch, RefObject, SetStateAction } from "react";
+import { videoSx } from "../../styles/theme";
 
 type SelectVolumeProps = {
     volume: number;
@@ -31,28 +32,15 @@ export default function SelectVolume({
             <Box
                 onMouseEnter={() => setHoveredVolume(true)}
                 onMouseLeave={() => setHoveredVolume(false)}
-                sx={{ position: "relative", display: "flex", alignItems: "center" }}
+                sx={videoSx.volumeRoot}
             >
                 {volume === 0 ? (
-                    <VolumeOffIcon sx={{ color: "#fff" }} />
+                    <VolumeOffIcon sx={videoSx.volumeIcon} />
                 ) : (
-                    <VolumeUpIcon sx={{ color: "#fff" }} />
+                    <VolumeUpIcon sx={videoSx.volumeIcon} />
                 )}
                 <Box
-                    sx={{
-                        position: "absolute",
-                        bottom: "120%",
-                        left: "50%",
-                        transform: hoveredVolume
-                            ? "translateX(10%) translateY(40px)"
-                            : "translateX(0%) translateY(40px)",
-                        opacity: hoveredVolume ? 1 : 0,
-                        pointerEvents: hoveredVolume ? "auto" : "none",
-                        transition: "all 0.2s ease",
-                        px: 1,
-                        py: 0.5,
-                        borderRadius: 1,
-                    }}
+                    sx={videoSx.volumePopover(hoveredVolume)}
                 >
                     <Slider
                         value={volume}
@@ -61,10 +49,7 @@ export default function SelectVolume({
                         step={0.01}
                         onChange={handleVolume}
                         size="small"
-                        sx={{
-                            width: 100,
-                            color: "#fff",
-                        }}
+                        sx={videoSx.volumeSlider}
                     />
                 </Box>
             </Box>

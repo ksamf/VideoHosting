@@ -4,11 +4,10 @@ import { Link, useNavigate } from "react-router-dom";
 import { useState, type FormEvent } from "react";
 import { login } from "../../api/auth";
 import useFormAuth from "../../hooks/useFormAuth";
-import { useTheme } from "@mui/material/styles";
+import { formSx } from "../../styles/theme";
 
 export default function LoginModal() {
     const navigate = useNavigate();
-    const theme = useTheme();
 
     const [email, setEmail] = useState<string>("");
     const [password, setPassword] = useState<string>("");
@@ -26,38 +25,17 @@ export default function LoginModal() {
         await handleSubmit({ email, password });
     };
 
-    const inputSx = (theme) => ({
-        color: theme.palette.text.primary,
-        caretColor: theme.palette.text.primary,
-        "&:before": { borderBottom: `1px solid ${theme.palette.muted.main}` },
-        "&:hover:not(.Mui-disabled):before": { borderBottom: `1px solid ${theme.palette.text.secondary}` },
-        "&.Mui-focused:after": { borderBottom: `2px solid ${theme.palette.text.primary}` },
-    });
-
     return (
         <Modal open onClose={() => navigate(-1)}>
-            <Box
-                sx={(theme) => ({
-                    color: theme.palette.text.secondary,
-                    position: "absolute",
-                    top: "50%",
-                    left: "50%",
-                    transform: "translate(-50%, -50%)",
-                    width: 400,
-                    bgcolor: theme.palette.background.paper,
-                    p: 2.5,
-                    borderRadius: 2,
-                    textAlign: "center",
-                })}
-            >
+            <Box sx={formSx.authModal}>
                 <Stack direction="row" justifyContent="space-between" alignItems="center" mb={1}>
                     <Typography variant="h6">Вход</Typography>
-                    <IconButton onClick={() => navigate(-1)} sx={(theme) => ({ color: theme.palette.text.secondary })}>
+                    <IconButton onClick={() => navigate(-1)} sx={formSx.authCloseButton}>
                         <CloseIcon />
                     </IconButton>
                 </Stack>
 
-                <Box component="form" onSubmit={onSubmit} sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
+                <Box component="form" onSubmit={onSubmit} sx={formSx.authForm}>
                     <Input
                         autoFocus
                         type="email"
@@ -65,7 +43,7 @@ export default function LoginModal() {
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
                         disabled={loading}
-                        sx={inputSx(theme)}
+                        sx={formSx.authInput}
                     />
 
                     <Input
@@ -74,7 +52,7 @@ export default function LoginModal() {
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
                         disabled={loading}
-                        sx={inputSx(theme)}
+                        sx={formSx.authInput}
                     />
 
                     {error && (
@@ -86,12 +64,7 @@ export default function LoginModal() {
                     <Button
                         type="submit"
                         disabled={!isFormValid || loading}
-                        sx={(theme) => ({
-                            bgcolor: theme.palette.text.primary,
-                            color: theme.palette.background.default,
-                            "&:hover": { bgcolor: theme.palette.text.secondary },
-                            "&.Mui-disabled": { bgcolor: "#555555", color: "#999" },
-                        })}
+                        sx={formSx.authPrimaryButton}
                     >
                         {loading ? "Загрузка..." : "Вход"}
                     </Button>
@@ -99,14 +72,7 @@ export default function LoginModal() {
                         type="button"
                         component={Link}
                         to="/register"
-                        sx={(theme) => ({
-                            bgcolor: theme.palette.divider,
-                            color: "#777777",
-                            "&:hover": {
-                                bgcolor: theme.palette.text.primary,
-                                color: theme.palette.background.default,
-                            },
-                        })}
+                        sx={formSx.authSecondaryButton}
                     >
                         {loading ? "Загрузка..." : "Регистрация"}
                     </Button>

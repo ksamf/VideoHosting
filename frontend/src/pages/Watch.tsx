@@ -9,6 +9,7 @@ import useFetch from "../hooks/useFetch";
 import useAuth from "../hooks/useAuth";
 import { useCallback } from "react";
 import { PageError, PageLoading } from "../components/common/PageState";
+import { pageSx } from "../styles/theme";
 
 export default function Watch() {
     const { user, isAuth } = useAuth();
@@ -50,7 +51,7 @@ export default function Watch() {
 
     if (!id) {
         return (
-            <Typography sx={(theme) => ({ color: theme.palette.text.secondary })}>
+            <Typography sx={pageSx.mutedMessage}>
                 Некорректный id видео
             </Typography>
         );
@@ -58,14 +59,14 @@ export default function Watch() {
 
     if (!video) {
         return (
-            <Typography sx={(theme) => ({ color: theme.palette.text.secondary })}>
+            <Typography sx={pageSx.mutedMessage}>
                 Видео не найдено
             </Typography>
         );
     }
 
     return (
-        <Box sx={{ maxWidth: 1500, mt: 2, ml: 4 }}>
+        <Box sx={pageSx.watchContainer}>
             <VideoPlayer
                 src={video.video_url}
                 poster={video.preview_url}

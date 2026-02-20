@@ -14,6 +14,7 @@ import { Link } from 'react-router-dom'
 import UserAvatar from "../common/UserAvatar";
 import { shortenNumRu } from "../../utils/ShortenNumRu";
 import type { Video } from "../../types/video";
+import { videoSx } from "../../styles/theme";
 
 TimeAgo.addLocale(ru);
 
@@ -25,51 +26,26 @@ export default function VideoItem({ video }: VideoItemProps) {
     const uploadDate = new Date(video.created_at);
     return (
         <Card
-            sx={(theme) => ({
-                width: "100%",
-                maxWidth: 360,
-                borderRadius: 2,
-                backgroundColor: theme.palette.background.default,
-                display: "flex",
-                flexDirection: "column",
-                cursor: "pointer",
-                transition: "transform 0.2s ease, box-shadow 0.2s ease",
-                "&:hover": { boxShadow: "0 12px 24px rgba(0,0,0,0.6)" },
-            })}
+            sx={videoSx.cardRoot}
         >
             <CardActionArea component={Link} to={{ pathname: `/watch/${video.video_id}` }} >
-                <Box
-                    sx={(theme) => ({
-                        position: "relative",
-                        width: "100%",
-                        aspectRatio: "16 / 9",
-                        overflow: "hidden",
-                        backgroundColor: theme.palette.common.black,
-                    })}
-                >
+                <Box sx={videoSx.cardPreviewBox}>
                     <CardMedia
                         component="img"
                         src={video.preview_url}
-                        sx={{
-                            width: "100%",
-                            height: "100%",
-                            objectFit: "cover",
-                            transition: "transform 0.25s ease",
-                            ".MuiCard-root:hover &": {
-                            },
-                        }}
+                        sx={videoSx.cardMedia}
                     />
                 </Box>
 
                 <CardHeader
-                    sx={{ p: 1.5, textAlign: "left" }}
+                    sx={videoSx.cardHeader}
                     avatar={
-                        <IconButton sx={{ p: 0 }}>
+                        <IconButton sx={videoSx.cardAvatarButton}>
                             <UserAvatar username={video.username} avatar_url={video.user_avatar_url} />
                         </IconButton>
                     }
                     action={
-                        <IconButton aria-label="settings" sx={(theme) => ({ color: theme.palette.text.secondary })}>
+                        <IconButton aria-label="settings" sx={videoSx.cardActionIcon}>
                             <MoreVertIcon />
                         </IconButton>
                     }
@@ -77,23 +53,17 @@ export default function VideoItem({ video }: VideoItemProps) {
                         <Typography
                             fontSize={15}
                             color="white"
-                            sx={{
-                                display: "-webkit-box",
-                                WebkitLineClamp: 2,
-                                WebkitBoxOrient: "vertical",
-                                overflow: "hidden",
-                                lineHeight: 1.3,
-                            }}
+                            sx={videoSx.cardTitle}
                         >
                             {video.name}
                         </Typography>
                     }
                     subheader={
                         <Stack spacing={0.3}>
-                            <Typography fontSize={12} sx={(theme) => ({ color: theme.palette.text.secondary })}>
+                            <Typography fontSize={12} sx={videoSx.cardMetaText}>
                                 {video.username}
                             </Typography>
-                            <Typography fontSize={12} sx={(theme) => ({ color: theme.palette.text.secondary })}>
+                            <Typography fontSize={12} sx={videoSx.cardMetaText}>
                                 {shortenNumRu(video.views)} просмотров ·{" "}
                                 <ReactTimeAgo date={uploadDate} locale="ru-RU" />
                             </Typography>

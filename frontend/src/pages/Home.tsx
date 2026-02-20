@@ -6,6 +6,7 @@ import useFetch from "../hooks/useFetch";
 import useAuth from "../hooks/useAuth";
 import { getUserRecommendations } from "../api/users";
 import { PageError, PageLoading } from "../components/common/PageState";
+import { pageSx } from "../styles/theme";
 
 export default function Home() {
     const { user, loading: authLoading, isAuth } = useAuth();
@@ -37,7 +38,7 @@ export default function Home() {
         return <PageError error={error} />;
     }
     return (
-        <Grid container spacing={2} sx={{ p: 2 }}>
+        <Grid container spacing={2} sx={pageSx.gridSection}>
             {isAuth
                 ? <VideoGrid videos={safeRecommendations.length > 0 ? safeRecommendations : safeVideos} />
                 : <VideoGrid videos={safeVideos} />}

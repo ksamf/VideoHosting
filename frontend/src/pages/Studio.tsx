@@ -16,6 +16,7 @@ import { formattedDate } from "../utils/FormattedDate";
 import { Stack } from "@mui/material";
 import useFetch from "../hooks/useFetch";
 import { PageError, PageLoading } from "../components/common/PageState";
+import { pageSx } from "../styles/theme";
 
 export default function Studio() {
     const { user, loading: authLoading } = useAuth();
@@ -80,33 +81,18 @@ export default function Studio() {
     }
 
     return (
-        <Box
-            sx={{
-                p: { xs: 2, md: 3 },
-                maxWidth: 1200,
-                mx: "auto",
-            }}
-        >
+        <Box sx={pageSx.studioRoot}>
             <Typography
                 variant="h4"
-                sx={{
-                    fontWeight: 600,
-                    mb: 2,
-                }}
+                sx={pageSx.studioHeader}
             >
                 Аналитика канала
             </Typography>
 
-            <Grid container spacing={2} sx={{ mb: 4 }}>
+            <Grid container spacing={2} sx={pageSx.studioMetricsGrid}>
                 <Grid size={{ xs: 12, sm: 6, md: 4 }}>
-                    <Paper
-                        sx={{
-                            p: 2,
-                            bgcolor: "#181818",
-                            borderRadius: 3,
-                        }}
-                    >
-                        <Typography color="#aaa" fontSize={13}>
+                    <Paper sx={pageSx.studioCard}>
+                        <Typography sx={pageSx.studioCardLabel}>
                             Подписчики (за 30 дней)
                         </Typography>
                         <Typography fontSize={22} fontWeight={600}>
@@ -116,8 +102,8 @@ export default function Studio() {
                 </Grid>
 
                 <Grid size={{ xs: 12, sm: 6, md: 4 }}>
-                    <Paper sx={{ p: 2, bgcolor: "#181818", borderRadius: 3 }}>
-                        <Typography color="#aaa" fontSize={13}>
+                    <Paper sx={pageSx.studioCard}>
+                        <Typography sx={pageSx.studioCardLabel}>
                             Просмотров за 30 дней
                         </Typography>
                         <Typography fontSize={22} fontWeight={600}>
@@ -130,32 +116,19 @@ export default function Studio() {
                     <Paper
                         component={Link}
                         to={bestVideo ? `/watch/${bestVideo.video_id}` : "#"}
-                        sx={{
-                            p: 2,
-                            bgcolor: "#181818",
-                            borderRadius: 3,
-                            display: "block",
-                            textDecoration: "none",
-                            color: "inherit",
-                            "&:visited": { color: "inherit" },
-                            "&:hover": { bgcolor: "#202020" },
-                        }}
+                        sx={pageSx.studioBestVideoCard}
                     >
-                        <Typography color="#aaa" fontSize={13} sx={{ mb: 1 }}>
+                        <Typography sx={pageSx.studioBestVideoTitle}>
                             Лучшее видео
                         </Typography>
                         {bestVideo ? (
-                            <Stack flexDirection="row" sx={{ display: "flex" }}>
+                            <Stack sx={pageSx.studioBestVideoRow}>
                                 <img
                                     src={bestVideo.preview_url}
                                     alt="preview"
-                                    style={{
-                                        width: "15%",
-                                        height: "15%",
-                                        borderRadius: 3,
-                                    }}
+                                    style={pageSx.studioBestVideoImage}
                                 />
-                                <Typography fontSize={16} fontWeight={500} sx={{ ml: 2, display: "flex", alignItems: "center" }} noWrap>
+                                <Typography fontSize={16} fontWeight={500} sx={pageSx.studioBestVideoName} noWrap>
                                     {bestVideo.name}
                                 </Typography>
                             </Stack>
@@ -168,32 +141,18 @@ export default function Studio() {
 
             <Typography
                 variant="h6"
-                sx={{
-                    fontWeight: 600,
-                    mb: 1,
-                }}
+                sx={pageSx.studioVideosTitle}
             >
                 Ваши видео
             </Typography>
 
             <TableContainer
                 component={Paper}
-                sx={{
-                    bgcolor: "#181818",
-                    borderRadius: 3,
-                }}
+                sx={pageSx.studioTableContainer}
             >
-                <Table sx={{ minWidth: 650 }}>
+                <Table sx={pageSx.studioTable}>
                     <TableHead>
-                        <TableRow
-                            sx={{
-                                "& th": {
-                                    color: "#aaa",
-                                    borderColor: "#222",
-                                    fontWeight: 600,
-                                },
-                            }}
-                        >
+                        <TableRow sx={pageSx.studioTableHeadRow}>
                             <TableCell>Видео</TableCell>
                             <TableCell align="center">Дата</TableCell>
                             <TableCell align="center">Просмотры</TableCell>
@@ -206,27 +165,15 @@ export default function Studio() {
                         {userVideos.map((video) => (
                             <TableRow
                                 key={video.video_id}
-                                sx={{
-                                    "& td": {
-                                        borderColor: "#222",
-                                    },
-                                    "&:hover": {
-                                        bgcolor: "#202020",
-                                    },
-                                    height: "100px",
-                                }}
+                                sx={pageSx.studioTableRow}
                             >
-                                <TableCell align="center" sx={{ display: "flex" }} onClick={() => navigate(`/watch/${video.video_id}`)}>
+                                <TableCell align="center" sx={pageSx.studioVideoCell} onClick={() => navigate(`/watch/${video.video_id}`)}>
                                     <img
                                         src={video.preview_url}
                                         alt="preview"
-                                        style={{
-                                            width: "35%",
-                                            height: "35%",
-                                            borderRadius: 3,
-                                        }}
+                                        style={pageSx.studioVideoImage}
                                     />
-                                    <Typography sx={{ display: "flex", alignItems: "center", ml: 2 }}>
+                                    <Typography sx={pageSx.studioVideoName}>
                                         {video.name}
                                     </Typography>
                                 </TableCell>

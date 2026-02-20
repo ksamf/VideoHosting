@@ -4,14 +4,14 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Modal from "@mui/material/Modal";
 import Box from "@mui/material/Box";
-import { Typography, useTheme } from "@mui/material";
+import { Typography } from "@mui/material";
 import CloseIcon from '@mui/icons-material/Close';
 import IconButton from "@mui/material/IconButton";
 import { getVideoPreview } from "../../utils/GetVideoPreview"
+import { formSx } from "../../styles/theme";
 
 export default function UploadVideo() {
     const navigate = useNavigate();
-    const theme = useTheme();
     const [step, setStep] = useState<number>(1);
     const [file, setFile] = useState<File | null>(null);
     const [preview, setPreview] = useState<File | null>(null);
@@ -47,27 +47,10 @@ export default function UploadVideo() {
 
     return (
         <Modal open onClose={() => navigate("/studio")}>
-            <Box sx={{
-                overflow: "auto",
-                color: theme.palette.text.secondary,
-                position: 'absolute',
-                top: '50%',
-                left: '50%',
-                transform: 'translate(-50%, -50%)',
-                width: { xs: "90%", md: 900 },
-                height: { xs: "70vh", md: "80vh" },
-                bgcolor: '#282828',
-                p: 2,
-                borderRadius: 2
-            }}>
-                <Box sx={{
-                    display: "flex",
-                    justifyContent: "space-between",
-                    alignItems: "center",
-                    mb: 2,
-                }}>
+            <Box sx={formSx.uploadModal}>
+                <Box sx={formSx.uploadHeader}>
                     <Typography variant="h6">{step === 1 ? "Загрузка видео" : "Детали видео"} </Typography>
-                    <IconButton onClick={() => navigate("/studio")} sx={{ color: "#aaa" }}>
+                    <IconButton onClick={() => navigate("/studio")} sx={formSx.uploadCloseButton}>
                         <CloseIcon />
                     </IconButton>
                 </Box>
