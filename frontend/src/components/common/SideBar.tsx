@@ -17,13 +17,20 @@ import LogoutIcon from '@mui/icons-material/Logout';
 import { Link, useNavigate } from "react-router-dom";
 import { getUserSubscriptions } from "../../api/users";
 import { logout } from "../../api/auth";
+import type { User } from "../../types/user";
 
-export default function SideBar({ user, open, setOpen }) {
-    const [subs, setSubs] = useState([]);
+type SideBarProps = {
+    user: User | null;
+    open: boolean;
+    setOpen: (open: boolean) => void;
+};
+
+export default function SideBar({ user, open, setOpen }: SideBarProps) {
+    const [subs, setSubs] = useState<User[]>([]);
     const [showAllSubs, setShowAllSubs] = useState(false);
 
     const [logoutLoading, setLogoutLoading] = useState(false);
-    const [logoutErr, setLogoutErr] = useState(null);
+    const [logoutErr, setLogoutErr] = useState<string | null>(null);
 
     const navigate = useNavigate();
 

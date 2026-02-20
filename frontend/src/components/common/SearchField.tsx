@@ -6,7 +6,7 @@ import SearchIcon from "@mui/icons-material/Search";
 import { useLocation, useNavigate } from "react-router-dom";
 
 export default function SearchField() {
-  const [query, setQuery] = useState(() => {
+  const [query, setQuery] = useState<string>(() => {
     const params = new URLSearchParams(window.location.search);
     return params.get("q") || "";
   });

@@ -1,24 +1,21 @@
 import IconButton from '@mui/material/IconButton';
 import Tooltip from '@mui/material/Tooltip';
 import Menu from '@mui/material/Menu';
-import MenuItem from '@mui/material/MenuItem';
-import Typography from '@mui/material/Typography';
-import Avatar from '@mui/material/Avatar';
-import PersonIcon from '@mui/icons-material/Person';
-import LogoutIcon from '@mui/icons-material/Logout';
-import HandymanIcon from '@mui/icons-material/Handyman';
-import { useState } from 'react'
-import Button from '@mui/material/Button';
-import Logout from './Logout';
+import { useState, type MouseEvent } from 'react';
 import UserAvatar from './UserAvatar';
 
-export default function NavMenu({ username, avatar_url }) {
-    const [anchorElUser, setAnchorElUser] = useState(null);
+type NavMenuProps = {
+    username?: string;
+    avatar_url?: string;
+};
+
+export default function NavMenu({ username, avatar_url }: NavMenuProps) {
+    const [anchorElUser, setAnchorElUser] = useState<HTMLElement | null>(null);
 
     const handleCloseUserMenu = () => {
         setAnchorElUser(null);
     };
-    const handleOpenUserMenu = (event) => {
+    const handleOpenUserMenu = (event: MouseEvent<HTMLElement>) => {
         setAnchorElUser(event.currentTarget);
     };
     return (
@@ -44,12 +41,6 @@ export default function NavMenu({ username, avatar_url }) {
                 open={Boolean(anchorElUser)}
                 onClose={handleCloseUserMenu}
             >
-                <MenuItem onClick={handleCloseUserMenu} sx={{ flexDirection: "column", alignItems: "flex-start", ":hover": { backgroundColor: "transparent" } }}>
-                    <Button sx={{ color: "inherit", textDecoration: 'none', }}><PersonIcon sx={{ paddingRight: "10px" }} /> Перейти на канал</Button>
-                    <Button href='/studio' sx={{ color: "inherit", textDecoration: 'none', }}><HandymanIcon sx={{ paddingRight: "10px" }} />Студия</Button>
-                    <Logout />
-                </MenuItem>
-
             </Menu>
         </>
     )

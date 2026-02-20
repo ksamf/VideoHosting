@@ -1,12 +1,13 @@
 import AdbIcon from '@mui/icons-material/Adb';
 import Button from '@mui/material/Button';
 import Typography from '@mui/material/Typography';
+import { Link } from "react-router-dom";
 
 export default function Logo() {
     return (<>
         <Button
-            href="/"
-            textDecoration='none'
+            component={Link}
+            to="/"
             sx={{
                 color: "inherit", textDecoration: 'none', '&:hover': {
                     color: 'inherit',

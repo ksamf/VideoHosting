@@ -1,6 +1,13 @@
 import { Avatar } from "@mui/material";
 
-export default function UserAvatar({ username, avatar_url, size = 40, cacheKey = "" }) {
+type UserAvatarProps = {
+    username?: string;
+    avatar_url?: string;
+    size?: number;
+    cacheKey?: string | number;
+};
+
+export default function UserAvatar({ username, avatar_url, size = 40, cacheKey = "" }: UserAvatarProps) {
     const hasAvatar = Boolean(avatar_url);
     const suffix = cacheKey ? `?v=${cacheKey}` : "";
     const avatar64 = hasAvatar ? `${avatar_url}/avatar_64.jpg${suffix}` : undefined;
@@ -9,7 +16,7 @@ export default function UserAvatar({ username, avatar_url, size = 40, cacheKey =
 
     return (
         <Avatar
-            alt={username}
+            alt={username ?? "user"}
             src={avatar128}
             srcSet={hasAvatar ? `${avatar64} 64w, ${avatar128} 128w, ${avatar256} 256w` : undefined}
             sx={{

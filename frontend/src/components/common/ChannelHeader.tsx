@@ -4,13 +4,20 @@ import UserAvatar from "./UserAvatar";
 import { uploadUserAvatar, getUserSubscriptionsCount, getUserViewsCount } from "../../api/users";
 import SubscribeButton from "../video/SubscribeButton";
 import { shortenNumRu } from "../../utils/ShortenNumRu";
+import type { User } from "../../types/user";
 
-export default function ChannelHeader({ channel, authUser, isAuth, countVideos, isSubscribed, setIsSubscribed }) {
-    const inputRef = useRef(null);
+type ChannelHeaderProps = {
+    channel: User;
+    authUser: User | null;
+    isAuth: boolean;
+    countVideos: number;
+};
+
+export default function ChannelHeader({ channel, authUser, isAuth, countVideos }: ChannelHeaderProps) {
+    const inputRef = useRef<HTMLInputElement | null>(null);
     const isOwnChannel = authUser?.user_id === channel.user_id;
-    const [avatarVersion, setAvatarVersion] = useState(0);
-    const [viewsCount, setViewsCount] = useState(0);
-    const [subscriptionsCount, setSubscriptionsCount] = useState(0);
+    const [viewsCount, setViewsCount] = useState<number>(0);
+    const [subscriptionsCount, setSubscriptionsCount] = useState<number>(0);
 
 
     const openFileDialog = () => {
@@ -18,7 +25,7 @@ export default function ChannelHeader({ channel, authUser, isAuth, countVideos, 
             inputRef.current?.click();
         }
     };
-    const handleFileSelect = async (file) => {
+    const handleFileSelect = async (file: File) => {
         if (!file.type.startsWith("image/")) {
             alert("Можно загружать только изображение");
             return;
@@ -27,7 +34,6 @@ export default function ChannelHeader({ channel, authUser, isAuth, countVideos, 
             return;
         }
         await uploadUserAvatar(authUser.user_id, file);
-        setAvatarVersion(Date.now());
     };
     useEffect(() => {
         if (!channel?.user_id) return;
@@ -62,6 +68,7 @@ export default function ChannelHeader({ channel, authUser, isAuth, countVideos, 
                 onChange={(e) => {
                     const file = e.target.files?.[0];
                     if (file) handleFileSelect(file);
+                    e.currentTarget.value = "";
                 }}
             />
             <Paper
@@ -89,7 +96,6 @@ export default function ChannelHeader({ channel, authUser, isAuth, countVideos, 
                             username={channel.username}
                             avatar_url={channel.avatar_url}
                             size={96}
-                            cacheKey={avatarVersion}
                         />
                     </Button>
                     <Typography fontWeight={600} fontSize={18}>
@@ -98,7 +104,7 @@ export default function ChannelHeader({ channel, authUser, isAuth, countVideos, 
                 </Stack>
 
                 {isAuth && !isOwnChannel && (
-                    <SubscribeButton channelId={channel.user_id} setSubscriptionsCount={setSubscriptionsCount} isSubscribed={isSubscribed} setIsSubscribed={setIsSubscribed} />
+                    <SubscribeButton channelId={channel.user_id} setSubscriptionsCount={setSubscriptionsCount} />
                 )}
 
                 <Typography sx={(theme) => ({ color: theme.palette.text.secondary })}>

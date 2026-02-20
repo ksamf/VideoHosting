@@ -17,7 +17,7 @@ import { Link } from "react-router-dom";
 
 export default function NavBar() {
     const { user, loading, isAuth } = useAuth();
-    const [drawerOpen, setDrawerOpen] = useState(false);
+    const [drawerOpen, setDrawerOpen] = useState<boolean>(false);
 
     const open = isAuth && drawerOpen;
 
