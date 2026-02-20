@@ -5,20 +5,23 @@ import IconButton from "@mui/material/IconButton";
 import MoreVertIcon from "@mui/icons-material/MoreVert";
 import Typography from "@mui/material/Typography";
 import Stack from "@mui/material/Stack";
-import Avatar from "@mui/material/Avatar";
 import ReactTimeAgo from "react-time-ago";
 import ru from "javascript-time-ago/locale/ru.json";
 import TimeAgo from "javascript-time-ago";
 import Box from "@mui/material/Box"
 import { CardActionArea } from "@mui/material";
 import { Link } from 'react-router-dom'
-import VideoPlayer from "./VideoPlayer";
 import UserAvatar from "../common/UserAvatar";
 import { shortenNumRu } from "../../utils/ShortenNumRu";
+import type { Video } from "../../types/video";
 
 TimeAgo.addLocale(ru);
 
-export default function VideoItem({ video }) {
+type VideoItemProps = {
+    video: Video;
+};
+
+export default function VideoItem({ video }: VideoItemProps) {
     const uploadDate = new Date(video.created_at);
     return (
         <Card

@@ -1,16 +1,21 @@
-import { useState } from "react";
+import { useState, type Dispatch, type MouseEvent, type RefObject, type SetStateAction } from "react";
 import { Box, Menu, MenuItem } from "@mui/material";
 
+type SelectSpeedProps = {
+    playbackRate: number;
+    setPlaybackRate: Dispatch<SetStateAction<number>>;
+    videoRef: RefObject<HTMLVideoElement | null>;
+}
 
-export default function SelectSpeed({ playbackRate, setPlaybackRate, videoRef }) {
-    const [speedAnchorEl, setSpeedAnchorEl] = useState(null);
+export default function SelectSpeed({ playbackRate, setPlaybackRate, videoRef }: SelectSpeedProps) {
+    const [speedAnchorEl, setSpeedAnchorEl] = useState<HTMLElement | null>(null);
     const speeds = [0.25, 0.5, 0.75, 1, 1.25, 1.5, 2];
     const speedOpen = Boolean(speedAnchorEl);
 
     return (
         <>
             <Box
-                onClick={(e) => setSpeedAnchorEl(e.currentTarget)}
+                onClick={(e: MouseEvent<HTMLElement>) => setSpeedAnchorEl(e.currentTarget)}
                 sx={{
                     px: 1.5,
                     py: 0.5,
@@ -58,7 +63,9 @@ export default function SelectSpeed({ playbackRate, setPlaybackRate, videoRef })
                         selected={s === playbackRate}
                         onClick={() => {
                             setPlaybackRate(s);
-                            videoRef.current.playbackRate = s;
+                            if (videoRef.current) {
+                                videoRef.current.playbackRate = s;
+                            }
                             setSpeedAnchorEl(null);
                         }}
                         sx={{

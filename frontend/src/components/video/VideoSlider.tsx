@@ -1,5 +1,15 @@
-import { useState, useRef } from "react";
+import { useState, useRef, type Dispatch, type RefObject, type SetStateAction } from "react";
 import { Box, Typography, Slider } from "@mui/material";
+
+type VideoSliderProps = {
+    videoRef: RefObject<HTMLVideoElement | null>;
+    progress: number;
+    duration: number;
+    buffering: boolean;
+    setProgress: Dispatch<SetStateAction<number>> | ((value: number) => void);
+    setCurrentTime: Dispatch<SetStateAction<number>> | ((value: number) => void);
+    formatTime: (seconds: number) => string;
+};
 
 export default function VideoSlider({
     videoRef,
@@ -9,14 +19,14 @@ export default function VideoSlider({
     setProgress,
     setCurrentTime,
     formatTime,
-}) {
-    const [hoverTime, setHoverTime] = useState(null);
+}: VideoSliderProps) {
+    const [hoverTime, setHoverTime] = useState<number | null>(null);
     const [hoverX, setHoverX] = useState(0);
-    const [previewImg, setPreviewImg] = useState(null);
+    const [previewImg, setPreviewImg] = useState<string | null>(null);
 
-    const previewCanvasRef = useRef(null);
+    const previewCanvasRef = useRef<HTMLCanvasElement | null>(null);
 
-    const handleSeek = (_, value) => {
+    const handleSeek = (_: Event, value: number | number[]) => {
         const video = videoRef.current;
         if (!video || !duration || !Number.isFinite(duration)) return;
 

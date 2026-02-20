@@ -1,7 +1,12 @@
 import { Box } from "@mui/material";
 import VideoItem from "./VideoItem";
+import type { Video } from "../../types/video";
 
-export default function VideoGrid({ videos }) {
+type VideoGridProps = {
+    videos: Video[];
+};
+
+export default function VideoGrid({ videos }: VideoGridProps) {
     return (
         <Box
             sx={{

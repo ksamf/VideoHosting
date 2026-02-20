@@ -9,8 +9,14 @@ import VideoSlider from "./VideoSlider";
 import useVideoPlayer from "../../hooks/useVideoPlayer";
 import { useEffect, useMemo } from "react";
 
+type VideoPlayerProps = {
+    src: string;
+    poster?: string;
+    qualities?: number[];
+    videoId: string;
+};
 
-export default function VideoPlayer({ src, poster, qualities = [], videoId }) {
+export default function VideoPlayer({ src, poster, qualities = [], videoId }: VideoPlayerProps) {
     const {
         videoRef,
         containerRef,
@@ -22,7 +28,6 @@ export default function VideoPlayer({ src, poster, qualities = [], videoId }) {
         setVolume,
         player,
         updatePlayer,
-        controlsVisible,
         effectiveControlsVisible,
         hoveredVolume,
         setHoveredVolume,
@@ -40,7 +45,7 @@ export default function VideoPlayer({ src, poster, qualities = [], videoId }) {
 
 
     const { playing, progress, duration, currentTime } = player;
-    const safeQualities = useMemo(() => (Array.isArray(qualities) ? qualities : []), [qualities]);
+    const safeQualities = useMemo<number[]>(() => (Array.isArray(qualities) ? qualities : []), [qualities]);
 
     useEffect(() => {
         if (safeQualities.length === 0) return;
@@ -115,9 +120,7 @@ export default function VideoPlayer({ src, poster, qualities = [], videoId }) {
                 >
                     <VideoSlider
                         videoRef={videoRef}
-                        videoSrc={videoSrc}
                         progress={progress}
-                        controlsVisible={controlsVisible}
                         duration={duration}
                         buffering={player.buffering}
                         setProgress={(p) => updatePlayer({ progress: p })}

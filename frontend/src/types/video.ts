@@ -2,6 +2,7 @@ export interface Video {
     video_id: string;
     user_id: string;
     name: string;
+    description?: string;
     video_url: string;
     preview_url: string;
     username: string;

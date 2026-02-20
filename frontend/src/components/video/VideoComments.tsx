@@ -6,8 +6,30 @@ import useFetch from "../../hooks/useFetch";
 import useCommentForm from "../../hooks/useCommentForm";
 import UserAvatar from "../common/UserAvatar";
 import { useCallback, useMemo, useState } from "react";
+import type { Comment } from "../../types/action";
+import type { VideoDetails } from "../../types/video";
+import type { User } from "../../types/user";
 
-export default function VideoComments({ video, user, isAuth }) {
+type VideoCommentsProps = {
+    video: VideoDetails;
+    user: User | null;
+    isAuth: boolean;
+};
+
+type UIComment = Comment & {
+    comment_text?: string;
+};
+
+type NewCommentPayload =
+    | string
+    | {
+        comment_id?: string;
+        text?: string;
+        comment_text?: string;
+        created_at?: string;
+    };
+
+export default function VideoComments({ video, user, isAuth }: VideoCommentsProps) {
     const videoId = video?.video_id ?? null;
     const fetchComments = useCallback(
         () => (videoId ? getComments(videoId) : Promise.resolve([])),
@@ -15,7 +37,7 @@ export default function VideoComments({ video, user, isAuth }) {
     );
 
     const { data: fetchedComments = [], loading: commentsLoading, refetch } = useFetch(fetchComments);
-    const [optimistic, setOptimistic] = useState([]);
+    const [optimistic, setOptimistic] = useState<UIComment[]>([]);
 
     const safeFetchedComments = useMemo(
         () => (Array.isArray(fetchedComments) ? fetchedComments : []),
@@ -42,15 +64,16 @@ export default function VideoComments({ video, user, isAuth }) {
         error,
         isDisabledSend,
         handleSubmitComment,
-    } = useCommentForm(video?.video_id, (newComment, rawText) => {
+    } = useCommentForm(video?.video_id, (newComment: NewCommentPayload, rawText: string) => {
+        const commentPayload = typeof newComment === "string" ? null : newComment;
         const createdCommentId =
             typeof newComment === "string"
                 ? newComment
-                : (newComment?.comment_id ?? crypto.randomUUID());
-        const optimistic = {
+                : (commentPayload?.comment_id ?? crypto.randomUUID());
+        const optimistic: UIComment = {
             comment_id: createdCommentId,
-            text: newComment?.text ?? newComment?.comment_text ?? rawText,
-            created_at: newComment?.created_at ?? new Date().toISOString(),
+            text: commentPayload?.text ?? commentPayload?.comment_text ?? rawText,
+            created_at: commentPayload?.created_at ?? new Date().toISOString(),
             username: user?.username ?? "Вы",
             user_avatar_url: user?.avatar_url ?? "",
         };
@@ -97,7 +120,7 @@ export default function VideoComments({ video, user, isAuth }) {
                             py: 0.5,
                             borderRadius: 5,
                             fontSize: 14,
-                            bgcolor: (theme) => theme.palette.background.surface,
+                            bgcolor: (theme) => theme.palette.background.paper,
                             color: (theme) => theme.palette.text.primary,
                         }}
                         endAdornment={
@@ -105,7 +128,7 @@ export default function VideoComments({ video, user, isAuth }) {
                                 <SendIcon
                                     sx={{
                                         color: (theme) =>
-                                            isDisabledSend ? theme.palette.muted.main : theme.palette.text.primary,
+                                            isDisabledSend ? theme.palette.text.secondary : theme.palette.text.primary,
                                     }}
                                 />
                             </IconButton>

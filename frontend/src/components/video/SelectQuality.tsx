@@ -1,14 +1,21 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, type MouseEvent, type Dispatch, type SetStateAction, type RefObject } from "react";
 import { Box, Menu, MenuItem } from "@mui/material";
 
-export default function SelectQuality({ qualities, videoRef, setPlaying, selectedIndex, setSelectedIndex }) {
-    const [anchorEl, setAnchorEl] = useState(null);
-    const restoreTimeRef = useRef(0);
-    const resumePlaybackRef = useRef(false);
-    const pendingSwitchRef = useRef(false);
+type SelectQualityProps = {
+    qualities: number[];
+    videoRef: RefObject<HTMLVideoElement | null>;
+    setPlaying: (playing: boolean) => void;
+    selectedIndex: number;
+    setSelectedIndex: Dispatch<SetStateAction<number>>;
+}
+export default function SelectQuality({ qualities, videoRef, setPlaying, selectedIndex, setSelectedIndex }: SelectQualityProps) {
+    const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
+    const restoreTimeRef = useRef<number>(0);
+    const resumePlaybackRef = useRef<boolean>(false);
+    const pendingSwitchRef = useRef<boolean>(false);
     const open = Boolean(anchorEl);
 
-    const handleClickListItem = (event) => {
+    const handleClickListItem = (event: MouseEvent<HTMLElement>) => {
         setAnchorEl(event.currentTarget);
     };
 
@@ -16,7 +23,7 @@ export default function SelectQuality({ qualities, videoRef, setPlaying, selecte
         setAnchorEl(null);
     };
 
-    const handleMenuItemClick = (_, index) => {
+    const handleMenuItemClick = (_: MouseEvent<HTMLElement>, index: number) => {
         if (index === selectedIndex) {
             setAnchorEl(null);
             return;

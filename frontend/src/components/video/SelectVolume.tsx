@@ -1,15 +1,30 @@
 import { Box, Slider } from "@mui/material";
 import VolumeOffIcon from "@mui/icons-material/VolumeOff";
 import VolumeUpIcon from "@mui/icons-material/VolumeUp";
+import type { Dispatch, RefObject, SetStateAction } from "react";
 
-export default function SelectVolume({ volume, setVolume, videoRef, hoveredVolume, setHoveredVolume }) {
+type SelectVolumeProps = {
+    volume: number;
+    setVolume: Dispatch<SetStateAction<number>>;
+    videoRef: RefObject<HTMLVideoElement | null>;
+    hoveredVolume: boolean;
+    setHoveredVolume: Dispatch<SetStateAction<boolean>>;
+};
 
-    const handleVolume = (_, value) => {
+export default function SelectVolume({
+    volume,
+    setVolume,
+    videoRef,
+    hoveredVolume,
+    setHoveredVolume,
+}: SelectVolumeProps) {
+    const handleVolume = (_: Event, value: number | number[]) => {
         const video = videoRef.current;
         if (!video) return;
+        const nextValue = Array.isArray(value) ? value[0] : value;
 
-        video.volume = value;
-        setVolume(value);
+        video.volume = nextValue;
+        setVolume(nextValue);
     };
     return (
         <>

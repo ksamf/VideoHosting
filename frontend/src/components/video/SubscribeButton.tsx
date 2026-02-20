@@ -1,9 +1,14 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, type Dispatch, type SetStateAction } from "react";
 import { getUserSubscribed, subUnsubChannel } from "../../api/users";
 import { Button } from "@mui/material";
 
-export default function SubscribeButton({ channelId, setSubscriptionsCount }) {
-    const [subscribeLoading, setSubscribeLoading] = useState(false)
+type SubscribeButtonProps = {
+    channelId: string;
+    setSubscriptionsCount: Dispatch<SetStateAction<number>>;
+};
+
+export default function SubscribeButton({ channelId, setSubscriptionsCount }: SubscribeButtonProps) {
+    const [subscribeLoading, setSubscribeLoading] = useState(false);
     const [isSubscribed, setIsSubscribed] = useState(false);
 
     const handleSubscribe = async () => {
@@ -29,9 +34,12 @@ export default function SubscribeButton({ channelId, setSubscriptionsCount }) {
     useEffect(() => {
         getUserSubscribed(channelId)
             .then((data) => {
-                setIsSubscribed(data.is_subscribed)
+                setIsSubscribed(data.is_subscribed);
             })
-    }, [channelId])
+            .catch(() => {
+                setIsSubscribed(false);
+            });
+    }, [channelId]);
     return (
         <>
             {isSubscribed ?

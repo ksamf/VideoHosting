@@ -6,14 +6,20 @@ import ThumbUpAltOutlinedIcon from '@mui/icons-material/ThumbUpAltOutlined';
 import ThumbDownAltOutlinedIcon from '@mui/icons-material/ThumbDownAltOutlined';
 import { shortenNumRu } from "../../utils/ShortenNumRu";
 import { addReaction, getReaction } from "../../api/videos";
+import type { VideoDetails } from "../../types/video";
 
-export default function VideoReaction({ video, isAuth }) {
+type VideoReactionProps = {
+    video: VideoDetails;
+    isAuth: boolean;
+};
+
+export default function VideoReaction({ video, isAuth }: VideoReactionProps) {
     const [reactionLoading, setReactionLoading] = useState(false);
     const [like, setLike] = useState(false);
     const [dislike, setDislike] = useState(false);
     const [currentLikes, setCurrentLikes] = useState(video.likes);
     const [currentDislikes, setCurrentDislikes] = useState(video.dislikes);
-    const sendTimerRef = useRef(null);
+    const sendTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
     useEffect(() => {
         setCurrentLikes(video.likes);
@@ -30,7 +36,7 @@ export default function VideoReaction({ video, isAuth }) {
         };
     }, []);
 
-    const scheduleReaction = (value, onFail) => {
+    const scheduleReaction = (value: string, onFail?: () => void) => {
         if (sendTimerRef.current) {
             clearTimeout(sendTimerRef.current);
         }
@@ -152,7 +158,7 @@ export default function VideoReaction({ video, isAuth }) {
             direction="row"
             spacing={1}
             sx={{
-                bgcolor: (theme) => theme.palette.background.surface,
+                bgcolor: (theme) => theme.palette.background.paper,
                 borderRadius: 5,
                 px: 1,
                 py: 0.5,

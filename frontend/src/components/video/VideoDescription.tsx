@@ -1,11 +1,16 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { Box, Typography, Button, useTheme } from "@mui/material";
 import ReactTimeAgo from "react-time-ago";
 import { Link } from "react-router-dom";
 import { shortenNumRu } from "../../utils/ShortenNumRu";
 import { formattedDate } from "../../utils/FormattedDate";
+import type { VideoDetails } from "../../types/video";
 
-export default function VideoDescription({ video }) {
+type VideoDescriptionProps = {
+    video: VideoDetails;
+};
+
+export default function VideoDescription({ video }: VideoDescriptionProps) {
     const theme = useTheme()
     const [expanded, setExpanded] = useState(false);
 
@@ -19,12 +24,12 @@ export default function VideoDescription({ video }) {
             sx={({
                 mt: 2,
                 p: 1.5,
-                bgcolor: theme.palette.background.surface,
+                bgcolor: theme.palette.background.paper,
                 borderRadius: 2,
                 wordWrap: "break-word",
             })}
         >
-            <Typography color={(theme) => theme.palette.text.secondary} fontSize={13} mb={0.5}>
+            <Typography sx={(theme) => ({ color: theme.palette.text.secondary })} fontSize={13} mb={0.5}>
                 {expanded ? `${video.views} просмотров • ` : `${shortenNumRu(video.views)} просмотров • `}
                 {expanded ? formattedDate(video.created_at) : uploadDate && (
                     <ReactTimeAgo
@@ -33,13 +38,13 @@ export default function VideoDescription({ video }) {
                     />
                 )}{" "}
                 {"• "}
-                {video.tags != [] && video.tags?.map((t, i) => (
+                {Array.isArray(video.tags) && video.tags.map((t, i) => (
                     <Link
                         key={i}
                         to={`/tags/${t}`}
                         style={({
                             marginRight: 6,
-                            color: theme.palette.link.main,
+                            color: theme.palette.primary.main,
                             textDecoration: "none",
                         })}
                     >

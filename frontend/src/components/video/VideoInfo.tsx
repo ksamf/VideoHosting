@@ -16,11 +16,20 @@ import { useEffect, useState } from "react";
 import { getUserSubscriptionsCount } from "../../api/users";
 import SubscribeButton from "./SubscribeButton";
 import { Link } from "react-router-dom";
+import type { VideoDetails } from "../../types/video";
+import type { User } from "../../types/user";
 
 TimeAgo.addLocale(ru);
 
-export default function VideoInfo({ video, channel, user, isAuth }) {
-    const [subscriptionsCount, setSubscriptionsCount] = useState(channel?.subscribers || 0);
+type VideoInfoProps = {
+    video: VideoDetails;
+    channel: User;
+    user: User | null;
+    isAuth: boolean;
+};
+
+export default function VideoInfo({ video, channel, user, isAuth }: VideoInfoProps) {
+    const [subscriptionsCount, setSubscriptionsCount] = useState<number>(0);
 
 
     useEffect(() => {
@@ -65,7 +74,7 @@ export default function VideoInfo({ video, channel, user, isAuth }) {
                             </Typography>
                         </Stack>
                     </Button>
-                    {isAuth && user.user_id !== channel.user_id && (
+                    {isAuth && user?.user_id !== channel.user_id && (
                         <SubscribeButton channelId={channel.user_id} setSubscriptionsCount={setSubscriptionsCount} />
                     )}
                 </Stack>
