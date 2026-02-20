@@ -1,6 +1,6 @@
 import { PaginatedQuery } from "../types/api";
 import { api, unwrapApi } from "./client";
-import { Video, VideosResponse, UploadVideoResponse } from "../types/video";
+import { VideoDetails, VideosResponse, UploadVideoResponse } from "../types/video";
 import { Comment, AddComment, AddReaction, Reaction, UpdateViews } from "../types/action";
 
 export const getVideos = async (params: PaginatedQuery): Promise<VideosResponse> => {
@@ -22,8 +22,8 @@ export const searchVideos = async (params: { q: string, limit: number, offset: n
     ));
 };
 
-export const getVideoById = async (id: string): Promise<Video> => {
-    return unwrapApi(await api<Video>(`/video/${id}`));
+export const getVideoById = async (id: string): Promise<VideoDetails> => {
+    return unwrapApi(await api<VideoDetails>(`/video/${id}`));
 };
 
 export const uploadVideo = async (form: FormData): Promise<UploadVideoResponse> => {

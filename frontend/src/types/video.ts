@@ -18,7 +18,7 @@ export interface VideoDetails extends Video {
     tags?: string[];
 }
 
-export type VideosResponse = Video[];
+export type VideosResponse = VideoDetails[];
 
 export interface UploadVideoResponse {
     video_id: string;

@@ -16,8 +16,14 @@ export default function Watch() {
     const { id } = useParams();
 
 
-    const fetchVideo = useCallback(() => getVideoById(id), [id]);
-    const fetchChannel = useCallback(() => getUserByVideoId(id), [id]);
+    const fetchVideo = useCallback(
+        () => (id ? getVideoById(id) : Promise.resolve(null)),
+        [id]
+    );
+    const fetchChannel = useCallback(
+        () => (id ? getUserByVideoId(id) : Promise.resolve(null)),
+        [id]
+    );
 
     const {
         data: video,
@@ -42,6 +48,14 @@ export default function Watch() {
         return <PageError error={error} />;
     }
 
+    if (!id) {
+        return (
+            <Typography sx={(theme) => ({ color: theme.palette.text.secondary })}>
+                Некорректный id видео
+            </Typography>
+        );
+    }
+
     if (!video) {
         return (
             <Typography sx={(theme) => ({ color: theme.palette.text.secondary })}>
@@ -57,7 +71,6 @@ export default function Watch() {
                 poster={video.preview_url}
                 qualities={video.qualities}
                 videoId={video.video_id}
-                isAuth={isAuth}
             />
             <VideoInfo video={video} channel={channel} user={user} isAuth={isAuth} />
         </Box>

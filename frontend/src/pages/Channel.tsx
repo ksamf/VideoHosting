@@ -1,4 +1,4 @@
-import { Box, Button, Paper, Stack, Typography } from "@mui/material";
+import { Box, Button, Stack, Typography } from "@mui/material";
 import { useMemo, useState, useCallback } from "react";
 import { useParams } from "react-router-dom";
 import useAuth from "../hooks/useAuth";
@@ -44,9 +44,9 @@ export default function Channel() {
             return list.sort((a, b) => (b.views ?? 0) - (a.views ?? 0));
         }
         if (sortBy === "old") {
-            return list.sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
+            return list.sort((a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime());
         }
-        return list.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+        return list.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
     }, [safeVideos, sortBy]);
 
     if (!channelId) {
