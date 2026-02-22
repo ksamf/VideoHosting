@@ -8,6 +8,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/google/uuid"
+	"github.com/ksamf/VideoHosting/backend/internal/database"
 )
 
 func (a *Auth) AuthMiddleware(c *gin.Context) {
@@ -102,12 +103,8 @@ func (a *Auth) OptionalAuthMiddleware(c *gin.Context) {
 			c.Next()
 			return
 		}
-		user, err := a.user.GetByID(id)
-		if err != nil {
-			c.Next()
-			return
-		}
-		c.Set("user", user)
+
+		c.Set("user", &database.User{UserId: id})
 		c.Next()
 
 	} else {

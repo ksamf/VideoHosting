@@ -32,9 +32,20 @@ func (h *UserHandler) Get(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
+	cacheKey := fmt.Sprintf("user:%s", id.String())
+	cache := h.redis.Get(cacheKey)
+	if cache != "" {
+		c.Data(http.StatusOK, "application/json", []byte(cache))
+		return
+	}
 	user, err := h.user.GetByID(id)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	if payload, err := json.Marshal(user); err == nil {
+		h.redis.Set(cacheKey, string(payload), 5*time.Minute)
+		c.Data(http.StatusOK, "application/json; charset=utf-8", payload)
 		return
 	}
 	c.JSON(http.StatusOK, user)
@@ -59,9 +70,20 @@ func (h *UserHandler) GetByVideoId(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
+	cacheKey := fmt.Sprintf("video_owner:%s", videoId.String())
+	cache := h.redis.Get(cacheKey)
+	if cache != "" {
+		c.Data(http.StatusOK, "application/json", []byte(cache))
+		return
+	}
 	user, err := h.user.GetByVideoId(videoId)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	if payload, err := json.Marshal(user); err == nil {
+		h.redis.Set(cacheKey, string(payload), 5*time.Minute)
+		c.Data(http.StatusOK, "application/json; charset=utf-8", payload)
 		return
 	}
 	c.JSON(http.StatusOK, user)

@@ -12,3 +12,4 @@ transcribe/
 translate/
 node_modules/
 .vite/
+*.pb

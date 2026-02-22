@@ -15,6 +15,7 @@ import (
 	"github.com/ksamf/VideoHosting/backend/internal/config"
 	"github.com/ksamf/VideoHosting/backend/internal/database"
 	"github.com/ksamf/VideoHosting/backend/internal/interfaces"
+	"golang.org/x/sync/singleflight"
 )
 
 type VideoHandler struct {
@@ -25,6 +26,7 @@ type VideoHandler struct {
 	s3     interfaces.ObjectStorage
 	redis  interfaces.Cache
 	kafka  interfaces.MessageBroker
+	sf     singleflight.Group
 }
 
 func (h *VideoHandler) Upload(c *gin.Context) {
@@ -159,6 +161,7 @@ func (h *VideoHandler) Upload(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to enqueue"})
 		return
 	}
+	invalidateCachePatterns(h.redis, "videos:*", "search:*")
 
 	c.JSON(http.StatusOK, gin.H{
 		"video_id": videoID,
@@ -172,29 +175,26 @@ func (h *VideoHandler) Get(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-	videoCache := h.redis.Get(id.String())
+	cacheKey := "video:" + id.String()
+
+	videoCache := h.redis.Get(cacheKey)
 	if videoCache != "" {
-		c.JSON(http.StatusOK, videoCache)
+		c.Data(http.StatusOK, "application/json; charset=utf-8", []byte(videoCache))
 		return
 	}
 	video, err := h.video.GetByID(id)
-	if video == nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
-		return
-	}
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
 	}
-	userValue, exists := c.Get("user")
-	if exists {
-		userId, ok := userValue.(*database.User).UserId, true
-		if ok {
-			err := h.action.Insert(userId, id)
-			if err != nil {
-				c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-				return
-			}
-		}
+	if video == nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "video not found"})
+		return
+	}
+	if payload, err := json.Marshal(video); err == nil {
+		h.redis.Set(cacheKey, string(payload), 5*time.Minute)
+		c.Data(http.StatusOK, "application/json; charset=utf-8", payload)
+		return
 	}
 	c.JSON(http.StatusOK, video)
 }
@@ -202,11 +202,7 @@ func (h *VideoHandler) Get(c *gin.Context) {
 func (h *VideoHandler) GetAll(c *gin.Context) {
 	limit := c.Query("limit")
 	offset := c.Query("offset")
-	videosCache := h.redis.Get("videos_" + limit + "_" + offset)
-	if videosCache != "" {
-		c.JSON(http.StatusOK, videosCache)
-		return
-	}
+
 	intLimit, err := strconv.Atoi(limit)
 	if err != nil {
 		intLimit = 10
@@ -215,13 +211,11 @@ func (h *VideoHandler) GetAll(c *gin.Context) {
 	if err != nil {
 		intOffset = 0
 	}
-	videos, err := h.video.GetAll(intLimit, intOffset)
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-		return
-	}
-	h.redis.Set("videos_"+limit+"_"+offset, videos, time.Minute*10)
-	c.JSON(http.StatusOK, videos)
+
+	cacheKey := fmt.Sprintf("videos:%d:%d", intLimit, intOffset)
+	h.respondWithCachedJSON(c, cacheKey, 2*time.Minute, func() (any, error) {
+		return h.video.GetAll(intLimit, intOffset)
+	})
 }
 
 func (h *VideoHandler) Search(c *gin.Context) {
@@ -241,22 +235,51 @@ func (h *VideoHandler) Search(c *gin.Context) {
 	}
 
 	cacheKey := fmt.Sprintf("search:%s:%d:%d", strings.ToLower(query), limit, offset)
-	if searchCache := h.redis.Get(cacheKey); searchCache != "" {
-		c.Data(http.StatusOK, "application/json; charset=utf-8", []byte(searchCache))
+	h.respondWithCachedJSON(c, cacheKey, time.Minute, func() (any, error) {
+		return h.video.Search(query, limit, offset)
+	})
+}
+
+func (h *VideoHandler) respondWithCachedJSON(
+	c *gin.Context,
+	cacheKey string,
+	ttl time.Duration,
+	load func() (any, error),
+) {
+	if cached := h.redis.Get(cacheKey); cached != "" {
+		c.Data(http.StatusOK, "application/json; charset=utf-8", []byte(cached))
 		return
 	}
 
-	videos, err := h.video.Search(query, limit, offset)
+	result, err, _ := h.sf.Do(cacheKey, func() (any, error) {
+		if cached := h.redis.Get(cacheKey); cached != "" {
+			return []byte(cached), nil
+		}
+
+		data, err := load()
+		if err != nil {
+			return nil, err
+		}
+
+		payload, err := json.Marshal(data)
+		if err != nil {
+			return nil, err
+		}
+
+		h.redis.Set(cacheKey, string(payload), ttl)
+		return payload, nil
+	})
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 
-	if payload, err := json.Marshal(videos); err == nil {
-		h.redis.Set(cacheKey, string(payload), time.Minute)
+	payload, ok := result.([]byte)
+	if !ok {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to encode response"})
+		return
 	}
-
-	c.JSON(http.StatusOK, videos)
+	c.Data(http.StatusOK, "application/json; charset=utf-8", payload)
 }
 
 func (h *VideoHandler) Delete(c *gin.Context) {
@@ -289,5 +312,13 @@ func (h *VideoHandler) Delete(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
+	invalidateCachePatterns(
+		h.redis,
+		"video:"+id.String(),
+		"videos:*",
+		"search:*",
+		"comments:"+id.String()+":*",
+		"video_owner:"+id.String(),
+	)
 	c.JSON(http.StatusOK, gin.H{"message": "Video deleted successfully"})
 }

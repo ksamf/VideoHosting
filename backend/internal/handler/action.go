@@ -1,7 +1,9 @@
 package handler
 
 import (
+	"encoding/json"
 	"net/http"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
@@ -43,6 +45,12 @@ func (h *ActionHandler) Reaction(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to process reaction"})
 		return
 	}
+	invalidateCachePatterns(
+		h.redis,
+		"video:"+videoId.String(),
+		"videos:*",
+		"search:*",
+	)
 
 	c.JSON(http.StatusOK, gin.H{
 		"message": "reaction recorded",
@@ -76,12 +84,22 @@ func (h *ActionHandler) Comments(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
+	cacheKey := "comments:" + videoId.String() + ":all"
+	if cached := h.redis.Get(cacheKey); cached != "" {
+		c.Data(http.StatusOK, "application/json; charset=utf-8", []byte(cached))
+		return
+	}
+
 	comments, err := h.action.GetComments(videoId)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
-
+	if payload, err := json.Marshal(comments); err == nil {
+		h.redis.Set(cacheKey, string(payload), time.Minute)
+		c.Data(http.StatusOK, "application/json; charset=utf-8", payload)
+		return
+	}
 	c.JSON(http.StatusOK, comments)
 
 }
@@ -111,6 +129,11 @@ func (h *ActionHandler) AddComment(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
+	invalidateCachePatterns(
+		h.redis,
+		"comments:"+videoId.String()+":*",
+		"video:"+videoId.String(),
+	)
 
 	c.JSON(http.StatusOK, commentId)
 }
@@ -144,6 +167,11 @@ func (h *ActionHandler) SubUnsubAction(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to process subscribe"})
 		return
 	}
+	invalidateCachePatterns(
+		h.redis,
+		"user:"+channelId.String(),
+		"channel_subcount:"+channelId.String()+":*",
+	)
 	c.JSON(http.StatusOK, gin.H{
 		"message": "subscribe processed",
 	})
