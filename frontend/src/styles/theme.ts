@@ -1,4 +1,4 @@
-import { createTheme } from "@mui/material/styles";
+import { createTheme, type PaletteMode } from "@mui/material/styles";
 const base = createTheme();
 
 export const appSx = {
@@ -44,38 +44,40 @@ export const pageSx = {
   studioRoot: { p: { xs: 2, md: 3 }, maxWidth: 1200, mx: "auto" },
   studioHeader: { fontWeight: 600, mb: 2 },
   studioMetricsGrid: { mb: 4 },
-  studioCard: { p: 2, bgcolor: "#181818", borderRadius: 3 },
-  studioCardLabel: { color: "#aaa", fontSize: 13 },
+  studioCard: (theme) => ({ p: 2, bgcolor: theme.palette.background.paper, borderRadius: 3, border: `1px solid ${theme.palette.divider}` }),
+  studioCardLabel: (theme) => ({ color: theme.palette.text.secondary, fontSize: 13 }),
   studioBestVideoCard: {
     p: 2,
-    bgcolor: "#181818",
+    bgcolor: "background.paper",
     borderRadius: 3,
+    border: "1px solid",
+    borderColor: "divider",
     display: "block",
     textDecoration: "none",
     color: "inherit",
     "&:visited": { color: "inherit" },
-    "&:hover": { bgcolor: "#202020" },
+    "&:hover": { bgcolor: "action.hover" },
   },
-  studioBestVideoTitle: { mb: 1, color: "#aaa", fontSize: 13 },
+  studioBestVideoTitle: { mb: 1, color: "text.secondary", fontSize: 13 },
   studioBestVideoRow: { display: "flex", flexDirection: "row" },
   studioBestVideoImage: { width: "15%", height: "15%", borderRadius: 3 },
   studioBestVideoName: { ml: 2, display: "flex", alignItems: "center" },
   studioVideosTitle: { fontWeight: 600, mb: 1 },
-  studioTableContainer: { bgcolor: "#181818", borderRadius: 3 },
+  studioTableContainer: { bgcolor: "background.paper", borderRadius: 3, border: "1px solid", borderColor: "divider" },
   studioTable: { minWidth: 650 },
   studioTableHeadRow: {
     "& th": {
-      color: "#aaa",
-      borderColor: "#222",
+      color: "text.secondary",
+      borderColor: "divider",
       fontWeight: 600,
     },
   },
   studioTableRow: {
     "& td": {
-      borderColor: "#222",
+      borderColor: "divider",
     },
     "&:hover": {
-      bgcolor: "#202020",
+      bgcolor: "action.hover",
     },
     height: "100px",
   },
@@ -85,7 +87,11 @@ export const pageSx = {
 };
 
 export const commonSx = {
-  navBarAppBar: { bgcolor: "#0f0f0f" },
+  navBarAppBar: (theme) => ({
+    bgcolor: theme.palette.background.paper,
+    color: theme.palette.text.primary,
+    borderBottom: `1px solid ${theme.palette.divider}`,
+  }),
   navBarToolbar: {
     minHeight: 64,
     display: "grid",
@@ -121,39 +127,83 @@ export const commonSx = {
     "& .MuiInputBase-root": {
       borderRadius: "40px",
       height: { xs: 40, sm: 45 },
-      backgroundColor: "#121212",
+      backgroundColor: "background.paper",
     },
   },
-  searchIcon: { color: "#aaa" },
+  searchIcon: (theme) => ({ color: theme.palette.text.secondary }),
   sideBarDrawer: {
-    "& .MuiDrawer-paper": {
+    "& .MuiDrawer-paper": (theme) => ({
       width: 260,
       top: 64,
       height: "calc(100% - 64px)",
-      bgcolor: "#0f0f0f",
-      borderRight: "1px solid #222",
+      bgcolor: theme.palette.background.paper,
+      borderRight: `1px solid ${theme.palette.divider}`,
       backgroundImage: "none",
-    },
+    }),
   },
   sideBarRoot: { display: "flex", flexDirection: "column", height: "100%" },
-  sideBarList: { flexGrow: 1, overflowY: "auto" },
-  sideBarPrimaryIcon: { mr: 1, color: "#fff" },
-  sideBarIcon: { mr: 1 },
+  sideBarList: (theme) => ({
+    flexGrow: 1,
+    overflowY: "auto",
+    color: theme.palette.text.primary,
+    "& .MuiListItemText-primary": { color: theme.palette.text.primary },
+    "& .MuiListItemText-secondary": { color: theme.palette.text.secondary },
+    "& .MuiListItemButton-root:hover": { backgroundColor: theme.palette.action.hover },
+  }),
+  sideBarPrimaryIcon: (theme) => ({ mr: 1, color: theme.palette.text.primary }),
+  sideBarIcon: (theme) => ({ mr: 1, color: theme.palette.text.primary }),
   sideBarChannelText: { ml: 1 },
-  sideBarChannelPrimary: { color: "#ddd", fontSize: 14 },
-  sideBarTogglePrimary: { color: "#aaa", fontSize: 13 },
-  sideBarDivider: { my: 1, borderColor: "#222" },
+  sideBarChannelPrimary: (theme) => ({ color: theme.palette.text.primary, fontSize: 14 }),
+  sideBarTogglePrimary: (theme) => ({ color: theme.palette.text.secondary, fontSize: 13 }),
+  sideBarDivider: (theme) => ({ my: 1, borderColor: theme.palette.divider }),
   userAvatar: (size) => ({
     width: size,
     height: size,
     fontSize: Math.round(size * 0.42),
     lineHeight: 1,
-    color: "#fff",
-    bgcolor: "#aaa",
+    color: "common.white",
+    bgcolor: "grey.500",
   }),
 };
 
-export const videoSx = {
+interface VideoSxStyles {
+  playerContainer: (controlsVisible: boolean) => Record<string, any>;
+  playerVideo: Record<string, any>;
+  playerUnavailable: (theme: any) => Record<string, any>;
+  playerControls: (controlsVisible: boolean) => Record<string, any>;
+  playerControlsRow: Record<string, any>;
+  playerActionIcon: Record<string, any>;
+  playerHoveredVolumeSpacer: (hovered: boolean) => Record<string, any>;
+  playerTime: Record<string, any>;
+  videoInfoContainer: Record<string, any>;
+  videoInfoChannelButton: Record<string, any>;
+  videoInfoChannelText: Record<string, any>;
+  videoInfoSubsText: Record<string, any>;
+  cardRoot: (theme: any) => Record<string, any>;
+  cardPreviewBox: (theme: any) => Record<string, any>;
+  cardMedia: Record<string, any>;
+  cardHeader: Record<string, any>;
+  cardAvatarButton: Record<string, any>;
+  cardActionIcon: (theme: any) => Record<string, any>;
+  cardTitle: Record<string, any>;
+  cardMetaText: (theme: any) => Record<string, any>;
+  sliderBufferOverlay: Record<string, any>;
+  sliderSpinner: Record<string, any>;
+  sliderPreviewBox: Record<string, any>;
+  sliderPreviewImage: Record<string, any>;
+  sliderPreviewTime: Record<string, any>;
+  slider: Record<string, any>;
+  hiddenCanvas: Record<string, any>;
+  selectButton: (theme: any) => Record<string, any>;
+  selectMenuPaper: (theme: any) => Record<string, any>;
+  selectMenuItem: (theme: any) => Record<string, any>;
+  volumeRoot: Record<string, any>;
+  volumeIcon: Record<string, any>;
+  volumePopover: (hoveredVolume: boolean) => Record<string, any>;
+  volumeSlider: Record<string, any>;
+}
+
+export const videoSx: VideoSxStyles = {
   playerContainer: (controlsVisible) => ({
     width: "100%",
     maxWidth: 1200,
@@ -180,17 +230,17 @@ export const videoSx = {
     pointerEvents: controlsVisible ? "auto" : "none",
   }),
   playerControlsRow: { p: 1 },
-  playerActionIcon: (theme) => ({ color: theme.palette.text.primary }),
+  playerActionIcon: { color: "#ffffff" },
   playerHoveredVolumeSpacer: (hovered) => ({
     width: hovered ? 110 : 0,
     transition: "width 0.2s ease",
     flexShrink: 0,
   }),
-  playerTime: (theme) => ({ color: theme.palette.text.primary, fontSize: 12 }),
+  playerTime: { color: "#ffffff", fontSize: 12 },
   videoInfoContainer: { maxWidth: 1200, width: "100%", mt: 2, px: 1 },
   videoInfoChannelButton: { p: 0, "&:hover": { backgroundColor: "transparent" } },
   videoInfoChannelText: { ml: 1 },
-  videoInfoSubsText: { ml: 1, color: "#aaa" },
+  videoInfoSubsText: { ml: 1, color: "text.secondary" },
   cardRoot: (theme) => ({
     width: "100%",
     maxWidth: 360,
@@ -200,7 +250,7 @@ export const videoSx = {
     flexDirection: "column",
     cursor: "pointer",
     transition: "transform 0.2s ease, box-shadow 0.2s ease",
-    "&:hover": { boxShadow: "0 12px 24px rgba(0,0,0,0.6)" },
+    "&:hover": { boxShadow: "0 12px 24px rgba(15, 23, 42, 0.12)" },
   }),
   cardPreviewBox: (theme) => ({
     position: "relative",
@@ -240,7 +290,7 @@ export const videoSx = {
     width: 48,
     height: 48,
     border: "4px solid rgba(255,255,255,0.3)",
-    borderTop: (theme) => `4px solid ${theme.palette.text.primary}`,
+    borderTop: "4px solid #ffffff",
     borderRadius: "50%",
     animation: "spin 1s linear infinite",
   },
@@ -255,40 +305,40 @@ export const videoSx = {
   },
   sliderPreviewImage: { width: 160, display: "block" },
   sliderPreviewTime: {
-    color: (theme) => theme.palette.text.primary,
+    color: "#ffffff",
     fontSize: 11,
     textAlign: "center",
     mt: 0.3,
   },
-  slider: (theme) => ({ color: theme.palette.text.primary }),
+  slider: { color: "#ffffff" },
   hiddenCanvas: { display: "none" },
-  selectButton: {
+  selectButton: () => ({
     px: 1.5,
     py: 0.5,
     borderRadius: "20px",
-    border: "1px solid #555",
-    color: "#fff",
+    border: "1px solid rgba(255,255,255,0.45)",
+    color: "#ffffff",
     cursor: "pointer",
     fontSize: 13,
     minWidth: 48,
     textAlign: "center",
     "&:hover": {
-      bgcolor: "#222",
+      bgcolor: "rgba(255,255,255,0.12)",
     },
-  },
-  selectMenuPaper: {
-    bgcolor: "#1f1f1f",
-    color: "#fff",
+  }),
+  selectMenuPaper: (theme) => ({
+    bgcolor: theme.palette.background.paper,
+    color: theme.palette.text.primary,
     borderRadius: 2,
     minWidth: 80,
-  },
-  selectMenuItem: {
+  }),
+  selectMenuItem: (theme) => ({
     justifyContent: "center",
-    "&.Mui-selected": { bgcolor: "#333" },
-    "&:hover": { bgcolor: "#444" },
-  },
+    "&.Mui-selected": { bgcolor: theme.palette.action.selected },
+    "&:hover": { bgcolor: theme.palette.action.hover },
+  }),
   volumeRoot: { position: "relative", display: "flex", alignItems: "center" },
-  volumeIcon: { color: "#fff" },
+  volumeIcon: { color: "#ffffff" },
   volumePopover: (hoveredVolume) => ({
     position: "absolute",
     bottom: "120%",
@@ -305,7 +355,7 @@ export const videoSx = {
   }),
   volumeSlider: {
     width: 100,
-    color: "#fff",
+    color: "#ffffff",
   },
 };
 
@@ -335,11 +385,14 @@ export const formSx = {
     bgcolor: theme.palette.text.primary,
     color: theme.palette.background.default,
     "&:hover": { bgcolor: theme.palette.text.secondary },
-    "&.Mui-disabled": { bgcolor: "#555555", color: "#999" },
+    "&.Mui-disabled": {
+      bgcolor: theme.palette.action.disabledBackground,
+      color: theme.palette.action.disabled,
+    },
   }),
   authSecondaryButton: (theme) => ({
     bgcolor: theme.palette.divider,
-    color: "#777777",
+    color: theme.palette.text.secondary,
     "&:hover": {
       bgcolor: theme.palette.text.primary,
       color: theme.palette.background.default,
@@ -354,7 +407,7 @@ export const formSx = {
     transform: "translate(-50%, -50%)",
     width: { xs: "90%", md: 900 },
     height: { xs: "70vh", md: "80vh" },
-    bgcolor: "#282828",
+    bgcolor: theme.palette.background.paper,
     p: 2,
     borderRadius: 2,
   }),
@@ -364,20 +417,20 @@ export const formSx = {
     alignItems: "center",
     mb: 2,
   },
-  uploadCloseButton: { color: "#aaa" },
+  uploadCloseButton: { color: "text.secondary" },
   setDetailsColumns: { direction: "row", spacing: 3 },
   setDetailsLeft: { flex: 2 },
   setDetailsRight: { flex: 1 },
   setDetailsHelper: (invalid) => ({
     mb: 2,
     "& .MuiFormHelperText-root": {
-      color: invalid ? "#f44336" : "#aaa",
+      color: invalid ? "error.main" : "text.secondary",
     },
   }),
   setDetailsDescription: (invalid) => ({
     mb: 3,
     "& .MuiFormHelperText-root": {
-      color: invalid ? "#f44336" : "#aaa",
+      color: invalid ? "error.main" : "text.secondary",
     },
   }),
   setDetailsSectionTitle: { mb: 1 },
@@ -385,8 +438,9 @@ export const formSx = {
   setDetailsPreviewCard: (aspectRatio, withMargin = false) => ({
     width: 240,
     aspectRatio,
-    bgcolor: "#1f1f1f",
-    border: "1px dashed #555",
+    bgcolor: "background.default",
+    border: "1px dashed",
+    borderColor: "divider",
     borderRadius: 2,
     cursor: "pointer",
     overflow: "hidden",
@@ -395,7 +449,7 @@ export const formSx = {
     justifyContent: "center",
     mr: withMargin ? "10px" : 0,
   }),
-  setDetailsUploadHint: { color: "#aaa" },
+  setDetailsUploadHint: { color: "text.secondary" },
   setDetailsPreviewContain: {
     width: "100%",
     height: "100%",
@@ -411,7 +465,7 @@ export const formSx = {
   setDetailsTagField: (invalid) => ({
     mb: 1,
     "& .MuiFormHelperText-root": {
-      color: invalid ? "#f44336" : "#aaa",
+      color: invalid ? "error.main" : "text.secondary",
     },
   }),
   setDetailsPlayerPaper: (aspectRatio) => ({
@@ -424,33 +478,40 @@ export const formSx = {
   }),
   setDetailsPlayer: { display: "block", width: "100%", height: "100%" },
   setDetailsActions: { mt: 4 },
-  setDetailsPublishButton: {
+  setDetailsPublishButton: (theme) => ({
     borderRadius: "50px",
     textTransform: "none",
-    backgroundColor: "#fff",
-    color: "#555",
-    "&:hover": { backgroundColor: "#909090" },
+    backgroundColor: theme.palette.text.primary,
+    color: theme.palette.background.default,
+    "&:hover": { backgroundColor: theme.palette.text.secondary },
     "&.Mui-disabled": {
-      color: "#fff !important",
+      color: `${theme.palette.action.disabled} !important`,
       opacity: 0.6,
     },
-  },
+  }),
 };
 
-const theme = createTheme(({
+export function createAppTheme(mode: PaletteMode = "light") {
+  const isLight = mode === "light";
+
+  return createTheme(({
     palette: {
-    mode: "dark",
-    primary: { main: "#ffffff" },
-    accent: { main: "#00bcd4" },
-    success: { main: "#4caf50" },
-    warning: { main: "#ff9800" },
-    danger: { main: "#f44336" },
-    muted: { main: "#555555" },
-    background: { default: "#0f0f0f", paper: "#181818" },
-    text: { primary: "#ffffff", secondary: "#aaaaaa" },
-    divider: "#444444",
+    mode,
+    primary: { main: isLight ? "#111111" : "#ffffff" },
+    accent: { main: isLight ? "#222222" : "#dddddd" },
+    success: { main: isLight ? "#2b2b2b" : "#8dd38d" },
+    warning: { main: isLight ? "#3a3a3a" : "#ffd28b" },
+    danger: { main: isLight ? "#444444" : "#ff9a9a" },
+    muted: { main: isLight ? "#6b7280" : "#666666" },
+    background: isLight
+      ? { default: "#ffffff", paper: "#ffffff" }
+      : { default: "#0f0f0f", paper: "#181818" },
+    text: isLight
+      ? { primary: "#111111", secondary: "#4b5563" }
+      : { primary: "#ffffff", secondary: "#aaaaaa" },
+    divider: isLight ? "#d1d5db" : "#444444",
     common: { black: "#000000" },
-    link: { main: "#00acee" },
+    link: { main: isLight ? "#111111" : "#ffffff" },
   } as any,
 
   spacing: 8, 
@@ -505,12 +566,18 @@ const theme = createTheme(({
   components: {
     MuiCssBaseline: {
       styleOverrides: {
-        body: { backgroundColor: "#0f0f0f" },
-        "*": { scrollbarColor: "#555 #0f0f0f", scrollbarWidth: "thin" },
+        body: { backgroundColor: isLight ? "#ffffff" : "#0f0f0f" },
+        "*": {
+          scrollbarColor: isLight ? "#d1d5db #ffffff" : "#555 #0f0f0f",
+          scrollbarWidth: "thin",
+        },
         "::-webkit-scrollbar": { width: "8px", height: "8px" },
-        "::-webkit-scrollbar-track": { background: "#0f0f0f" },
-        "::-webkit-scrollbar-thumb": { background: "#555", borderRadius: "8px" },
-        "::-webkit-scrollbar-thumb:hover": { background: "#777" },
+        "::-webkit-scrollbar-track": { background: isLight ? "#ffffff" : "#0f0f0f" },
+        "::-webkit-scrollbar-thumb": {
+          background: isLight ? "#d1d5db" : "#555",
+          borderRadius: "8px",
+        },
+        "::-webkit-scrollbar-thumb:hover": { background: isLight ? "#9ca3af" : "#777" },
       },
     },
 
@@ -522,10 +589,13 @@ const theme = createTheme(({
           fontWeight: 500,
         },
         contained: {
-          backgroundColor: "#fff",
-          color: "#1a1a1a",
-          "&:hover": { backgroundColor: "#aaa" },
-          "&.Mui-disabled": { backgroundColor: "#555", color: "#999" },
+          backgroundColor: isLight ? "#111111" : "#ffffff",
+          color: isLight ? "#ffffff" : "#1a1a1a",
+          "&:hover": { backgroundColor: isLight ? "#2a2a2a" : "#aaaaaa" },
+          "&.Mui-disabled": {
+            backgroundColor: isLight ? "#d1d5db" : "#555555",
+            color: isLight ? "#9ca3af" : "#999999",
+          },
         },
       },
     },
@@ -535,16 +605,19 @@ const theme = createTheme(({
     MuiOutlinedInput: {
       styleOverrides: {
         root: {
-          backgroundColor: "#1f1f1f",
-          color: "#fff",
+          backgroundColor: isLight ? "#ffffff" : "#1f1f1f",
+          color: isLight ? "#111111" : "#ffffff",
           borderRadius: 8,
-          "& fieldset": { borderColor: "#555" },
-          "&:hover fieldset": { borderColor: "#aaa" },
-          "&.Mui-focused fieldset": { borderColor: "#fff", borderWidth: 1 },
+          "& fieldset": { borderColor: isLight ? "#d1d5db" : "#555" },
+          "&:hover fieldset": { borderColor: isLight ? "#9ca3af" : "#aaa" },
+          "&.Mui-focused fieldset": {
+            borderColor: isLight ? "#111111" : "#ffffff",
+            borderWidth: 1,
+          },
         },
         input: {
-          color: "#fff",
-          "&::placeholder": { color: "#aaa", opacity: 1 },
+          color: isLight ? "#111111" : "#ffffff",
+          "&::placeholder": { color: isLight ? "#9ca3af" : "#aaa", opacity: 1 },
         },
       },
     },
@@ -552,28 +625,28 @@ const theme = createTheme(({
     MuiInput: {
       styleOverrides: {
         root: {
-          backgroundColor: "#1f1f1f",
-          color: "#fff",
+          backgroundColor: isLight ? "#ffffff" : "#1f1f1f",
+          color: isLight ? "#111111" : "#ffffff",
           borderRadius: 8,
           padding: "8px 12px",
-          "&:before": { borderBottomColor: "#555" },
-          "&:hover:not(.Mui-disabled):before": { borderBottomColor: "#aaa" },
-          "&:after": { borderBottomColor: "#fff" },
+          "&:before": { borderBottomColor: isLight ? "#d1d5db" : "#555" },
+          "&:hover:not(.Mui-disabled):before": { borderBottomColor: isLight ? "#9ca3af" : "#aaa" },
+          "&:after": { borderBottomColor: isLight ? "#111111" : "#ffffff" },
         },
         input: {
-          color: "#fff",
-          "&::placeholder": { color: "#aaa", opacity: 1 },
+          color: isLight ? "#111111" : "#ffffff",
+          "&::placeholder": { color: isLight ? "#9ca3af" : "#aaa", opacity: 1 },
         },
       },
     },
 
     MuiInputLabel: {
       styleOverrides: {
-        root: { color: "#aaa", "&.Mui-focused": { color: "#fff" } },
+        root: { color: isLight ? "#4b5563" : "#aaa", "&.Mui-focused": { color: isLight ? "#111111" : "#fff" } },
       },
     },
 
-    MuiFormHelperText: { styleOverrides: { root: { color: "#aaa" } } },
+    MuiFormHelperText: { styleOverrides: { root: { color: isLight ? "#4b5563" : "#aaa" } } },
 
     MuiDialog: {
       styleOverrides: {
@@ -589,5 +662,8 @@ const theme = createTheme(({
     },
   },
 }) as any);
+}
+
+const theme = createAppTheme("light");
 
 export default theme;

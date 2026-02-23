@@ -52,7 +52,7 @@ export default function VideoItem({ video }: VideoItemProps) {
                     title={
                         <Typography
                             fontSize={15}
-                            color="white"
+                            color="text.primary"
                             sx={videoSx.cardTitle}
                         >
                             {video.name}

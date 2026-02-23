@@ -15,8 +15,17 @@ import VideoCallIcon from "@mui/icons-material/VideoCall";
 import PersonIcon from "@mui/icons-material/Person";
 import { Link } from "react-router-dom";
 import { commonSx } from "../../styles/theme";
+import LightModeIcon from "@mui/icons-material/LightMode";
+import DarkModeIcon from "@mui/icons-material/DarkMode";
 
-export default function NavBar() {
+type ThemeMode = "light" | "dark";
+
+type NavBarProps = {
+    themeMode: ThemeMode;
+    onToggleTheme: () => void;
+};
+
+export default function NavBar({ themeMode, onToggleTheme }: NavBarProps) {
     const { user, loading, isAuth } = useAuth();
     const [drawerOpen, setDrawerOpen] = useState<boolean>(false);
 
@@ -50,6 +59,10 @@ export default function NavBar() {
                         </Box>
 
                         <Box sx={commonSx.navBarRight}>
+                            <IconButton color="inherit" onClick={onToggleTheme}>
+                                {themeMode === "light" ? <DarkModeIcon /> : <LightModeIcon />}
+                            </IconButton>
+
                             <Button
                                 variant="contained"
                                 startIcon={<VideoCallIcon />}

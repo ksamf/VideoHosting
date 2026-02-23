@@ -50,7 +50,7 @@ export default function VideoInfo({ video, channel, user, isAuth }: VideoInfoPro
         <Box
             sx={videoSx.videoInfoContainer}
         >
-            <Typography color="white" fontSize={22} fontWeight={600} mb={1}>
+            <Typography color="text.primary" fontSize={22} fontWeight={600} mb={1}>
                 {video.name}
             </Typography>
 
@@ -62,7 +62,7 @@ export default function VideoInfo({ video, channel, user, isAuth }: VideoInfoPro
                             avatar_url={channel.avatar_url}
                         />
                         <Stack>
-                            <Typography color="white" fontSize={14} fontWeight={500} sx={videoSx.videoInfoChannelText}>
+                            <Typography color="text.primary" fontSize={14} fontWeight={500} sx={videoSx.videoInfoChannelText}>
                                 {channel.username}
                             </Typography>
                             <Typography fontSize={12} sx={videoSx.videoInfoSubsText}>

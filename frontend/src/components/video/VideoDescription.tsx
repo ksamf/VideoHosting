@@ -54,7 +54,7 @@ export default function VideoDescription({ video }: VideoDescriptionProps) {
             </Typography>
 
             <Typography
-                color="white"
+                color="text.primary"
                 fontSize={14}
                 sx={{ whiteSpace: "pre-line" }}
             >

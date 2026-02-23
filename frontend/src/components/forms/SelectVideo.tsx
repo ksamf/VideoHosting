@@ -40,24 +40,25 @@ export default function SelectVideo({ onSelect }: SelectVideoProps) {
                 onDrop={handleDrop}
                 onDragOver={handleDragOver}
                 onClick={openFileDialog}
-                sx={{
+                sx={(theme) => ({
                     padding: 4,
                     textAlign: 'center',
                     cursor: 'pointer',
                     minHeight: 200,
                     boxShadow: "none",
-                }}>
+                    color: theme.palette.text.primary,
+                })}>
 
                 <IconButton
-                    sx={{
+                    sx={(theme) => ({
                         display: 'block',
                         m: "100px auto",
-                        border: '2px solid #555',
-                        bgcolor: '#1a1a1a',
-                    }}>
-                    <FileUploadIcon sx={{ color: '#aaa', fontSize: 150 }} />
+                        border: `2px solid ${theme.palette.divider}`,
+                        bgcolor: theme.palette.background.default,
+                    })}>
+                    <FileUploadIcon sx={(theme) => ({ color: theme.palette.text.secondary, fontSize: 150 })} />
                 </IconButton  >
-                <Typography variant="body1" align="center" sx={{ marginTop: '50px', color: "#aaa" }}>
+                <Typography variant="body1" align="center" sx={{ marginTop: '50px', color: "text.secondary" }}>
                     Перетащите файлы сюда или нажмите кнопку ниже, чтобы выбрать их на компьютере.
                 </Typography>
             </Paper>
@@ -67,7 +68,7 @@ export default function SelectVideo({ onSelect }: SelectVideoProps) {
                 variant="contained"
                 sx={{ display: 'block', m: "auto" }}
             >
-                <Typography variant="body1" sx={{ color: "#1a1a1a" }}>Выберите файл</Typography>
+                <Typography variant="body1" sx={(theme) => ({ color: theme.palette.background.default })}>Выберите файл</Typography>
             </Button>
         </>
     )

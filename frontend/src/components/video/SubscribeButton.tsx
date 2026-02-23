@@ -44,19 +44,23 @@ export default function SubscribeButton({ channelId, setSubscriptionsCount }: Su
         <>
             {isSubscribed ?
                 <Button
-                    variant="contained"
+                    variant="outlined"
                     size="small"
                     disabled={subscribeLoading}
                     onClick={handleSubscribe}
-                    sx={{
+                    sx={(theme) => ({
                         ml: 1,
-                        bgcolor: "#555",
-                        "&:hover": { bgcolor: "#444" },
+                        bgcolor: theme.palette.background.paper,
+                        borderColor: theme.palette.divider,
+                        "&:hover": {
+                            bgcolor: theme.palette.action.hover,
+                            borderColor: theme.palette.text.secondary,
+                        },
                         borderRadius: 5,
                         textTransform: "none",
                         fontWeight: 600,
-                        color: "#777"
-                    }}
+                        color: theme.palette.text.primary,
+                    })}
                 >
                     Отписаться
                 </Button>
@@ -66,14 +70,15 @@ export default function SubscribeButton({ channelId, setSubscriptionsCount }: Su
                     size="small"
                     disabled={subscribeLoading}
                     onClick={handleSubscribe}
-                    sx={{
+                    sx={(theme) => ({
                         ml: 1,
-                        bgcolor: "#fff",
-                        "&:hover": { bgcolor: "#aaa" },
+                        bgcolor: theme.palette.text.primary,
+                        "&:hover": { bgcolor: theme.palette.text.secondary },
                         borderRadius: 5,
                         textTransform: "none",
                         fontWeight: 600,
-                    }}
+                        color: theme.palette.background.default,
+                    })}
                 >
                     Подписаться
                 </Button>

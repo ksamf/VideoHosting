@@ -14,11 +14,18 @@ import Subscriptions from './pages/Subscriptions'
 import Search from './pages/Search'
 import { appSx } from './styles/theme'
 
-export default function App() {
+type ThemeMode = "light" | "dark";
+
+type AppProps = {
+  themeMode: ThemeMode;
+  onToggleTheme: () => void;
+};
+
+export default function App({ themeMode, onToggleTheme }: AppProps) {
 
   return (
     <>
-      <NavBar />
+      <NavBar themeMode={themeMode} onToggleTheme={onToggleTheme} />
       <Toolbar />
       <Box sx={appSx.routeShell}>
         <Routes>

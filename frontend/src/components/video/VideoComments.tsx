@@ -91,7 +91,7 @@ export default function VideoComments({ video, user, isAuth }: VideoCommentsProp
 
     return (
         <Stack mt={3}>
-            <Typography color="white" fontSize={16} fontWeight={500} mb={2}>
+            <Typography color="text.primary" fontSize={16} fontWeight={500} mb={2}>
                 {comments == null ? 0 : comments.length} комментариев
             </Typography>
 
@@ -150,14 +150,14 @@ export default function VideoComments({ video, user, isAuth }: VideoCommentsProp
                             <UserAvatar username={comment.username} avatar_url={comment.user_avatar_url} />
                             <Stack flex={1}>
                                 <Stack direction="row" spacing={1} alignItems="center">
-                                    <Typography fontSize={13} fontWeight={500} color="white">
+                                    <Typography fontSize={13} fontWeight={500} color="text.primary">
                                         {comment.username}
                                     </Typography>
                                     <Typography fontSize={12} sx={(theme) => ({ color: theme.palette.text.secondary })}>
                                         <ReactTimeAgo date={new Date(comment.created_at)} locale="ru-RU" />
                                     </Typography>
                                 </Stack>
-                                <Typography fontSize={13} sx={{ mt: 0.5 }} color="white">
+                                <Typography fontSize={13} sx={{ mt: 0.5 }} color="text.primary">
                                     {comment.text ?? comment.comment_text}
                                 </Typography>
                             </Stack>
