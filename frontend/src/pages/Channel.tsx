@@ -6,8 +6,9 @@ import VideoGrid from "../components/video/VideoGrid";
 import { getUserById, getUserVideos } from "../api/users";
 import ChannelHeader from "../components/common/ChannelHeader";
 import useFetch from "../hooks/useFetch";
-import { PageError, PageLoading } from "../components/common/PageState";
+import { PageError } from "../components/common/PageState";
 import { pageSx } from "../styles/theme";
+import ChannelSkeleton from "../skeleton/ChannelSkeleton";
 
 export default function Channel() {
     const { id: channelId } = useParams();
@@ -54,9 +55,8 @@ export default function Channel() {
         return <Typography color="error" sx={pageSx.mutedMessage}>Некорректный id канала</Typography>;
     }
 
-
     if (loading) {
-        return <PageLoading />;
+        return <ChannelSkeleton />;
     }
 
     if (error) {

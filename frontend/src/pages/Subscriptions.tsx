@@ -3,7 +3,8 @@ import { getUserSubscriptionsVideo } from "../api/users"
 import VideoGrid from "../components/video/VideoGrid"
 import { useParams } from "react-router-dom"
 import useFetch from "../hooks/useFetch"
-import { PageError, PageLoading } from "../components/common/PageState"
+import { PageError } from "../components/common/PageState"
+import VideoGridSkeleton from "../skeleton/VideoGridSkeleton"
 
 export default function Subscriptions() {
     const { id } = useParams();
@@ -18,7 +19,7 @@ export default function Subscriptions() {
         error: videoError,
     } = useFetch(fetchSubscriptions);
     if (videoLoading) {
-        return <PageLoading />;
+        return <VideoGridSkeleton items={10} />;
     }
     if (videoError) {
         return <PageError error={videoError} />;

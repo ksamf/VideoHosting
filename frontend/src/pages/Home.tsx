@@ -5,8 +5,8 @@ import VideoGrid from "../components/video/VideoGrid";
 import useFetch from "../hooks/useFetch";
 import useAuth from "../hooks/useAuth";
 import { getUserRecommendations } from "../api/users";
-import { PageError, PageLoading } from "../components/common/PageState";
-import { pageSx } from "../styles/theme";
+import { PageError } from "../components/common/PageState";
+import VideoGridSkeleton from "../skeleton/VideoGridSkeleton";
 
 export default function Home() {
     const { user, loading: authLoading, isAuth } = useAuth();
@@ -31,17 +31,15 @@ export default function Home() {
     const loading = videosLoading || authLoading;
     const error = videosError;
     if (loading) {
-        return <PageLoading />;
+        return <VideoGridSkeleton items={10} />;
     }
 
     if (error) {
         return <PageError error={error} />;
     }
     return (
-        <Grid container spacing={2} sx={pageSx.gridSection}>
-            {isAuth
-                ? <VideoGrid videos={safeRecommendations.length > 0 ? safeRecommendations : safeVideos} />
-                : <VideoGrid videos={safeVideos} />}
-        </Grid >
+        isAuth
+            ? <VideoGrid videos={safeRecommendations.length > 0 ? safeRecommendations : safeVideos} />
+            : <VideoGrid videos={safeVideos} />
     );
 }

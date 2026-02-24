@@ -4,8 +4,9 @@ import VideoGrid from "../components/video/VideoGrid";
 import { getUserWatchedVideo } from "../api/users";
 import useAuth from "../hooks/useAuth";
 import useFetch from "../hooks/useFetch";
-import { PageError, PageLoading } from "../components/common/PageState";
+import { PageError } from "../components/common/PageState";
 import { pageSx } from "../styles/theme";
+import VideoGridSkeleton from "../skeleton/VideoGridSkeleton";
 
 
 export default function Watched() {
@@ -26,7 +27,7 @@ export default function Watched() {
     const watchedVideos = Array.isArray(video) ? video : [];
 
     if (loading) {
-        return <PageLoading />;
+        return <VideoGridSkeleton items={10} />;
     }
     if (videoError) {
         return <PageError error={videoError} />;

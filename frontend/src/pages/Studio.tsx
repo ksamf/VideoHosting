@@ -15,8 +15,9 @@ import { getUserSubscriptionsCount, getUserVideos, getUserViewsCount } from "../
 import { formattedDate } from "../utils/FormattedDate";
 import { Stack } from "@mui/material";
 import useFetch from "../hooks/useFetch";
-import { PageError, PageLoading } from "../components/common/PageState";
+import { PageError } from "../components/common/PageState";
 import { pageSx } from "../styles/theme";
+import StudioSkeleton from "../skeleton/StudioSkeleton";
 
 export default function Studio() {
     const { user, loading: authLoading } = useAuth();
@@ -73,7 +74,7 @@ export default function Studio() {
     const error = subscriptionsCountPeriodError || userViewsCountError || userViewsCountPeriodError || userVideoError;
 
     if (loading) {
-        return <PageLoading />;
+        return <StudioSkeleton />;
     }
 
     if (error) {

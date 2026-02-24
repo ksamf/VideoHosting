@@ -243,7 +243,8 @@ export const videoSx: VideoSxStyles = {
   videoInfoSubsText: { ml: 1, color: "text.secondary" },
   cardRoot: (theme) => ({
     width: "100%",
-    maxWidth: 360,
+    minWidth: { xs: 0, sm: 280 },
+    maxWidth: 320,
     borderRadius: 2,
     backgroundColor: theme.palette.background.default,
     display: "flex",
@@ -491,177 +492,233 @@ export const formSx = {
   }),
 };
 
+export const skeletonSx = {
+  videoGrid: {
+    display: "grid",
+    gridTemplateColumns: {
+      xs: "repeat(1, 1fr)",
+      sm: "repeat(auto-fill, minmax(280px, 1fr))",
+    },
+    gap: 2.5,
+    p: 2,
+    justifyItems: "center",
+    width: "100%",
+  },
+  videoCard: { width: "100%", minWidth: { xs: 0, sm: 280 }, maxWidth: 320 },
+  videoPreviewWrap: {
+    position: "relative",
+    width: "100%",
+    pt: "56.25%",
+    borderRadius: 2,
+    overflow: "hidden",
+  },
+  videoPreview: { position: "absolute", inset: 0, width: "100%", height: "100%" },
+  videoMetaRow: { mt: 1.5, display: "flex", gap: 1.5 },
+  channelSidebarCard: (theme) => ({
+    p: 2,
+    width: { xs: "100%", md: 280 },
+    bgcolor: "transparent",
+    boxShadow: "none",
+    border: `1px solid ${theme.palette.divider}`,
+    borderRadius: 3,
+    display: "flex",
+    flexDirection: "column",
+    gap: 1.5,
+    position: { md: "sticky" },
+    top: 80,
+  }),
+  channelSortButton: { borderRadius: 3 },
+  studioCard: (theme) => ({
+    p: 2,
+    bgcolor: theme.palette.background.paper,
+    borderRadius: 3,
+    border: `1px solid ${theme.palette.divider}`,
+  }),
+  studioTableCell: { py: 1.8 },
+  watchPlayerWrap: {
+    width: "100%",
+    maxWidth: 1200,
+    borderRadius: 2,
+    overflow: "hidden",
+  },
+  watchPlayer: { width: "100%", aspectRatio: "16 / 9" },
+  watchInfo: { maxWidth: 1200, width: "100%", mt: 2, px: 1 },
+  watchTitle: { mb: 1.2 },
+  watchMetaRow: { display: "flex", alignItems: "center", gap: 1.5 },
+  watchDescription: { mt: 2, borderRadius: 2 },
+};
+
 export function createAppTheme(mode: PaletteMode = "light") {
   const isLight = mode === "light";
 
   return createTheme(({
     palette: {
-    mode,
-    primary: { main: isLight ? "#111111" : "#ffffff" },
-    accent: { main: isLight ? "#222222" : "#dddddd" },
-    success: { main: isLight ? "#2b2b2b" : "#8dd38d" },
-    warning: { main: isLight ? "#3a3a3a" : "#ffd28b" },
-    danger: { main: isLight ? "#444444" : "#ff9a9a" },
-    muted: { main: isLight ? "#6b7280" : "#666666" },
-    background: isLight
-      ? { default: "#ffffff", paper: "#ffffff" }
-      : { default: "#0f0f0f", paper: "#181818" },
-    text: isLight
-      ? { primary: "#111111", secondary: "#4b5563" }
-      : { primary: "#ffffff", secondary: "#aaaaaa" },
-    divider: isLight ? "#d1d5db" : "#444444",
-    common: { black: "#000000" },
-    link: { main: isLight ? "#111111" : "#ffffff" },
-  } as any,
+      mode,
+      primary: { main: isLight ? "#111111" : "#ffffff" },
+      accent: { main: isLight ? "#222222" : "#dddddd" },
+      success: { main: isLight ? "#2b2b2b" : "#8dd38d" },
+      warning: { main: isLight ? "#3a3a3a" : "#ffd28b" },
+      danger: { main: isLight ? "#444444" : "#ff9a9a" },
+      muted: { main: isLight ? "#6b7280" : "#666666" },
+      background: isLight
+        ? { default: "#ffffff", paper: "#ffffff" }
+        : { default: "#0f0f0f", paper: "#181818" },
+      text: isLight
+        ? { primary: "#111111", secondary: "#4b5563" }
+        : { primary: "#ffffff", secondary: "#aaaaaa" },
+      divider: isLight ? "#d1d5db" : "#444444",
+      common: { black: "#000000" },
+      link: { main: isLight ? "#111111" : "#ffffff" },
+    } as any,
 
-  spacing: 8, 
+    spacing: 8,
 
-  typography: {
-    fontFamily: '"Inter", "Roboto", "Helvetica", "Arial", sans-serif',
-    h1: { fontSize: "2rem", fontWeight: 700 },
-    h2: { fontSize: "1.5rem", fontWeight: 600 },
-    body1: { fontSize: "1rem" },
-    body2: { fontSize: "0.875rem" },
-  },
-
-  breakpoints: {
-    values: { xs: 0, sm: 600, md: 900, lg: 1200, xl: 1536 },
-  },
-
-  shape: {
-    borderRadius: 8,
-  },
-
-  shadows: base.shadows.map((s, i) => {
-    if (i === 0) return "none";
-    if (i === 1) return "0px 1px 3px rgba(0,0,0,0.12)";
-    if (i === 2) return "0px 3px 6px rgba(0,0,0,0.16)";
-    if (i === 3) return "0px 8px 16px rgba(0,0,0,0.2)";
-    if (i === 4) return "0px 10px 20px rgba(0,0,0,0.24)";
-    return s;
-  }) as any,
-
-  zIndex: {
-    appBar: 1200,
-    modal: 1300,
-    tooltip: 1500,
-  },
-
-  transitions: {
-    duration: { shortest: 150, shorter: 200, short: 250, standard: 300, complex: 375 },
-    easing: { easeInOut: "cubic-bezier(0.4, 0, 0.2, 1)" },
-  },
-
-
-  custom: {
-    modal: {
-      upload: { maxWidth: 1000, maxHeight: 700, padding: 16 },
+    typography: {
+      fontFamily: '"Inter", "Roboto", "Helvetica", "Arial", sans-serif',
+      h1: { fontSize: "2rem", fontWeight: 700 },
+      h2: { fontSize: "1.5rem", fontWeight: 600 },
+      body1: { fontSize: "1rem" },
+      body2: { fontSize: "0.875rem" },
     },
-    player: { height: 360, controlsHeight: 52 },
-    radii: { sm: 4, md: 8, lg: 16, pill: 50 },
-    sizes: { thumbnail: 160, avatar: 40 },
-    elevation: { card: 1, overlay: 3 },
-  },
 
-  components: {
-    MuiCssBaseline: {
-      styleOverrides: {
-        body: { backgroundColor: isLight ? "#ffffff" : "#0f0f0f" },
-        "*": {
-          scrollbarColor: isLight ? "#d1d5db #ffffff" : "#555 #0f0f0f",
-          scrollbarWidth: "thin",
-        },
-        "::-webkit-scrollbar": { width: "8px", height: "8px" },
-        "::-webkit-scrollbar-track": { background: isLight ? "#ffffff" : "#0f0f0f" },
-        "::-webkit-scrollbar-thumb": {
-          background: isLight ? "#d1d5db" : "#555",
-          borderRadius: "8px",
-        },
-        "::-webkit-scrollbar-thumb:hover": { background: isLight ? "#9ca3af" : "#777" },
+    breakpoints: {
+      values: { xs: 0, sm: 600, md: 900, lg: 1200, xl: 1536 },
+    },
+
+    shape: {
+      borderRadius: 8,
+    },
+
+    shadows: base.shadows.map((s, i) => {
+      if (i === 0) return "none";
+      if (i === 1) return "0px 1px 3px rgba(0,0,0,0.12)";
+      if (i === 2) return "0px 3px 6px rgba(0,0,0,0.16)";
+      if (i === 3) return "0px 8px 16px rgba(0,0,0,0.2)";
+      if (i === 4) return "0px 10px 20px rgba(0,0,0,0.24)";
+      return s;
+    }) as any,
+
+    zIndex: {
+      appBar: 1200,
+      modal: 1300,
+      tooltip: 1500,
+    },
+
+    transitions: {
+      duration: { shortest: 150, shorter: 200, short: 250, standard: 300, complex: 375 },
+      easing: { easeInOut: "cubic-bezier(0.4, 0, 0.2, 1)" },
+    },
+
+
+    custom: {
+      modal: {
+        upload: { maxWidth: 1000, maxHeight: 700, padding: 16 },
       },
+      player: { height: 360, controlsHeight: 52 },
+      radii: { sm: 4, md: 8, lg: 16, pill: 50 },
+      sizes: { thumbnail: 160, avatar: 40 },
+      elevation: { card: 1, overlay: 3 },
     },
 
-    MuiButton: {
-      styleOverrides: {
-        root: {
-          textTransform: "none",
-          borderRadius: "50px",
-          fontWeight: 500,
+    components: {
+      MuiCssBaseline: {
+        styleOverrides: {
+          body: { backgroundColor: isLight ? "#ffffff" : "#0f0f0f" },
+          "*": {
+            scrollbarColor: isLight ? "#d1d5db #ffffff" : "#555 #0f0f0f",
+            scrollbarWidth: "thin",
+          },
+          "::-webkit-scrollbar": { width: "8px", height: "8px" },
+          "::-webkit-scrollbar-track": { background: isLight ? "#ffffff" : "#0f0f0f" },
+          "::-webkit-scrollbar-thumb": {
+            background: isLight ? "#d1d5db" : "#555",
+            borderRadius: "8px",
+          },
+          "::-webkit-scrollbar-thumb:hover": { background: isLight ? "#9ca3af" : "#777" },
         },
-        contained: {
-          backgroundColor: isLight ? "#111111" : "#ffffff",
-          color: isLight ? "#ffffff" : "#1a1a1a",
-          "&:hover": { backgroundColor: isLight ? "#2a2a2a" : "#aaaaaa" },
-          "&.Mui-disabled": {
-            backgroundColor: isLight ? "#d1d5db" : "#555555",
-            color: isLight ? "#9ca3af" : "#999999",
+      },
+
+      MuiButton: {
+        styleOverrides: {
+          root: {
+            textTransform: "none",
+            borderRadius: "50px",
+            fontWeight: 500,
+          },
+          contained: {
+            backgroundColor: isLight ? "#111111" : "#ffffff",
+            color: isLight ? "#ffffff" : "#1a1a1a",
+            "&:hover": { backgroundColor: isLight ? "#2a2a2a" : "#aaaaaa" },
+            "&.Mui-disabled": {
+              backgroundColor: isLight ? "#d1d5db" : "#555555",
+              color: isLight ? "#9ca3af" : "#999999",
+            },
+          },
+        },
+      },
+
+      MuiTextField: { defaultProps: { variant: "outlined" } },
+
+      MuiOutlinedInput: {
+        styleOverrides: {
+          root: {
+            backgroundColor: isLight ? "#ffffff" : "#1f1f1f",
+            color: isLight ? "#111111" : "#ffffff",
+            borderRadius: 8,
+            "& fieldset": { borderColor: isLight ? "#d1d5db" : "#555" },
+            "&:hover fieldset": { borderColor: isLight ? "#9ca3af" : "#aaa" },
+            "&.Mui-focused fieldset": {
+              borderColor: isLight ? "#111111" : "#ffffff",
+              borderWidth: 1,
+            },
+          },
+          input: {
+            color: isLight ? "#111111" : "#ffffff",
+            "&::placeholder": { color: isLight ? "#9ca3af" : "#aaa", opacity: 1 },
+          },
+        },
+      },
+
+      MuiInput: {
+        styleOverrides: {
+          root: {
+            backgroundColor: isLight ? "#ffffff" : "#1f1f1f",
+            color: isLight ? "#111111" : "#ffffff",
+            borderRadius: 8,
+            padding: "8px 12px",
+            "&:before": { borderBottomColor: isLight ? "#d1d5db" : "#555" },
+            "&:hover:not(.Mui-disabled):before": { borderBottomColor: isLight ? "#9ca3af" : "#aaa" },
+            "&:after": { borderBottomColor: isLight ? "#111111" : "#ffffff" },
+          },
+          input: {
+            color: isLight ? "#111111" : "#ffffff",
+            "&::placeholder": { color: isLight ? "#9ca3af" : "#aaa", opacity: 1 },
+          },
+        },
+      },
+
+      MuiInputLabel: {
+        styleOverrides: {
+          root: { color: isLight ? "#4b5563" : "#aaa", "&.Mui-focused": { color: isLight ? "#111111" : "#fff" } },
+        },
+      },
+
+      MuiFormHelperText: { styleOverrides: { root: { color: isLight ? "#4b5563" : "#aaa" } } },
+
+      MuiDialog: {
+        styleOverrides: {
+          paper: {
+            width: "90%",
+            maxWidth: 1000,
+            height: "70vh",
+            maxHeight: 700,
+            borderRadius: 8,
+            padding: "16px",
           },
         },
       },
     },
-
-    MuiTextField: { defaultProps: { variant: "outlined" } },
-
-    MuiOutlinedInput: {
-      styleOverrides: {
-        root: {
-          backgroundColor: isLight ? "#ffffff" : "#1f1f1f",
-          color: isLight ? "#111111" : "#ffffff",
-          borderRadius: 8,
-          "& fieldset": { borderColor: isLight ? "#d1d5db" : "#555" },
-          "&:hover fieldset": { borderColor: isLight ? "#9ca3af" : "#aaa" },
-          "&.Mui-focused fieldset": {
-            borderColor: isLight ? "#111111" : "#ffffff",
-            borderWidth: 1,
-          },
-        },
-        input: {
-          color: isLight ? "#111111" : "#ffffff",
-          "&::placeholder": { color: isLight ? "#9ca3af" : "#aaa", opacity: 1 },
-        },
-      },
-    },
-
-    MuiInput: {
-      styleOverrides: {
-        root: {
-          backgroundColor: isLight ? "#ffffff" : "#1f1f1f",
-          color: isLight ? "#111111" : "#ffffff",
-          borderRadius: 8,
-          padding: "8px 12px",
-          "&:before": { borderBottomColor: isLight ? "#d1d5db" : "#555" },
-          "&:hover:not(.Mui-disabled):before": { borderBottomColor: isLight ? "#9ca3af" : "#aaa" },
-          "&:after": { borderBottomColor: isLight ? "#111111" : "#ffffff" },
-        },
-        input: {
-          color: isLight ? "#111111" : "#ffffff",
-          "&::placeholder": { color: isLight ? "#9ca3af" : "#aaa", opacity: 1 },
-        },
-      },
-    },
-
-    MuiInputLabel: {
-      styleOverrides: {
-        root: { color: isLight ? "#4b5563" : "#aaa", "&.Mui-focused": { color: isLight ? "#111111" : "#fff" } },
-      },
-    },
-
-    MuiFormHelperText: { styleOverrides: { root: { color: isLight ? "#4b5563" : "#aaa" } } },
-
-    MuiDialog: {
-      styleOverrides: {
-        paper: {
-          width: "90%",
-          maxWidth: 1000,
-          height: "70vh",
-          maxHeight: 700,
-          borderRadius: 8,
-          padding: "16px",
-        },
-      },
-    },
-  },
-}) as any);
+  }) as any);
 }
 
 const theme = createAppTheme("light");

@@ -8,8 +8,9 @@ import VideoInfo from "../components/video/VideoInfo";
 import useFetch from "../hooks/useFetch";
 import useAuth from "../hooks/useAuth";
 import { useCallback } from "react";
-import { PageError, PageLoading } from "../components/common/PageState";
+import { PageError } from "../components/common/PageState";
 import { pageSx } from "../styles/theme";
+import WatchSkeleton from "../skeleton/WatchSkeleton";
 
 export default function Watch() {
     const { user, isAuth } = useAuth();
@@ -42,7 +43,7 @@ export default function Watch() {
     const error = videoError || channelError;
 
     if (loading) {
-        return <PageLoading />;
+        return <WatchSkeleton />;
     }
 
     if (error) {

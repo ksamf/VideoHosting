@@ -12,11 +12,8 @@ export default function VideoGrid({ videos }: VideoGridProps) {
             sx={{
                 display: "grid",
                 gridTemplateColumns: {
-                    xs: "repeat(1, 1fr)",
-                    sm: "repeat(2, 1fr)",
-                    md: "repeat(3, 1fr)",
-                    lg: "repeat(4, 1fr)",
-                    xl: "repeat(5, 1fr)",
+                    xs: "repeat(auto-fill, minmax(220px, 1fr))",
+                    sm: "repeat(auto-fill, minmax(280px, 1fr))",
                 },
                 gap: 2.5,
                 padding: 2,

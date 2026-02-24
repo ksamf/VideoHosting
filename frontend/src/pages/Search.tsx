@@ -4,8 +4,9 @@ import { Box, Typography } from "@mui/material";
 import VideoGrid from "../components/video/VideoGrid";
 import useFetch from "../hooks/useFetch";
 import { searchVideos } from "../api/videos";
-import { PageError, PageLoading } from "../components/common/PageState";
+import { PageError } from "../components/common/PageState";
 import { pageSx } from "../styles/theme";
+import VideoGridSkeleton from "../skeleton/VideoGridSkeleton";
 
 export default function Search() {
   const [params] = useSearchParams();
@@ -20,7 +21,7 @@ export default function Search() {
   const videos = useMemo(() => (Array.isArray(data) ? data : []), [data]);
 
   if (loading) {
-    return <PageLoading />;
+    return <VideoGridSkeleton items={20} />;
   }
 
   if (error) {
