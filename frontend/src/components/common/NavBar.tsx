@@ -14,7 +14,7 @@ import Button from "@mui/material/Button";
 import VideoCallIcon from "@mui/icons-material/VideoCall";
 import PersonIcon from "@mui/icons-material/Person";
 import { Link } from "react-router-dom";
-import { commonSx } from "../../styles/theme";
+import { commonSx } from "../../styles/sx/common";
 import LightModeIcon from "@mui/icons-material/LightMode";
 import DarkModeIcon from "@mui/icons-material/DarkMode";
 
@@ -102,3 +102,4 @@ export default function NavBar({ themeMode, onToggleTheme }: NavBarProps) {
         </>
     );
 }
+

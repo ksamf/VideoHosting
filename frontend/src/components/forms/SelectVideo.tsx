@@ -42,8 +42,8 @@ export default function SelectVideo({ onSelect }: SelectVideoProps) {
                 onClick={openFileDialog}
                 sx={(theme) => ({
                     padding: 4,
-                    textAlign: 'center',
-                    cursor: 'pointer',
+                    textAlign: "center",
+                    cursor: "pointer",
                     minHeight: 200,
                     boxShadow: "none",
                     color: theme.palette.text.primary,
@@ -51,14 +51,14 @@ export default function SelectVideo({ onSelect }: SelectVideoProps) {
 
                 <IconButton
                     sx={(theme) => ({
-                        display: 'block',
+                        display: "block",
                         m: "100px auto",
                         border: `2px solid ${theme.palette.divider}`,
                         bgcolor: theme.palette.background.default,
                     })}>
                     <FileUploadIcon sx={(theme) => ({ color: theme.palette.text.secondary, fontSize: 150 })} />
                 </IconButton  >
-                <Typography variant="body1" align="center" sx={{ marginTop: '50px', color: "text.secondary" }}>
+                <Typography variant="body1" align="center" sx={{ marginTop: "50px", color: "text.secondary" }}>
                     Перетащите файлы сюда или нажмите кнопку ниже, чтобы выбрать их на компьютере.
                 </Typography>
             </Paper>
@@ -66,10 +66,11 @@ export default function SelectVideo({ onSelect }: SelectVideoProps) {
             <Button
                 onClick={openFileDialog}
                 variant="contained"
-                sx={{ display: 'block', m: "auto" }}
+                sx={{ display: "block", m: "auto" }}
             >
                 <Typography variant="body1" sx={(theme) => ({ color: theme.palette.background.default })}>Выберите файл</Typography>
             </Button>
         </>
     )
 }
+

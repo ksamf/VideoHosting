@@ -8,7 +8,7 @@ import SelectVolume from "./SelectVolume";
 import VideoSlider from "./VideoSlider";
 import useVideoPlayer from "../../hooks/useVideoPlayer";
 import { useEffect, useMemo } from "react";
-import { videoSx } from "../../styles/theme";
+import { videoSx } from "../../styles/sx/video";
 
 type VideoPlayerProps = {
     src: string;
@@ -148,3 +148,4 @@ export default function VideoPlayer({ src, poster, qualities = [], videoId }: Vi
         </Box>
     );
 }
+

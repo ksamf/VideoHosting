@@ -1,6 +1,6 @@
 import { useState, type Dispatch, type MouseEvent, type RefObject, type SetStateAction } from "react";
 import { Box, Menu, MenuItem } from "@mui/material";
-import { videoSx } from "../../styles/theme";
+import { videoSx } from "../../styles/sx/video";
 
 type SelectSpeedProps = {
     playbackRate: number;
@@ -60,3 +60,4 @@ export default function SelectSpeed({ playbackRate, setPlaybackRate, videoRef }:
         </>
     )
 }
+

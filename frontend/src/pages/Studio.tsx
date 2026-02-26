@@ -16,7 +16,7 @@ import { formattedDate } from "../utils/FormattedDate";
 import { Stack } from "@mui/material";
 import useFetch from "../hooks/useFetch";
 import { PageError } from "../components/common/PageState";
-import { pageSx } from "../styles/theme";
+import { pageSx } from "../styles/sx/page";
 import StudioSkeleton from "../skeleton/StudioSkeleton";
 
 export default function Studio() {
@@ -192,3 +192,4 @@ export default function Studio() {
         </Box>
     );
 }
+

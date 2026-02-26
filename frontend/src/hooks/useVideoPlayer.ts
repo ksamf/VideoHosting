@@ -34,7 +34,7 @@ export default function useVideoPlayer(videoId: string) {
     const viewSentRef = useRef(false);
 
     const [selectedIndex, setSelectedIndex] = useLocalStorage(`video-quality-${videoId}`, 0);
-    const [playbackRate, setPlaybackRate] = useLocalStorage(`video-playback-rate`, 1);
+    const [playbackRate, setPlaybackRate] = useLocalStorage("video-playback-rate", 1);
     const [volume, setVolume] = useLocalStorage("video-volume", 1);
 
     const [player, setPlayer] = useState<PlayerState>({

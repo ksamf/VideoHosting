@@ -18,7 +18,7 @@ import SubscribeButton from "./SubscribeButton";
 import { Link } from "react-router-dom";
 import type { VideoDetails } from "../../types/video";
 import type { User } from "../../types/user";
-import { videoSx } from "../../styles/theme";
+import { videoSx } from "../../styles/sx/video";
 
 TimeAgo.addLocale(ru);
 
@@ -85,3 +85,4 @@ export default function VideoInfo({ video, channel, user, isAuth }: VideoInfoPro
         </Box >
     );
 }
+

@@ -4,7 +4,7 @@ import InputAdornment from "@mui/material/InputAdornment";
 import IconButton from "@mui/material/IconButton";
 import SearchIcon from "@mui/icons-material/Search";
 import { useLocation, useNavigate } from "react-router-dom";
-import { commonSx } from "../../styles/theme";
+import { commonSx } from "../../styles/sx/common";
 
 export default function SearchField() {
   const [query, setQuery] = useState<string>(() => {
@@ -50,3 +50,4 @@ export default function SearchField() {
     />
   );
 }
+

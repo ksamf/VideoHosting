@@ -1,5 +1,5 @@
 import { Avatar } from "@mui/material";
-import { commonSx } from "../../styles/theme";
+import { commonSx } from "../../styles/sx/common";
 
 type UserAvatarProps = {
     username?: string;
@@ -26,3 +26,4 @@ export default function UserAvatar({ username, avatar_url, size = 40, cacheKey =
         </Avatar>
     );
 }
+

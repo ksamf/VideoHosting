@@ -2,8 +2,8 @@ import { useState, useEffect, useRef } from "react";
 import { Divider, IconButton, Stack, Typography } from "@mui/material";
 import ThumbUpAltIcon from "@mui/icons-material/ThumbUpAlt";
 import ThumbDownAltIcon from "@mui/icons-material/ThumbDownAlt";
-import ThumbUpAltOutlinedIcon from '@mui/icons-material/ThumbUpAltOutlined';
-import ThumbDownAltOutlinedIcon from '@mui/icons-material/ThumbDownAltOutlined';
+import ThumbUpAltOutlinedIcon from "@mui/icons-material/ThumbUpAltOutlined";
+import ThumbDownAltOutlinedIcon from "@mui/icons-material/ThumbDownAltOutlined";
 import { shortenNumRu } from "../../utils/ShortenNumRu";
 import { addReaction, getReaction } from "../../api/videos";
 import type { VideoDetails } from "../../types/video";
@@ -187,3 +187,4 @@ export default function VideoReaction({ video, isAuth }: VideoReactionProps) {
         </Stack>
     )
 }
+

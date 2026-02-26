@@ -9,7 +9,7 @@ import useFetch from "../hooks/useFetch";
 import useAuth from "../hooks/useAuth";
 import { useCallback } from "react";
 import { PageError } from "../components/common/PageState";
-import { pageSx } from "../styles/theme";
+import { pageSx } from "../styles/sx/page";
 import WatchSkeleton from "../skeleton/WatchSkeleton";
 
 export default function Watch() {
@@ -78,3 +78,4 @@ export default function Watch() {
         </Box>
     );
 }
+

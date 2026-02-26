@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState, type MouseEvent, type Dispatch, type SetStateAction, type RefObject } from "react";
 import { Box, Menu, MenuItem } from "@mui/material";
-import { videoSx } from "../../styles/theme";
+import { videoSx } from "../../styles/sx/video";
 
 type SelectQualityProps = {
     qualities: number[];
@@ -121,3 +121,4 @@ export default function SelectQuality({ qualities, videoRef, setPlaying, selecte
         </>
     );
 }
+

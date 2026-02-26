@@ -7,18 +7,18 @@ import ListItem from "@mui/material/ListItem";
 import ListItemText from "@mui/material/ListItemText";
 import { useEffect, useState } from "react";
 import SubscriptionsIcon from "@mui/icons-material/Subscriptions";
-import HistoryIcon from '@mui/icons-material/History';
+import HistoryIcon from "@mui/icons-material/History";
 import ThumbUpAltIcon from "@mui/icons-material/ThumbUpAlt";
 import PersonIcon from "@mui/icons-material/Person";
 import HandymanIcon from "@mui/icons-material/Handyman";
 import { ListItemButton } from "@mui/material";
 import Divider from "@mui/material/Divider";
-import LogoutIcon from '@mui/icons-material/Logout';
+import LogoutIcon from "@mui/icons-material/Logout";
 import { Link, useNavigate } from "react-router-dom";
 import { getUserSubscriptions } from "../../api/users";
 import { logout } from "../../api/auth";
 import type { User } from "../../types/user";
-import { commonSx } from "../../styles/theme";
+import { commonSx } from "../../styles/sx/common";
 
 type SideBarProps = {
     user: User | null;
@@ -196,3 +196,5 @@ export default function SideBar({ user, open, setOpen }: SideBarProps) {
         </Drawer >
     );
 }
+
+

@@ -1,8 +1,8 @@
-import IconButton from '@mui/material/IconButton';
-import Tooltip from '@mui/material/Tooltip';
-import Menu from '@mui/material/Menu';
-import { useState, type MouseEvent } from 'react';
-import UserAvatar from './UserAvatar';
+import IconButton from "@mui/material/IconButton";
+import Tooltip from "@mui/material/Tooltip";
+import Menu from "@mui/material/Menu";
+import { useState, type MouseEvent } from "react";
+import UserAvatar from "./UserAvatar";
 
 type NavMenuProps = {
     username?: string;
@@ -26,17 +26,17 @@ export default function NavMenu({ username, avatar_url }: NavMenuProps) {
                 </IconButton>
             </Tooltip >
             <Menu
-                sx={{ mt: '45px' }}
+                sx={{ mt: "45px" }}
                 id="menu-appbar"
                 anchorEl={anchorElUser}
                 anchorOrigin={{
-                    vertical: 'top',
-                    horizontal: 'right',
+                    vertical: "top",
+                    horizontal: "right",
                 }}
                 keepMounted
                 transformOrigin={{
-                    vertical: 'top',
-                    horizontal: 'right',
+                    vertical: "top",
+                    horizontal: "right",
                 }}
                 open={Boolean(anchorElUser)}
                 onClose={handleCloseUserMenu}
@@ -45,3 +45,5 @@ export default function NavMenu({ username, avatar_url }: NavMenuProps) {
         </>
     )
 }
+
+

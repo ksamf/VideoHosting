@@ -1,5 +1,5 @@
 import { Box, Skeleton } from "@mui/material";
-import { skeletonSx } from "../styles/theme";
+import { skeletonSx } from "../styles/sx/skeleton";
 
 type HomeSkeletonProps = {
     items?: number;
@@ -26,3 +26,4 @@ export default function VideoGridSkeleton({ items = 10 }: HomeSkeletonProps) {
         </Box>
     );
 }
+

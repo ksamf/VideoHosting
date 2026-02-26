@@ -12,7 +12,8 @@ import {
     TableHead,
     TableRow,
 } from "@mui/material";
-import { pageSx, skeletonSx } from "../styles/theme";
+import { pageSx } from "../styles/sx/page";
+import { skeletonSx } from "../styles/sx/skeleton";
 
 export default function StudioSkeleton() {
     return (
@@ -88,3 +89,4 @@ export default function StudioSkeleton() {
         </Box>
     );
 }
+

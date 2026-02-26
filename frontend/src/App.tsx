@@ -1,18 +1,18 @@
-import Home from './pages/Home'
-import Studio from './pages/Studio'
-import { Routes, Route } from 'react-router-dom'
-import UploadVideo from './components/common/UploadVideo'
-import NavBar from './components/common/NavBar'
-import Watch from './pages/Watch'
-import LoginModal from './components/forms/LoginModal'
-import RegisterModal from './components/forms/RegisterModal'
-import { Box, Toolbar } from '@mui/material'
-import Watched from './pages/Watched'
-import Liked from './pages/Liked'
-import Channel from './pages/Channel'
-import Subscriptions from './pages/Subscriptions'
-import Search from './pages/Search'
-import { appSx } from './styles/theme'
+import Home from "./pages/Home"
+import Studio from "./pages/Studio"
+import { Routes, Route } from "react-router-dom"
+import UploadVideo from "./components/common/UploadVideo"
+import NavBar from "./components/common/NavBar"
+import Watch from "./pages/Watch"
+import LoginModal from "./components/forms/LoginModal"
+import RegisterModal from "./components/forms/RegisterModal"
+import { Box, Toolbar } from "@mui/material"
+import Watched from "./pages/Watched"
+import Liked from "./pages/Liked"
+import Channel from "./pages/Channel"
+import Subscriptions from "./pages/Subscriptions"
+import Search from "./pages/Search"
+import { appSx } from "./styles/sx/app"
 
 type ThemeMode = "light" | "dark";
 
@@ -47,3 +47,5 @@ export default function App({ themeMode, onToggleTheme }: AppProps) {
     </>
   )
 }
+
+

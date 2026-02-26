@@ -7,7 +7,7 @@ import { getUserById, getUserVideos } from "../api/users";
 import ChannelHeader from "../components/common/ChannelHeader";
 import useFetch from "../hooks/useFetch";
 import { PageError } from "../components/common/PageState";
-import { pageSx } from "../styles/theme";
+import { pageSx } from "../styles/sx/page";
 import ChannelSkeleton from "../skeleton/ChannelSkeleton";
 
 export default function Channel() {
@@ -106,3 +106,4 @@ export default function Channel() {
         </Box>
     );
 }
+

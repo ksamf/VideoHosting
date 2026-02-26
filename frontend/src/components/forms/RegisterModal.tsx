@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { useState, type FormEvent } from "react";
 import { register } from "../../api/auth";
 import useFormAuth from "../../hooks/useFormAuth";
-import { formSx } from "../../styles/theme";
+import { formSx } from "../../styles/sx/form";
 
 export default function RegisterModal() {
     const navigate = useNavigate();
@@ -83,3 +83,4 @@ export default function RegisterModal() {
         </Modal>
     );
 }
+

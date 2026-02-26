@@ -1,6 +1,7 @@
 import { Box, Stack, Skeleton } from "@mui/material";
 import VideoGridSkeleton from "./VideoGridSkeleton";
-import { pageSx, skeletonSx } from "../styles/theme";
+import { pageSx } from "../styles/sx/page";
+import { skeletonSx } from "../styles/sx/skeleton";
 
 export default function ChannelSkeleton() {
     return (
@@ -26,3 +27,4 @@ export default function ChannelSkeleton() {
         </>
     )
 }
+

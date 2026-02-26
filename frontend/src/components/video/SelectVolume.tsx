@@ -2,7 +2,7 @@ import { Box, Slider } from "@mui/material";
 import VolumeOffIcon from "@mui/icons-material/VolumeOff";
 import VolumeUpIcon from "@mui/icons-material/VolumeUp";
 import type { Dispatch, RefObject, SetStateAction } from "react";
-import { videoSx } from "../../styles/theme";
+import { videoSx } from "../../styles/sx/video";
 
 type SelectVolumeProps = {
     volume: number;
@@ -56,3 +56,4 @@ export default function SelectVolume({
         </>
     )
 }
+

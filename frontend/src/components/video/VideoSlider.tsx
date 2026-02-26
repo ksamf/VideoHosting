@@ -1,6 +1,6 @@
 import { useState, useRef, type Dispatch, type RefObject, type SetStateAction } from "react";
 import { Box, Typography, Slider } from "@mui/material";
-import { videoSx } from "../../styles/theme";
+import { videoSx } from "../../styles/sx/video";
 
 type VideoSliderProps = {
     videoRef: RefObject<HTMLVideoElement | null>;
@@ -93,3 +93,4 @@ export default function VideoSlider({
         </>
     );
 }
+

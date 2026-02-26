@@ -9,7 +9,7 @@ import {
 import { useState, useEffect, useMemo, type ChangeEvent } from "react";
 import { uploadVideo } from "../../api/videos";
 import { useNavigate } from "react-router-dom";
-import { formSx } from "../../styles/theme";
+import { formSx } from "../../styles/sx/form";
 
 type SetVideoDetailsProps = {
     file: File;
@@ -227,3 +227,4 @@ export default function VideoDetailsStep({ file, defaultPreview, defaultPreviewU
         </>
     );
 }
+

@@ -1,5 +1,5 @@
 import { Box, Skeleton, Stack } from "@mui/material";
-import { skeletonSx } from "../styles/theme";
+import { skeletonSx } from "../styles/sx/skeleton";
 
 export default function WatchSkeleton() {
     return (
@@ -24,3 +24,4 @@ export default function WatchSkeleton() {
         </Stack>
     );
 }
+

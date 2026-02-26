@@ -5,7 +5,7 @@ import { getUserLikedVideo } from "../api/users";
 import useAuth from "../hooks/useAuth";
 import useFetch from "../hooks/useFetch";
 import { PageError } from "../components/common/PageState";
-import { pageSx } from "../styles/theme";
+import { pageSx } from "../styles/sx/page";
 import VideoGridSkeleton from "../skeleton/VideoGridSkeleton";
 
 
@@ -42,3 +42,4 @@ export default function Liked() {
         </>
     );
 }
+

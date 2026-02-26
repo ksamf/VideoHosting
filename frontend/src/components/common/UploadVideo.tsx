@@ -5,10 +5,10 @@ import { useNavigate } from "react-router-dom";
 import Modal from "@mui/material/Modal";
 import Box from "@mui/material/Box";
 import { Typography } from "@mui/material";
-import CloseIcon from '@mui/icons-material/Close';
+import CloseIcon from "@mui/icons-material/Close";
 import IconButton from "@mui/material/IconButton";
 import { getVideoPreview } from "../../utils/GetVideoPreview"
-import { formSx } from "../../styles/theme";
+import { formSx } from "../../styles/sx/form";
 
 export default function UploadVideo() {
     const navigate = useNavigate();
@@ -69,3 +69,5 @@ export default function UploadVideo() {
         </Modal>
     );
 }
+
+

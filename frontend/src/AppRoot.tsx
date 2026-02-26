@@ -2,7 +2,7 @@ import { useMemo } from "react";
 import { BrowserRouter } from "react-router-dom";
 import { ThemeProvider, CssBaseline } from "@mui/material";
 import App from "./App";
-import { createAppTheme } from "./styles/theme";
+import { createAppTheme } from "./styles/createTheme";
 import useLocalStorage from "./hooks/useLocalStorage";
 
 type ThemeMode = "light" | "dark";
@@ -24,3 +24,4 @@ export default function AppRoot() {
     </BrowserRouter>
   );
 }
+
