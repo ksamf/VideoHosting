@@ -528,6 +528,8 @@ export const skeletonSx = {
     top: 80,
   }),
   channelSortButton: { borderRadius: 3 },
+  channelSidebarRect: { p: 2, width: { xs: "100%", md: 280 }, height: 300, borderRadius: 3 },
+  channelSortRowItem: { width: 120, height: 36, borderRadius: 3 },
   studioCard: (theme) => ({
     p: 2,
     bgcolor: theme.palette.background.paper,
@@ -535,6 +537,9 @@ export const skeletonSx = {
     border: `1px solid ${theme.palette.divider}`,
   }),
   studioTableCell: { py: 1.8 },
+  studioTitle: { mb: 3 },
+  studioSectionTitle: { mt: 5, mb: 2 },
+  studioThumb: { borderRadius: 1 },
   watchPlayerWrap: {
     width: "100%",
     maxWidth: 1200,
@@ -546,6 +551,15 @@ export const skeletonSx = {
   watchTitle: { mb: 1.2 },
   watchMetaRow: { display: "flex", alignItems: "center", gap: 1.5 },
   watchDescription: { mt: 2, borderRadius: 2 },
+  watchRoot: { maxWidth: 1300, mt: 2, ml: { xs: 0, md: 4 } },
+  watchFrame: { width: "100%", maxWidth: 1300, mx: "auto", aspectRatio: "16 / 9" },
+  watchPlayerRect: { width: "100%", height: "100%", borderRadius: 2 },
+  watchChannelRow: { display: "flex", alignItems: "center", gap: 2 },
+  watchGrow: { flexGrow: 1 },
+  watchButton: { width: "10%", height: 50, borderRadius: 5 },
+  watchTextButton: { width: "10%", height: 50 },
+  watchCommentTitle: { width: "20%", height: 20 },
+  watchDescriptionBlock: { width: "100%", height: 150, borderRadius: 2 },
 };
 
 export function createAppTheme(mode: PaletteMode = "light") {

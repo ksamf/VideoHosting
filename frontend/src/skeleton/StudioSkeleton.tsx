@@ -12,12 +12,12 @@ import {
     TableHead,
     TableRow,
 } from "@mui/material";
-import { pageSx } from "../styles/theme";
+import { pageSx, skeletonSx } from "../styles/theme";
 
 export default function StudioSkeleton() {
     return (
         <Box sx={pageSx.studioRoot}>
-            <Skeleton variant="text" width={260} height={40} sx={{ mb: 3 }} />
+            <Skeleton variant="text" width={260} height={40} sx={skeletonSx.studioTitle} />
 
             <Grid container spacing={2} sx={pageSx.studioMetricsGrid}>
                 {[1, 2, 3].map((item) => (
@@ -30,7 +30,7 @@ export default function StudioSkeleton() {
                 ))}
             </Grid>
 
-            <Skeleton variant="text" width={180} height={32} sx={{ mt: 5, mb: 2 }} />
+            <Skeleton variant="text" width={180} height={32} sx={skeletonSx.studioSectionTitle} />
 
             <TableContainer component={Paper} sx={pageSx.studioTableContainer}>
                 <Table sx={pageSx.studioTable}>
@@ -63,7 +63,7 @@ export default function StudioSkeleton() {
                                             variant="rectangular"
                                             width={80}
                                             height={45}
-                                            sx={{ borderRadius: 1 }}
+                                            sx={skeletonSx.studioThumb}
                                         />
                                         <Skeleton variant="text" width={180} />
                                     </Stack>
