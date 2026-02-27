@@ -21,7 +21,7 @@ COPY --from=builder /app/backend .
 COPY ./migrations ./migrations
 COPY --from=builder /go/bin/migrate /usr/local/bin/migrate
 
-EXPOSE 8000
+EXPOSE 8080
 
 
 CMD ["sh", "-c", "migrate -path migrations -database postgres://$DB_USER:$DB_PASS@$DB_HOST:$DB_PORT/$DB_NAME?sslmode=disable up && ./backend"]

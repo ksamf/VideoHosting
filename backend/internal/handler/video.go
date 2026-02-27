@@ -40,11 +40,6 @@ func (h *VideoHandler) Upload(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid user id"})
 		return
 	}
-	c.Request.Body = http.MaxBytesReader(
-		c.Writer,
-		c.Request.Body,
-		5<<30,
-	)
 
 	videoFile, videoHeader, err := c.Request.FormFile("video")
 	if err != nil {

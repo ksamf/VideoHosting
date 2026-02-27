@@ -3,6 +3,7 @@ package auth
 import (
 	"fmt"
 	"net/http"
+	"strconv"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -110,5 +111,55 @@ func (a *Auth) OptionalAuthMiddleware(c *gin.Context) {
 	} else {
 		c.Next()
 		return
+	}
+}
+
+func (a *Auth) RateLimiter(c *gin.Context) {
+	a.applyRateLimit(c, time.Minute, 60)
+}
+
+func (a *Auth) RateLimiterWith(window time.Duration, maxHits int64) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		a.applyRateLimit(c, window, maxHits)
+	}
+}
+
+func (a *Auth) applyRateLimit(c *gin.Context, window time.Duration, maxHits int64) {
+	if a.redis == nil {
+		c.Next()
+		return
+	}
+
+	subject := c.ClientIP()
+	if userValue, exists := c.Get("user"); exists {
+		switch u := userValue.(type) {
+		case *database.User:
+			if u != nil && u.UserId != uuid.Nil {
+				subject = "u:" + u.UserId.String()
+			}
+		case database.User:
+			if u.UserId != uuid.Nil {
+				subject = "u:" + u.UserId.String()
+			}
+		}
+	}
+
+	key := "rl:" + subject + ":" + c.FullPath()
+	info := a.redis.Limit(key, window, maxHits)
+
+	retryAfter := int(time.Until(info.ResetTime).Seconds())
+	if retryAfter < 0 {
+		retryAfter = 0
+	}
+	c.Header("X-RateLimit-Limit", strconv.FormatInt(maxHits, 10))
+	c.Header("X-RateLimit-Remaining", strconv.FormatInt(info.Remaining, 10))
+	c.Header("X-RateLimit-Reset", strconv.FormatInt(info.ResetTime.Unix(), 10))
+
+	if info.RateLimited {
+		c.Header("Retry-After", strconv.Itoa(retryAfter))
+		c.String(http.StatusTooManyRequests, "Too many requests. Try again later.")
+		c.Abort()
+	} else {
+		c.Next()
 	}
 }

@@ -1,6 +1,8 @@
 package interfaces
 
 import (
+	"time"
+
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 )
@@ -13,4 +15,6 @@ type Auth interface {
 	Signup(c *gin.Context)
 	AuthMiddleware(c *gin.Context)
 	OptionalAuthMiddleware(c *gin.Context)
+	RateLimiter(c *gin.Context)
+	RateLimiterWith(window time.Duration, maxHits int64) gin.HandlerFunc
 }

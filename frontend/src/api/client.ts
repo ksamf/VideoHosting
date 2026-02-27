@@ -4,6 +4,8 @@ type ApiOptions = RequestInit & {
   headers?: HeadersInit;
 };
 
+const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL ?? "").replace(/\/+$/, "");
+
 export async function api<T = unknown>(path: string, options: ApiOptions = {}): Promise<ApiResult<T>> {
   const headers =
     options.body instanceof FormData
@@ -13,7 +15,7 @@ export async function api<T = unknown>(path: string, options: ApiOptions = {}): 
           ...(options.headers || {}),
         };
 
-  const res = await fetch(`http://localhost:8000/api${path}`, {
+  const res = await fetch(`${API_BASE_URL}/api${path}`, {
     credentials: "include",
     headers,
     ...options,

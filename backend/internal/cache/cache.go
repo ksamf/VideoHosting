@@ -4,6 +4,7 @@ import (
 	"context"
 	"time"
 
+	"github.com/ksamf/VideoHosting/backend/internal/interfaces"
 	"github.com/redis/go-redis/v9"
 )
 
@@ -74,4 +75,41 @@ func (r *RedisModel) SIsMember(key string, member any) bool {
 		return false
 	}
 	return res
+}
+func (r *RedisModel) Expire(key string, exp time.Duration) {
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
+	defer cancel()
+	r.conn.Expire(ctx, key, exp)
+}
+
+func (r *RedisModel) Limit(key string, window time.Duration, maxHits int64) interfaces.RateLimitInfo {
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
+	defer cancel()
+
+	info := interfaces.RateLimitInfo{
+		RateLimited: false,
+		ResetTime:   time.Now().Add(window),
+		Remaining:   maxHits,
+	}
+
+	hits, err := r.conn.Incr(ctx, key).Result()
+	if err != nil {
+		return info
+	}
+
+	ttl, err := r.conn.TTL(ctx, key).Result()
+	if err != nil || ttl <= 0 {
+		_ = r.conn.Expire(ctx, key, window).Err()
+		ttl = window
+	}
+
+	if hits >= maxHits {
+		info.Remaining = 0
+	} else {
+		info.Remaining = maxHits - hits
+	}
+	info.ResetTime = time.Now().Add(ttl)
+	info.RateLimited = hits > maxHits
+
+	return info
 }

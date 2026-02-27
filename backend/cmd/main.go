@@ -38,7 +38,7 @@ func main() {
 	models := database.NewModel(pool)
 	buckets := storage.NewBucket(s3, conf)
 	handlers := handler.NewHandlers(*models, conf, buckets, redis, kafka)
-	auth := auth.New(&models.Users, conf)
+	auth := auth.New(&models.Users, conf, redis)
 
 	app := &application{
 		host:     conf.App.Host,

@@ -3,6 +3,7 @@ package auth
 import (
 	"fmt"
 	"net/http"
+	"strings"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -16,12 +17,18 @@ import (
 type Auth struct {
 	user   interfaces.User
 	config *config.Config
+	redis  interfaces.Cache
 }
 
-func New(users interfaces.User, conf *config.Config) *Auth {
+func New(users interfaces.User, conf *config.Config, redis ...interfaces.Cache) *Auth {
+	var cache interfaces.Cache
+	if len(redis) > 0 {
+		cache = redis[0]
+	}
 	return &Auth{
 		user:   users,
 		config: conf,
+		redis:  cache,
 	}
 }
 func (a *Auth) Me(c *gin.Context) {
@@ -70,13 +77,13 @@ func (a *Auth) Login(c *gin.Context) {
 		return
 	}
 	c.SetSameSite(http.SameSiteLaxMode)
-	c.SetCookie("Authorization", tokenString, 3600*24*30, "/", "", false, true)
+	c.SetCookie("Authorization", tokenString, 3600*24*30, "/", "", isHTTPSRequest(c), true)
 	c.JSON(http.StatusOK, gin.H{"message": "login successful"})
 }
 
 func (a *Auth) Logout(c *gin.Context) {
 	c.SetSameSite(http.SameSiteLaxMode)
-	c.SetCookie("Authorization", "", -1, "", "", false, true)
+	c.SetCookie("Authorization", "", -1, "/", "", isHTTPSRequest(c), true)
 	c.JSON(http.StatusOK, gin.H{"message": "Logged out"})
 }
 
@@ -107,4 +114,11 @@ func (a *Auth) Signup(c *gin.Context) {
 	}
 	c.JSON(http.StatusOK, gin.H{"message": "signup successful"})
 
+}
+
+func isHTTPSRequest(c *gin.Context) bool {
+	if c.Request != nil && c.Request.TLS != nil {
+		return true
+	}
+	return strings.EqualFold(c.GetHeader("X-Forwarded-Proto"), "https")
 }

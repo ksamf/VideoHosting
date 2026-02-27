@@ -6,6 +6,12 @@ import (
 	"github.com/redis/go-redis/v9"
 )
 
+type RateLimitInfo struct {
+	RateLimited bool
+	ResetTime   time.Time
+	Remaining   int64
+}
+
 type Cache interface {
 	Set(key string, value any, exp time.Duration)
 	Get(key string) string
@@ -17,4 +23,5 @@ type Cache interface {
 	SCard(key string) int64
 	Scan(cursor uint64, match string, count int64) *redis.ScanCmd
 	SIsMember(key string, member any) bool
+	Limit(key string, window time.Duration, maxHits int64) RateLimitInfo
 }

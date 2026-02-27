@@ -11,6 +11,9 @@ func invalidateCachePatterns(cache interfaces.Cache, patterns ...string) {
 		var cursor uint64
 		for {
 			cmd := cache.Scan(cursor, pattern, 100)
+			if cmd == nil {
+				break
+			}
 			keys, nextCursor, err := cmd.Result()
 			if err != nil {
 				log.Printf("cache scan failed pattern=%q err=%v", pattern, err)
@@ -26,4 +29,3 @@ func invalidateCachePatterns(cache interfaces.Cache, patterns ...string) {
 		}
 	}
 }
-
