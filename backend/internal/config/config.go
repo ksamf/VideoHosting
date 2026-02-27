@@ -25,6 +25,14 @@ type UploadConfig struct {
 	AvatarMaxBytes int64
 }
 
+type VideoProcessingConfig struct {
+	SourceCRF      int
+	SourcePreset   string
+	Encoder        string
+	RetryAttempts  int
+	RetryBackoffMS int
+}
+
 type JwtConfig struct {
 	Key string
 }
@@ -60,6 +68,7 @@ type Config struct {
 	App      AppConfig
 	Rate     RateLimitConfig
 	Upload   UploadConfig
+	Video    VideoProcessingConfig
 	Jwt      JwtConfig
 	Postgres PgConfig
 	Redis    RedisConfig
@@ -69,7 +78,9 @@ type Config struct {
 }
 
 func New() *Config {
-
+	// if err := godotenv.Load(".env.dev"); err != nil {
+	// 	panic(err)
+	// }
 	return &Config{
 		App: AppConfig{
 			Host:        getEnv("APP_HOST", "localhost"),
@@ -86,6 +97,13 @@ func New() *Config {
 		Upload: UploadConfig{
 			VideoMaxBytes:  getEnvAsInt64("UPLOAD_VIDEO_MAX_BYTES", 200<<20), // 200MB
 			AvatarMaxBytes: getEnvAsInt64("UPLOAD_AVATAR_MAX_BYTES", 5<<20),  // 5MB
+		},
+		Video: VideoProcessingConfig{
+			SourceCRF:      getEnvAsInt("VIDEO_SOURCE_CRF", 22),
+			SourcePreset:   getEnv("VIDEO_SOURCE_PRESET", "fast"),
+			Encoder:        getEnv("VIDEO_ENCODER", "libx264"),
+			RetryAttempts:  getEnvAsInt("VIDEO_PROCESS_RETRY_ATTEMPTS", 3),
+			RetryBackoffMS: getEnvAsInt("VIDEO_PROCESS_RETRY_BACKOFF_MS", 500),
 		},
 		Jwt: JwtConfig{
 			Key: getEnv("SECRET_KEY", ""),

@@ -47,6 +47,19 @@ func (h *VideoHandler) Upload(c *gin.Context) {
 		return
 	}
 	defer videoFile.Close()
+	if videoHeader.Size <= 0 {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "empty video file"})
+		return
+	}
+	if h.config != nil && h.config.Upload.VideoMaxBytes > 0 && videoHeader.Size > h.config.Upload.VideoMaxBytes {
+		c.JSON(http.StatusRequestEntityTooLarge, gin.H{"error": "video is too large"})
+		return
+	}
+	contentType := strings.ToLower(videoHeader.Header.Get("Content-Type"))
+	if contentType != "" && contentType != "application/octet-stream" && !strings.HasPrefix(contentType, "video/") {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid video content type"})
+		return
+	}
 
 	ext := strings.ToLower(filepath.Ext(videoHeader.Filename))
 	allowed := map[string]bool{

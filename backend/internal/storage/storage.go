@@ -28,6 +28,14 @@ func (s3 *Storage) PutObject(ctx context.Context, fileName string, file io.Reade
 	return nil
 }
 
+func (s3 *Storage) GetObjectReader(ctx context.Context, object string) (io.ReadCloser, error) {
+	reader, err := s3.Client.GetObject(ctx, s3.BucketName, object, minio.GetObjectOptions{})
+	if err != nil {
+		return nil, fmt.Errorf("failed to get object %s: %w", object, err)
+	}
+	return reader, nil
+}
+
 func (s3 *Storage) GetObject(object, tmpPath string) error {
 	ctx := context.Background()
 
