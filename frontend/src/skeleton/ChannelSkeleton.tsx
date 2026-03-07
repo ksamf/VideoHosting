@@ -8,8 +8,8 @@ export default function ChannelSkeleton() {
         <>
             <Box sx={pageSx.channelContainer}>
                 <Stack
-                    direction={{ xs: "column", md: "row" }}
-                    spacing={2}
+                    direction={{ xs: "column", lg: "row" }}
+                    spacing={{ xs: 1.5, sm: 2 }}
                     alignItems="flex-start"
                 >
                     <Skeleton variant="rectangular" sx={skeletonSx.channelSidebarRect} />

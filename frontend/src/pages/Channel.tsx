@@ -69,8 +69,8 @@ export default function Channel() {
 
         <Box sx={pageSx.channelContainer}>
             <Stack
-                direction={{ xs: "column", md: "row" }}
-                spacing={2}
+                direction={{ xs: "column", lg: "row" }}
+                spacing={{ xs: 1.5, sm: 2 }}
                 alignItems="flex-start"
             >
                 <ChannelHeader channel={channel} authUser={authUser} isAuth={isAuth} countVideos={safeVideos.length} />

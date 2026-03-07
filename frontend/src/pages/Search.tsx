@@ -131,40 +131,30 @@ export default function Search() {
         Результаты поиска: {query || "пустой запрос"}
       </Typography>
       {query.length < 2 ? (
-        <Typography sx={pageSx.searchMuted}>
+        <Typography sx={pageSx.pageStateText}>
           Введите минимум 2 символа.
         </Typography>
       ) : channels.length === 0 && videos.length === 0 ? (
-        <Typography sx={pageSx.searchMuted}>
+        <Typography sx={pageSx.pageStateText}>
           Ничего не найдено.
         </Typography>
       ) : (
         <>
           {channels.length > 0 && (
             <Box sx={{ mb: 2 }}>
-              <Typography variant="subtitle1" sx={{ mb: 1 }}>
+              <Typography variant="subtitle1" sx={pageSx.searchSectionTitle}>
                 Каналы
               </Typography>
-              <Stack spacing={0.5}>
+              <Stack sx={pageSx.searchChannelList}>
                 {channels.map((channel) => (
                   <Box
                     key={channel.user_id}
                     component={Link}
                     to={`/channel/${channel.user_id}`}
-                    sx={{
-                      display: "flex",
-                      alignItems: "center",
-                      gap: 1.5,
-                      px: 1,
-                      py: 1,
-                      textDecoration: "none",
-                      color: "text.primary",
-                      borderRadius: 2,
-                      "&:hover": { bgcolor: "action.hover" },
-                    }}
+                    sx={pageSx.searchChannelItem}
                   >
                     <UserAvatar username={channel.username} avatar_url={channel.avatar_url} size={36} />
-                    <Typography fontWeight={500}>{channel.username}</Typography>
+                    <Typography sx={pageSx.searchChannelName}>{channel.username}</Typography>
                   </Box>
                 ))}
               </Stack>
@@ -172,13 +162,13 @@ export default function Search() {
           )}
 
           {videos.length > 0 && (
-            <Typography variant="subtitle1" sx={{ mb: 1 }}>
+            <Typography variant="subtitle1" sx={pageSx.searchSectionTitle}>
               Видео
             </Typography>
           )}
           <VideoGrid videos={videos} />
           {(hasMore || loadingMore) && (
-            <Box ref={loadMoreRef} sx={{ display: "flex", justifyContent: "center", py: 2 }}>
+            <Box ref={loadMoreRef} sx={pageSx.infiniteLoader}>
               {loadingMore && <CircularProgress size={24} />}
             </Box>
           )}

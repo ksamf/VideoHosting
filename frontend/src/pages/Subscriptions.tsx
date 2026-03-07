@@ -6,6 +6,7 @@ import { PageError } from "../components/common/PageState";
 import VideoGrid from "../components/video/VideoGrid";
 import VideoGridSkeleton from "../skeleton/VideoGridSkeleton";
 import type { Video } from "../types/video";
+import { pageSx } from "../styles/sx/page";
 
 const SUBSCRIPTIONS_PAGE_SIZE = 12;
 
@@ -111,19 +112,19 @@ export default function Subscriptions() {
     }
 
     return (
-        <>
+        <Box sx={pageSx.pageContainer}>
             {!id ? (
-                <Typography color="text.secondary">Некорректный id пользователя.</Typography>
+                <Typography sx={pageSx.pageStateText}>Некорректный id пользователя.</Typography>
             ) : (
                 <>
                     <VideoGrid videos={videos} />
                     {(hasMore || loadingMore) && (
-                        <Box ref={loadMoreRef} sx={{ display: "flex", justifyContent: "center", py: 2 }}>
+                        <Box ref={loadMoreRef} sx={pageSx.infiniteLoader}>
                             {loadingMore && <CircularProgress size={24} />}
                         </Box>
                     )}
                 </>
             )}
-        </>
+        </Box>
     );
 }

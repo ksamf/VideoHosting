@@ -73,8 +73,8 @@ export default function ChannelHeader({ channel, authUser, isAuth, countVideos }
             />
             <Paper
                 sx={(theme) => ({
-                    p: 2,
-                    width: { xs: "100%", md: 280 },
+                    p: { xs: 1.5, sm: 2 },
+                    width: { xs: "100%", lg: 280 },
                     bgcolor: "transparent",
                     boxShadow: "none",
                     border: `1px solid ${theme.palette.divider}`,
@@ -82,8 +82,9 @@ export default function ChannelHeader({ channel, authUser, isAuth, countVideos }
                     display: "flex",
                     flexDirection: "column",
                     gap: 1.5,
-                    position: { md: "sticky" },
-                    top: 80,
+                    position: { lg: "sticky" },
+                    top: { lg: 80 },
+                    alignSelf: { lg: "flex-start" },
                 })}
             >
                 <Stack alignItems="center" spacing={1}>
@@ -95,7 +96,7 @@ export default function ChannelHeader({ channel, authUser, isAuth, countVideos }
                         <UserAvatar
                             username={channel.username}
                             avatar_url={channel.avatar_url}
-                            size={96}
+                            size={88}
                         />
                     </Button>
                     <Typography fontWeight={600} fontSize={18}>

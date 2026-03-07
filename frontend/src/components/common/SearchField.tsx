@@ -41,7 +41,7 @@ export default function SearchField() {
           startAdornment: (
             <InputAdornment position="start">
               <IconButton onClick={goToSearch} edge="start">
-                <SearchIcon sx={commonSx.searchIcon} />
+                <SearchIcon sx={(theme) => ({ ...commonSx.searchIcon(theme), fontSize: { xs: 20, sm: 22 } })} />
               </IconButton>
             </InputAdornment>
           ),

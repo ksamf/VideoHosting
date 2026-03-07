@@ -242,7 +242,7 @@ export default function VideoComments({ video, user, isAuth }: VideoCommentsProp
                                         <ReactTimeAgo date={new Date(comment.created_at)} locale="ru-RU" />
                                     </Typography>
                                 </Stack>
-                                <Typography fontSize={13} sx={{ mt: 0.5 }} color="text.primary">
+                                <Typography fontSize={13} sx={{ mt: 0.5, wordBreak: "break-word" }} color="text.primary">
                                     {comment.text}
                                 </Typography>
                             </Stack>

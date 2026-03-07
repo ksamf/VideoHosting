@@ -55,17 +55,22 @@ export default function VideoInfo({ video, channel, user, isAuth }: VideoInfoPro
             </Typography>
 
             <Stack direction={{ xs: "column", sm: "row" }} alignItems={{ xs: "stretch", sm: "center" }} spacing={1.5}>
-                <Stack direction="row" alignItems="center" justifyContent="space-between" sx={{ width: "100%" }}>
+                <Stack
+                    direction="row"
+                    alignItems="center"
+                    justifyContent="space-between"
+                    sx={{ width: "100%", minWidth: 0, gap: 1, flexWrap: { xs: "wrap", sm: "nowrap" } }}
+                >
                     <Button component={Link} to={`/channel/${channel.user_id}`} sx={videoSx.videoInfoChannelButton} >
                         <UserAvatar
                             username={channel.username}
                             avatar_url={channel.avatar_url}
                         />
                         <Stack>
-                            <Typography color="text.primary" fontSize={14} fontWeight={500} sx={videoSx.videoInfoChannelText}>
+                            <Typography color="text.primary" fontSize={14} fontWeight={500} sx={videoSx.videoInfoChannelText} noWrap>
                                 {channel.username}
                             </Typography>
-                            <Typography fontSize={12} sx={videoSx.videoInfoSubsText}>
+                            <Typography fontSize={12} sx={videoSx.videoInfoSubsText} noWrap>
                                 {shortenNumRu(subscriptionsCount || 0)} подписчиков
                             </Typography>
                         </Stack>

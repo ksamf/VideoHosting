@@ -6,6 +6,7 @@ import VideoGrid from "../components/video/VideoGrid";
 import useAuth from "../hooks/useAuth";
 import VideoGridSkeleton from "../skeleton/VideoGridSkeleton";
 import type { Video } from "../types/video";
+import { pageSx } from "../styles/sx/page";
 
 const LIKED_PAGE_SIZE = 12;
 
@@ -115,24 +116,24 @@ export default function Liked() {
     }
 
     if (!userId) {
-        return <Typography color="text.secondary">Требуется авторизация.</Typography>;
+        return <Typography sx={pageSx.pageStateText}>Требуется авторизация.</Typography>;
     }
 
     return (
-        <>
+        <Box sx={pageSx.pageContainer}>
             {videos.length === 0 ? (
-                <Typography color="text.secondary">Нет понравившихся.</Typography>
+                <Typography sx={pageSx.pageStateText}>Нет понравившихся.</Typography>
             ) : (
                 <>
                     <VideoGrid videos={videos} />
                     {(hasMore || loadingMore) && (
-                        <Box ref={loadMoreRef} sx={{ display: "flex", justifyContent: "center", py: 2 }}>
+                        <Box ref={loadMoreRef} sx={pageSx.infiniteLoader}>
                             {loadingMore && <CircularProgress size={24} />}
                         </Box>
                     )}
                 </>
             )}
-        </>
+        </Box>
     );
 }
 

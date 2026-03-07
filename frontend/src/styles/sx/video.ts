@@ -75,8 +75,8 @@ export const videoSx: VideoSxStyles = {
   videoInfoSubsText: { ml: 1, color: "text.secondary" },
   cardRoot: (theme) => ({
     width: "100%",
-    minWidth: { xs: 0, sm: 280 },
-    maxWidth: 320,
+    minWidth: 0,
+    maxWidth: { xs: "100%", md: 360, xl: 320 },
     borderRadius: 2,
     backgroundColor: theme.palette.background.default,
     display: "flex",

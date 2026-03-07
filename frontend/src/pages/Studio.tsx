@@ -99,7 +99,7 @@ export default function Studio() {
                         <Typography sx={pageSx.studioCardLabel}>
                             Подписчики (за 30 дней)
                         </Typography>
-                        <Typography fontSize={22} fontWeight={600}>
+                        <Typography fontSize={{ xs: 20, sm: 22 }} fontWeight={600}>
                             {user?.subscriptions ?? 0} +{subscriptionsCountPeriod?.subscriptions ?? 0}
                         </Typography>
                     </Paper>
@@ -110,7 +110,7 @@ export default function Studio() {
                         <Typography sx={pageSx.studioCardLabel}>
                             Просмотров за 30 дней
                         </Typography>
-                        <Typography fontSize={22} fontWeight={600}>
+                        <Typography fontSize={{ xs: 20, sm: 22 }} fontWeight={600}>
                             {userViewsCount?.subscriptions ?? 0} +{userViewsCountPeriod?.subscriptions ?? 0}
                         </Typography>
                     </Paper>
@@ -151,47 +151,80 @@ export default function Studio() {
                 Ваши видео
             </Typography>
 
-            <TableContainer
-                component={Paper}
-                sx={pageSx.studioTableContainer}
-            >
-                <Table sx={pageSx.studioTable}>
-                    <TableHead>
-                        <TableRow sx={pageSx.studioTableHeadRow}>
-                            <TableCell>Видео</TableCell>
-                            <TableCell align="center">Дата</TableCell>
-                            <TableCell align="center">Просмотры</TableCell>
-                            {!isMobile && <TableCell align="center">Комментарии</TableCell>}
-                            {!isMobile && <TableCell align="center">Лайки / Дизлайки</TableCell>}
-                        </TableRow>
-                    </TableHead>
-
-                    <TableBody>
-                        {userVideos.map((video) => (
-                            <TableRow
-                                key={video.video_id}
-                                sx={pageSx.studioTableRow}
-                            >
-                                <TableCell align="center" sx={pageSx.studioVideoCell} onClick={() => navigate(`/watch/${video.video_id}`)}>
-                                    <Box
-                                        component="img"
-                                        src={video.preview_url}
-                                        alt="preview"
-                                        sx={pageSx.studioVideoImage}
-                                    />
-                                    <Typography sx={pageSx.studioVideoName}>
-                                        {video.name}
-                                    </Typography>
-                                </TableCell>
-                                <TableCell align="center">{formattedDate(video.created_at)}</TableCell>
-                                <TableCell align="center">{video.views}</TableCell>
-                                {!isMobile && <TableCell align="center">{video.comment_count}</TableCell>}
-                                {!isMobile && <TableCell align="center">{video.likes} / {video.dislikes}</TableCell>}
+            {isMobile ? (
+                <Stack sx={pageSx.studioMobileList}>
+                    {userVideos.map((video) => (
+                        <Box
+                            key={video.video_id}
+                            sx={pageSx.studioMobileCard}
+                            onClick={() => navigate(`/watch/${video.video_id}`)}
+                        >
+                            <Box
+                                component="img"
+                                src={video.preview_url}
+                                alt="preview"
+                                sx={pageSx.studioMobileThumb}
+                            />
+                            <Box sx={pageSx.studioMobileMeta}>
+                                <Typography fontSize={14} fontWeight={600} noWrap>
+                                    {video.name}
+                                </Typography>
+                                <Typography variant="caption" color="text.secondary">
+                                    {formattedDate(video.created_at)}
+                                </Typography>
+                                <Typography variant="caption" color="text.secondary">
+                                    {video.views} просмотров
+                                </Typography>
+                                <Typography variant="caption" color="text.secondary">
+                                    {video.likes} / {video.dislikes}
+                                </Typography>
+                            </Box>
+                        </Box>
+                    ))}
+                </Stack>
+            ) : (
+                <TableContainer
+                    component={Paper}
+                    sx={pageSx.studioTableContainer}
+                >
+                    <Table sx={pageSx.studioTable}>
+                        <TableHead>
+                            <TableRow sx={pageSx.studioTableHeadRow}>
+                                <TableCell>Видео</TableCell>
+                                <TableCell align="center">Дата</TableCell>
+                                <TableCell align="center">Просмотры</TableCell>
+                                <TableCell align="center">Комментарии</TableCell>
+                                <TableCell align="center">Лайки / Дизлайки</TableCell>
                             </TableRow>
-                        ))}
-                    </TableBody>
-                </Table>
-            </TableContainer>
+                        </TableHead>
+
+                        <TableBody>
+                            {userVideos.map((video) => (
+                                <TableRow
+                                    key={video.video_id}
+                                    sx={pageSx.studioTableRow}
+                                >
+                                    <TableCell align="center" sx={pageSx.studioVideoCell} onClick={() => navigate(`/watch/${video.video_id}`)}>
+                                        <Box
+                                            component="img"
+                                            src={video.preview_url}
+                                            alt="preview"
+                                            sx={pageSx.studioVideoImage}
+                                        />
+                                        <Typography sx={pageSx.studioVideoName}>
+                                            {video.name}
+                                        </Typography>
+                                    </TableCell>
+                                    <TableCell align="center">{formattedDate(video.created_at)}</TableCell>
+                                    <TableCell align="center">{video.views}</TableCell>
+                                    <TableCell align="center">{video.comment_count}</TableCell>
+                                    <TableCell align="center">{video.likes} / {video.dislikes}</TableCell>
+                                </TableRow>
+                            ))}
+                        </TableBody>
+                    </Table>
+                </TableContainer>
+            )}
 
             <Outlet />
         </Box>

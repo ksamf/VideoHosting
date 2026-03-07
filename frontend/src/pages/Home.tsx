@@ -7,6 +7,7 @@ import { getUserRecommendations } from "../api/users";
 import { PageError } from "../components/common/PageState";
 import VideoGridSkeleton from "../skeleton/VideoGridSkeleton";
 import type { Video } from "../types/video";
+import { pageSx } from "../styles/sx/page";
 
 const HOME_PAGE_SIZE = 12;
 
@@ -150,13 +151,13 @@ export default function Home() {
     }
 
     return (
-        <>
+        <Box sx={pageSx.pageContainer}>
             <VideoGrid videos={videos} />
             {(hasMore || loadingMore) && (
-                <Box ref={loadMoreRef} sx={{ display: "flex", justifyContent: "center", py: 2 }}>
+                <Box ref={loadMoreRef} sx={pageSx.infiniteLoader}>
                     {loadingMore && <CircularProgress size={24} />}
                 </Box>
             )}
-        </>
+        </Box>
     );
 }
