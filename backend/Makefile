@@ -12,7 +12,23 @@ FILE?=cpu.pb
 BASE?=cpu_before.pb
 NEW?=cpu.pb
 
-.PHONY: all run create_migration migrate_up migrate_down migrate_force add_all add_air add_migrate pprof_cpu pprof_heap pprof_goroutine pprof_block pprof_mutex pprof_all pprof_top pprof_web pprof_diff
+SEED_API?=http://localhost:8080/api
+SEED_USERS?=5
+SEED_VIDEOS?=3
+SEED_DIR?=
+SEED_PREVIEW_DIR?=
+SEED_AVATAR_DIR?=
+SEED_PASSWORD?=Qwerty123!
+SEED_PREFIX?=seed_user
+SEED_TITLE_TEMPLATE?=seed_u{u}_v{v}
+SEED_DESCRIPTION_TEMPLATE?=seed upload user={u} video={v}
+SEED_TAGS?=seed,u{u},v{v}
+
+SEED_DIR_ARG=$(if $(SEED_DIR),--dir "$(SEED_DIR)",)
+SEED_PREVIEW_DIR_ARG=$(if $(SEED_PREVIEW_DIR),--preview-dir "$(SEED_PREVIEW_DIR)",)
+SEED_AVATAR_DIR_ARG=$(if $(SEED_AVATAR_DIR),--avatar-dir "$(SEED_AVATAR_DIR)",)
+
+.PHONY: all run create_migration migrate_up migrate_down migrate_force add_all add_air add_migrate pprof_cpu pprof_heap pprof_goroutine pprof_block pprof_mutex pprof_all pprof_top pprof_web pprof_diff seed seed_quick seed_custom
 
 all:
 	make migrate_up && air
@@ -67,3 +83,23 @@ pprof_web:
 
 pprof_diff:
 	go tool pprof -top -base "$(BASE)" "$(NEW)"
+
+seed:
+	node tests/seed/seed.js \
+		--api "$(SEED_API)" \
+		--users "$(SEED_USERS)" \
+		--videos "$(SEED_VIDEOS)" \
+		$(SEED_DIR_ARG) \
+		$(SEED_PREVIEW_DIR_ARG) \
+		$(SEED_AVATAR_DIR_ARG) \
+		--title-template "$(SEED_TITLE_TEMPLATE)" \
+		--description-template "$(SEED_DESCRIPTION_TEMPLATE)" \
+		--tags "$(SEED_TAGS)" \
+		--password "$(SEED_PASSWORD)" \
+		--prefix "$(SEED_PREFIX)"
+
+seed_quick:
+	$(MAKE) seed SEED_USERS=2 SEED_VIDEOS=2
+
+seed_custom:
+	$(MAKE) seed
