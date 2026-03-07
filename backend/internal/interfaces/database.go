@@ -11,6 +11,7 @@ type User interface {
 	GetByID(id uuid.UUID) (*database.User, error)
 	Delete(id uuid.UUID) error
 	GetByVideoId(id uuid.UUID) (*database.User, error)
+	SearchChannels(query string, limit, offset int) ([]*database.User, error)
 	UpdateAvatar(userId uuid.UUID, avatar_url string) error
 	GetSubscriptionsCount(channelId uuid.UUID, period int) (int, error)
 	GetSubscriptionsVideo(userId uuid.UUID, limit, offset int) ([]*database.Video, error)

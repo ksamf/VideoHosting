@@ -50,6 +50,43 @@ func (h *UserHandler) Get(c *gin.Context) {
 	}
 	c.JSON(http.StatusOK, user)
 }
+func (h *UserHandler) SearchChannels(c *gin.Context) {
+	query := strings.TrimSpace(c.Query("q"))
+	if query == "" {
+		c.JSON(http.StatusOK, []database.User{})
+		return
+	}
+
+	limit, err := strconv.Atoi(c.DefaultQuery("limit", "20"))
+	if err != nil || limit <= 0 {
+		limit = 20
+	}
+	if limit > 100 {
+		limit = 100
+	}
+	offset, err := strconv.Atoi(c.DefaultQuery("offset", "0"))
+	if err != nil || offset < 0 {
+		offset = 0
+	}
+
+	cacheKey := fmt.Sprintf("search:channels:%s:%d:%d", strings.ToLower(query), limit, offset)
+	if cached := h.redis.Get(cacheKey); cached != "" {
+		c.Data(http.StatusOK, "application/json; charset=utf-8", []byte(cached))
+		return
+	}
+
+	channels, err := h.user.SearchChannels(query, limit, offset)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	if payload, err := json.Marshal(channels); err == nil {
+		h.redis.Set(cacheKey, string(payload), time.Minute)
+		c.Data(http.StatusOK, "application/json; charset=utf-8", payload)
+		return
+	}
+	c.JSON(http.StatusOK, channels)
+}
 
 func (h *UserHandler) Delete(c *gin.Context) {
 	id, err := uuid.Parse(c.Param("id"))

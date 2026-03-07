@@ -18,6 +18,16 @@ export const getUserByVideoId = async (id: string): Promise<User> => {
     return unwrapApi(await api<User>(`/user/video/${id}`));
 };
 
+export const searchChannels = async (params: { q: string, limit: number, offset: number }): Promise<User[]> => {
+    return unwrapApi(await api<User[]>(
+        "/search/channels?" + new URLSearchParams({
+            q: params.q,
+            limit: String(params.limit),
+            offset: String(params.offset),
+        }),
+    ));
+};
+
 export const subUnsubChannel = async (channelId: string, action: "sub" | "unsub"): Promise<ChannelActionResponse> => {
     const query = new URLSearchParams({ action });
     return unwrapApi(await api<ChannelActionResponse>(`/user/channel/${channelId}?${query.toString()}`,

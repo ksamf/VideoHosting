@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"log"
+	"strings"
 	"time"
 
 	"github.com/google/uuid"
@@ -61,6 +62,48 @@ func (m *UserModel) GetByID(id uuid.UUID) (*User, error) {
 		return nil, fmt.Errorf("failed get id: %w", err)
 	}
 	return &u, nil
+}
+func (m *UserModel) SearchChannels(query string, limit, offset int) ([]*User, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+
+	if limit <= 0 || limit > 100 {
+		limit = 20
+	}
+	if offset < 0 {
+		offset = 0
+	}
+	query = strings.TrimSpace(query)
+	if query == "" {
+		return []*User{}, nil
+	}
+
+	const sqlQuery = `
+	SELECT user_id, username, avatar_url
+	FROM users
+	WHERE username ILIKE '%' || $1 || '%'
+	ORDER BY username ASC
+	LIMIT $2 OFFSET $3
+	`
+	rows, err := m.Pool.Query(ctx, sqlQuery, query, limit, offset)
+	if err != nil {
+		return nil, fmt.Errorf("failed to query channels: %w", err)
+	}
+	defer rows.Close()
+
+	channels := make([]*User, 0, limit)
+	for rows.Next() {
+		var u User
+		if err := rows.Scan(&u.UserId, &u.UserName, &u.AvatarUrl); err != nil {
+			return nil, fmt.Errorf("failed to scan channel: %w", err)
+		}
+		channels = append(channels, &u)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+
+	return channels, nil
 }
 
 func (m *UserModel) Delete(id uuid.UUID) error {

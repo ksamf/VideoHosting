@@ -10,6 +10,7 @@ type MockUser struct {
 	GetByEmailFunc               func(email string) (*database.User, error)
 	GetByIDFunc                  func(id uuid.UUID) (*database.User, error)
 	GetByIdFunc                  func(id uuid.UUID) (*database.User, error)
+	SearchChannelsFunc           func(query string, limit, offset int) ([]*database.User, error)
 	DeleteFunc                   func(id uuid.UUID) error
 	GetByVideoIdFunc             func(id uuid.UUID) (*database.User, error)
 	UpdateAvatarFunc             func(userId uuid.UUID, avatarURL string) error
@@ -48,6 +49,13 @@ func (m *MockUser) GetByID(id uuid.UUID) (*database.User, error) {
 		return m.GetByIdFunc(id)
 	}
 	return nil, nil
+}
+
+func (m *MockUser) SearchChannels(query string, limit, offset int) ([]*database.User, error) {
+	if m.SearchChannelsFunc != nil {
+		return m.SearchChannelsFunc(query, limit, offset)
+	}
+	return []*database.User{}, nil
 }
 
 func (m *MockUser) Delete(id uuid.UUID) error {
