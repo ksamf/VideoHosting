@@ -27,6 +27,7 @@ type User interface {
 type Video interface {
 	Insert(video *database.Video) error
 	GetAll(limit, offset int) ([]*database.Video, error)
+	GetByChannel(channelID uuid.UUID, limit, offset int) ([]*database.Video, error)
 	Search(query string, limit, offset int) ([]*database.Video, error)
 	GetByID(id uuid.UUID) (*database.Video, error)
 	Delete(id uuid.UUID) error

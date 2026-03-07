@@ -9,6 +9,7 @@ type MockVideo struct {
 	InsertFunc                       func(video *database.Video) error
 	GetAllFunc                       func(limit, offset string, getURL func(uuid.UUID) string) ([]*database.Video, error)
 	GetAllIntFunc                    func(limit, offset int) ([]*database.Video, error)
+	GetByChannelFunc                 func(channelID uuid.UUID, limit, offset int) ([]*database.Video, error)
 	SearchFunc                       func(query string, limit, offset int) ([]*database.Video, error)
 	GetByIDFunc                      func(id uuid.UUID, getURL func(uuid.UUID) string) (*database.Video, error)
 	GetByIDSimpleFunc                func(id uuid.UUID) (*database.Video, error)
@@ -40,6 +41,13 @@ func (m *MockVideo) GetAll(limit, offset int) ([]*database.Video, error) {
 	}
 	if m.GetAllFunc != nil {
 		return m.GetAllFunc("", "", nil)
+	}
+	return []*database.Video{}, nil
+}
+
+func (m *MockVideo) GetByChannel(channelID uuid.UUID, limit, offset int) ([]*database.Video, error) {
+	if m.GetByChannelFunc != nil {
+		return m.GetByChannelFunc(channelID, limit, offset)
 	}
 	return []*database.Video{}, nil
 }

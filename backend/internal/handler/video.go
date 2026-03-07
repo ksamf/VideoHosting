@@ -169,7 +169,12 @@ func (h *VideoHandler) Upload(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to enqueue"})
 		return
 	}
-	invalidateCachePatterns(h.redis, "videos:*", "search:*")
+	invalidateCachePatterns(
+		h.redis,
+		"videos:*",
+		"search:*",
+		"channel_videos:"+userID.String()+":*",
+	)
 
 	c.JSON(http.StatusOK, gin.H{
 		"video_id": videoID,
@@ -223,6 +228,31 @@ func (h *VideoHandler) GetAll(c *gin.Context) {
 	cacheKey := fmt.Sprintf("videos:%d:%d", intLimit, intOffset)
 	h.respondWithCachedJSON(c, cacheKey, 2*time.Minute, func() (any, error) {
 		return h.video.GetAll(intLimit, intOffset)
+	})
+}
+
+func (h *VideoHandler) GetByChannel(c *gin.Context) {
+	channelID, err := uuid.Parse(c.Param("id"))
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid channel id"})
+		return
+	}
+
+	limit, err := strconv.Atoi(c.DefaultQuery("limit", "20"))
+	if err != nil || limit <= 0 {
+		limit = 20
+	}
+	if limit > 100 {
+		limit = 100
+	}
+	offset, err := strconv.Atoi(c.DefaultQuery("offset", "0"))
+	if err != nil || offset < 0 {
+		offset = 0
+	}
+
+	cacheKey := fmt.Sprintf("channel_videos:%s:%d:%d", channelID.String(), limit, offset)
+	h.respondWithCachedJSON(c, cacheKey, 2*time.Minute, func() (any, error) {
+		return h.video.GetByChannel(channelID, limit, offset)
 	})
 }
 
@@ -325,6 +355,7 @@ func (h *VideoHandler) Delete(c *gin.Context) {
 		"video:"+id.String(),
 		"videos:*",
 		"search:*",
+		"channel_videos:"+userId.String()+":*",
 		"comments:"+id.String()+":*",
 		"video_owner:"+id.String(),
 	)

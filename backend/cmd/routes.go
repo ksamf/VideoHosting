@@ -42,6 +42,7 @@ func (app *application) routes() http.Handler {
 	router.GET("api/video", app.handlers.Video.GetAll) //query limit=10, offset=0
 	router.GET("api/search", searchLimiter, app.handlers.Video.Search)
 	router.GET("api/search/channels", searchLimiter, app.handlers.User.SearchChannels)
+	router.GET("api/channel/:id/videos", app.handlers.Video.GetByChannel)
 	router.GET("api/video/:id", app.handlers.Video.Get)
 	router.POST("api/video/upload", videoUploadLimit, app.auth.AuthMiddleware, writeLimiter, app.handlers.Video.Upload)
 	router.DELETE("api/video/:id", app.auth.AuthMiddleware, app.handlers.Video.Delete)

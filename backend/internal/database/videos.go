@@ -87,6 +87,57 @@ func (m *VideoModel) GetAll(limit, offset int) ([]*Video, error) {
 	return videos, nil
 }
 
+func (m *VideoModel) GetByChannel(channelID uuid.UUID, limit, offset int) ([]*Video, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	if limit <= 0 || limit > 100 {
+		limit = 20
+	}
+	if offset < 0 {
+		offset = 0
+	}
+
+	query := `
+	SELECT v.video_id, v.user_id, v.video_url, v.preview_url, v.name, v.created_at, u.username, u.avatar_url, v.views
+	FROM videos v
+	INNER JOIN users u ON u.user_id = v.user_id
+	WHERE v.user_id = $1
+	  AND v.status IN ('uploaded', 'processed')
+	ORDER BY v.created_at DESC, v.video_id DESC
+	LIMIT $2 OFFSET $3
+	`
+	rows, err := m.Pool.Query(ctx, query, channelID, limit, offset)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	videos := make([]*Video, 0, limit)
+	for rows.Next() {
+		var video Video
+		if err := rows.Scan(
+			&video.VideoId,
+			&video.UserId,
+			&video.VideoUrl,
+			&video.PreviewUrl,
+			&video.Name,
+			&video.CreatedAt,
+			&video.UserName,
+			&video.UserAvatarUrl,
+			&video.Views,
+		); err != nil {
+			return nil, err
+		}
+		videos = append(videos, &video)
+	}
+
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return videos, nil
+}
+
 func (m *VideoModel) GetByID(id uuid.UUID) (*Video, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
