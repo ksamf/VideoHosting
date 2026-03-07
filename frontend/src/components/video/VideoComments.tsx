@@ -98,9 +98,9 @@ export default function VideoComments({ video, user, isAuth }: VideoCommentsProp
             {isAuth && (
                 <Stack
                     component="form"
-                    direction="row"
+                    direction={{ xs: "column", sm: "row" }}
                     spacing={1}
-                    alignItems="center"
+                    alignItems={{ xs: "stretch", sm: "center" }}
                     mb={3}
                     onSubmit={(e) => {
                         e.preventDefault();

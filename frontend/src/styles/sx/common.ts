@@ -7,7 +7,7 @@ export const commonSx = {
   navBarToolbar: {
     minHeight: 64,
     display: "grid",
-    gridTemplateColumns: "auto minmax(0, 720px) auto",
+    gridTemplateColumns: { xs: "auto minmax(0, 1fr) auto", md: "auto minmax(0, 720px) auto" },
     alignItems: "center",
     columnGap: { xs: 1, md: 2 },
   },
@@ -26,12 +26,22 @@ export const commonSx = {
     marginLeft: "auto",
     display: "flex",
     alignItems: "center",
-    gap: { xs: 1, sm: 2 },
+    gap: { xs: 0.5, sm: 1.5 },
     flexShrink: 0,
     minWidth: 0,
   },
-  navBarUploadButton: { px: { xs: 1.2, sm: 2 }, whiteSpace: "nowrap" },
-  navBarLoginButton: { whiteSpace: "nowrap" },
+  navBarUploadButton: {
+    minWidth: { xs: 36, sm: 44 },
+    px: { xs: 0.8, sm: 2 },
+    whiteSpace: "nowrap",
+    "& .MuiButton-startIcon": { mr: { xs: 0, sm: 1 } },
+  },
+  navBarLoginButton: {
+    minWidth: { xs: 36, sm: 44 },
+    px: { xs: 0.8, sm: 2 },
+    whiteSpace: "nowrap",
+    "& .MuiButton-startIcon": { mr: { xs: 0, sm: 1 } },
+  },
   searchField: {
     width: "100%",
     maxWidth: 500,
@@ -45,7 +55,8 @@ export const commonSx = {
   searchIcon: (theme) => ({ color: theme.palette.text.secondary }),
   sideBarDrawer: {
     "& .MuiDrawer-paper": (theme) => ({
-      width: 260,
+      width: { xs: "85vw", sm: 260 },
+      maxWidth: 320,
       top: 64,
       height: "calc(100% - 64px)",
       bgcolor: theme.palette.background.paper,

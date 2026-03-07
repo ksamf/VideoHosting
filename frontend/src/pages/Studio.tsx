@@ -18,11 +18,14 @@ import useFetch from "../hooks/useFetch";
 import { PageError } from "../components/common/PageState";
 import { pageSx } from "../styles/sx/page";
 import StudioSkeleton from "../skeleton/StudioSkeleton";
+import { useMediaQuery, useTheme } from "@mui/material";
 
 export default function Studio() {
     const { user, loading: authLoading } = useAuth();
     const userId = user?.user_id ?? null;
     const navigate = useNavigate();
+    const theme = useTheme();
+    const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
 
     const fetchSubscriptionsCount = useCallback(
         () => (userId ? getUserSubscriptionsCount(userId, 30) : Promise.resolve({ subscriptions: 0 })),
@@ -124,10 +127,11 @@ export default function Studio() {
                         </Typography>
                         {bestVideo ? (
                             <Stack sx={pageSx.studioBestVideoRow}>
-                                <img
+                                <Box
+                                    component="img"
                                     src={bestVideo.preview_url}
                                     alt="preview"
-                                    style={pageSx.studioBestVideoImage}
+                                    sx={pageSx.studioBestVideoImage}
                                 />
                                 <Typography fontSize={16} fontWeight={500} sx={pageSx.studioBestVideoName} noWrap>
                                     {bestVideo.name}
@@ -157,8 +161,8 @@ export default function Studio() {
                             <TableCell>Видео</TableCell>
                             <TableCell align="center">Дата</TableCell>
                             <TableCell align="center">Просмотры</TableCell>
-                            <TableCell align="center">Комментарии</TableCell>
-                            <TableCell align="center">Лайки / Дизлайки</TableCell>
+                            {!isMobile && <TableCell align="center">Комментарии</TableCell>}
+                            {!isMobile && <TableCell align="center">Лайки / Дизлайки</TableCell>}
                         </TableRow>
                     </TableHead>
 
@@ -169,10 +173,11 @@ export default function Studio() {
                                 sx={pageSx.studioTableRow}
                             >
                                 <TableCell align="center" sx={pageSx.studioVideoCell} onClick={() => navigate(`/watch/${video.video_id}`)}>
-                                    <img
+                                    <Box
+                                        component="img"
                                         src={video.preview_url}
                                         alt="preview"
-                                        style={pageSx.studioVideoImage}
+                                        sx={pageSx.studioVideoImage}
                                     />
                                     <Typography sx={pageSx.studioVideoName}>
                                         {video.name}
@@ -180,8 +185,8 @@ export default function Studio() {
                                 </TableCell>
                                 <TableCell align="center">{formattedDate(video.created_at)}</TableCell>
                                 <TableCell align="center">{video.views}</TableCell>
-                                <TableCell align="center">{video.comment_count}</TableCell>
-                                <TableCell align="center">{video.likes} / {video.dislikes}</TableCell>
+                                {!isMobile && <TableCell align="center">{video.comment_count}</TableCell>}
+                                {!isMobile && <TableCell align="center">{video.likes} / {video.dislikes}</TableCell>}
                             </TableRow>
                         ))}
                     </TableBody>

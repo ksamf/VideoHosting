@@ -1,7 +1,10 @@
 export const pageSx = {
   watchContainer: {
     maxWidth: 1500,
+    width: "100%",
     mt: 2,
+    mx: "auto",
+    px: { xs: 0.5, sm: 1 },
     ml: { xs: 0, md: 4 },
   },
   channelContainer: {
@@ -26,8 +29,8 @@ export const pageSx = {
     px: 3,
     py: 2,
   },
-  gridSection: { p: 2 },
-  searchContainer: { p: 2 },
+  gridSection: { p: { xs: 1, sm: 2 } },
+  searchContainer: { p: { xs: 1, sm: 2 } },
   searchTitle: { mb: 1 },
   searchMuted: { color: "text.secondary" },
   studioRoot: { p: { xs: 2, md: 3 }, maxWidth: 1200, mx: "auto" },
@@ -48,12 +51,12 @@ export const pageSx = {
     "&:hover": { bgcolor: "action.hover" },
   },
   studioBestVideoTitle: { mb: 1, color: "text.secondary", fontSize: 13 },
-  studioBestVideoRow: { display: "flex", flexDirection: "row" },
-  studioBestVideoImage: { width: "15%", height: "15%", borderRadius: 3 },
-  studioBestVideoName: { ml: 2, display: "flex", alignItems: "center" },
+  studioBestVideoRow: { display: "flex", flexDirection: "row", alignItems: "center", gap: 1.5 },
+  studioBestVideoImage: { width: { xs: 72, sm: 84 }, height: { xs: 40, sm: 48 }, borderRadius: 1.5, objectFit: "cover" },
+  studioBestVideoName: { display: "flex", alignItems: "center", minWidth: 0, flex: 1 },
   studioVideosTitle: { fontWeight: 600, mb: 1 },
-  studioTableContainer: { bgcolor: "background.paper", borderRadius: 3, border: "1px solid", borderColor: "divider" },
-  studioTable: { minWidth: 650 },
+  studioTableContainer: { bgcolor: "background.paper", borderRadius: 3, border: "1px solid", borderColor: "divider", overflowX: "auto" },
+  studioTable: { minWidth: { xs: 520, sm: 650 } },
   studioTableHeadRow: {
     "& th": {
       color: "text.secondary",
@@ -70,7 +73,7 @@ export const pageSx = {
     },
     height: "100px",
   },
-  studioVideoCell: { display: "flex" },
-  studioVideoImage: { width: "35%", height: "35%", borderRadius: 3 },
-  studioVideoName: { display: "flex", alignItems: "center", ml: 2 },
+  studioVideoCell: { display: "flex", alignItems: "center", minWidth: 220, gap: 1.5 },
+  studioVideoImage: { width: { xs: 72, sm: 88 }, height: { xs: 40, sm: 50 }, borderRadius: 1.5, objectFit: "cover", flexShrink: 0 },
+  studioVideoName: { display: "flex", alignItems: "center", minWidth: 0, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" },
 };

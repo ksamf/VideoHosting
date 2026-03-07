@@ -9,6 +9,7 @@ import VideoSlider from "./VideoSlider";
 import useVideoPlayer from "../../hooks/useVideoPlayer";
 import { useEffect, useMemo } from "react";
 import { videoSx } from "../../styles/sx/video";
+import { useMediaQuery, useTheme } from "@mui/material";
 
 type VideoPlayerProps = {
     src: string;
@@ -18,6 +19,9 @@ type VideoPlayerProps = {
 };
 
 export default function VideoPlayer({ src, poster, qualities = [], videoId }: VideoPlayerProps) {
+    const theme = useTheme();
+    const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
+
     const {
         videoRef,
         containerRef,
@@ -67,6 +71,7 @@ export default function VideoPlayer({ src, poster, qualities = [], videoId }: Vi
             onMouseMove={showControls}
             onMouseEnter={showControls}
             onMouseLeave={hideControls}
+            onTouchStart={showControls}
             sx={videoSx.playerContainer(effectiveControlsVisible)}
         >
             {videoSrc ? (
@@ -120,16 +125,18 @@ export default function VideoPlayer({ src, poster, qualities = [], videoId }: Vi
                         <Box sx={videoSx.playerHoveredVolumeSpacer(hoveredVolume)} />
 
                         <Typography sx={videoSx.playerTime}>
-                            {formatTime(currentTime)} / {formatTime(duration)}
+                            {isMobile ? formatTime(currentTime) : `${formatTime(currentTime)} / ${formatTime(duration)}`}
                         </Typography>
 
                         <Box sx={{ flexGrow: 1 }} />
 
-                        <SelectSpeed
-                            playbackRate={playbackRate}
-                            setPlaybackRate={setPlaybackRate}
-                            videoRef={videoRef}
-                        />
+                        {!isMobile && (
+                            <SelectSpeed
+                                playbackRate={playbackRate}
+                                setPlaybackRate={setPlaybackRate}
+                                videoRef={videoRef}
+                            />
+                        )}
 
                         <SelectQuality
                             qualities={safeQualities}

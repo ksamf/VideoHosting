@@ -49,7 +49,8 @@ export default function SubscribeButton({ channelId, setSubscriptionsCount }: Su
                     disabled={subscribeLoading}
                     onClick={handleSubscribe}
                     sx={(theme) => ({
-                        ml: 1,
+                        ml: { xs: 0, sm: 1 },
+                        mt: { xs: 0.5, sm: 0 },
                         bgcolor: theme.palette.background.paper,
                         borderColor: theme.palette.divider,
                         "&:hover": {
@@ -71,7 +72,8 @@ export default function SubscribeButton({ channelId, setSubscriptionsCount }: Su
                     disabled={subscribeLoading}
                     onClick={handleSubscribe}
                     sx={(theme) => ({
-                        ml: 1,
+                        ml: { xs: 0, sm: 1 },
+                        mt: { xs: 0.5, sm: 0 },
                         bgcolor: theme.palette.text.primary,
                         "&:hover": { bgcolor: theme.palette.text.secondary },
                         borderRadius: 5,

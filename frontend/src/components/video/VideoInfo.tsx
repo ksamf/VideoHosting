@@ -50,12 +50,12 @@ export default function VideoInfo({ video, channel, user, isAuth }: VideoInfoPro
         <Box
             sx={videoSx.videoInfoContainer}
         >
-            <Typography color="text.primary" fontSize={22} fontWeight={600} mb={1}>
+            <Typography color="text.primary" fontSize={{ xs: 18, sm: 22 }} fontWeight={600} mb={1}>
                 {video.name}
             </Typography>
 
-            <Stack direction="row" alignItems="center" spacing={2}>
-                <Stack direction="row" alignItems="center">
+            <Stack direction={{ xs: "column", sm: "row" }} alignItems={{ xs: "stretch", sm: "center" }} spacing={1.5}>
+                <Stack direction="row" alignItems="center" justifyContent="space-between" sx={{ width: "100%" }}>
                     <Button component={Link} to={`/channel/${channel.user_id}`} sx={videoSx.videoInfoChannelButton} >
                         <UserAvatar
                             username={channel.username}
@@ -75,9 +75,9 @@ export default function VideoInfo({ video, channel, user, isAuth }: VideoInfoPro
                     )}
                 </Stack>
 
-                <Box sx={{ flexGrow: 1 }} />
-
-                <VideoReaction video={video} isAuth={isAuth} />
+                <Box sx={{ alignSelf: { xs: "flex-start", sm: "center" } }}>
+                    <VideoReaction video={video} isAuth={isAuth} />
+                </Box>
             </Stack>
 
             <VideoDescription video={video} />

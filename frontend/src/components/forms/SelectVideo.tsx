@@ -4,6 +4,7 @@ import Typography from "@mui/material/Typography";
 import IconButton from "@mui/material/IconButton";
 import Paper from "@mui/material/Paper";
 import { useRef, type DragEvent } from "react";
+import { formSx } from "../../styles/sx/form";
 
 type SelectVideoProps = {
     onSelect: (file: File) => void;
@@ -41,10 +42,10 @@ export default function SelectVideo({ onSelect }: SelectVideoProps) {
                 onDragOver={handleDragOver}
                 onClick={openFileDialog}
                 sx={(theme) => ({
-                    padding: 4,
+                    p: { xs: 2, sm: 4 },
                     textAlign: "center",
                     cursor: "pointer",
-                    minHeight: 200,
+                    minHeight: { xs: 140, sm: 200 },
                     boxShadow: "none",
                     color: theme.palette.text.primary,
                 })}>
@@ -52,13 +53,13 @@ export default function SelectVideo({ onSelect }: SelectVideoProps) {
                 <IconButton
                     sx={(theme) => ({
                         display: "block",
-                        m: "100px auto",
+                        m: { xs: "24px auto", sm: "48px auto" },
                         border: `2px solid ${theme.palette.divider}`,
                         bgcolor: theme.palette.background.default,
                     })}>
-                    <FileUploadIcon sx={(theme) => ({ color: theme.palette.text.secondary, fontSize: 150 })} />
+                    <FileUploadIcon sx={(theme) => ({ color: theme.palette.text.secondary, fontSize: { xs: 72, sm: 150 } })} />
                 </IconButton  >
-                <Typography variant="body1" align="center" sx={{ marginTop: "50px", color: "text.secondary" }}>
+                <Typography variant="body1" align="center" sx={{ mt: { xs: 1, sm: 4 }, color: "text.secondary" }}>
                     Перетащите файлы сюда или нажмите кнопку ниже, чтобы выбрать их на компьютере.
                 </Typography>
             </Paper>
@@ -66,7 +67,7 @@ export default function SelectVideo({ onSelect }: SelectVideoProps) {
             <Button
                 onClick={openFileDialog}
                 variant="contained"
-                sx={{ display: "block", m: "auto" }}
+                sx={formSx.selectVideoActionButton}
             >
                 <Typography variant="body1" sx={(theme) => ({ color: theme.palette.background.default })}>Выберите файл</Typography>
             </Button>

@@ -107,7 +107,7 @@ export default function VideoDetailsStep({ file, defaultPreview, defaultPreviewU
 
     return (
         <>
-            <Stack direction="row" spacing={3}>
+            <Stack direction={{ xs: "column", md: "row" }} spacing={{ xs: 2, md: 3 }}>
                 <Box sx={formSx.setDetailsLeft}>
                     <TextField
                         label="Название (обязательное поле)"

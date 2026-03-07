@@ -160,8 +160,9 @@ export default function VideoReaction({ video, isAuth }: VideoReactionProps) {
             sx={{
                 bgcolor: (theme) => theme.palette.background.paper,
                 borderRadius: 5,
-                px: 1,
+                px: { xs: 0.5, sm: 1 },
                 py: 0.5,
+                flexWrap: "nowrap",
             }
             }
         >

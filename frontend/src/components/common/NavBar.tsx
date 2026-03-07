@@ -17,6 +17,7 @@ import { Link } from "react-router-dom";
 import { commonSx } from "../../styles/sx/common";
 import LightModeIcon from "@mui/icons-material/LightMode";
 import DarkModeIcon from "@mui/icons-material/DarkMode";
+import { useMediaQuery, useTheme } from "@mui/material";
 
 type ThemeMode = "light" | "dark";
 
@@ -28,6 +29,8 @@ type NavBarProps = {
 export default function NavBar({ themeMode, onToggleTheme }: NavBarProps) {
     const { user, loading, isAuth } = useAuth();
     const [drawerOpen, setDrawerOpen] = useState<boolean>(false);
+    const theme = useTheme();
+    const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
 
     const open = isAuth && drawerOpen;
 
@@ -65,12 +68,12 @@ export default function NavBar({ themeMode, onToggleTheme }: NavBarProps) {
 
                             <Button
                                 variant="contained"
-                                startIcon={<VideoCallIcon />}
+                                startIcon={!isMobile ? <VideoCallIcon /> : undefined}
                                 component={Link}
                                 to={isAuth ? "/studio/upload" : "/login"}
                                 sx={commonSx.navBarUploadButton}
                             >
-                                Загрузить
+                                {isMobile ? <VideoCallIcon fontSize="small" /> : "Загрузить"}
                             </Button>
 
                             {isAuth && user ? (
@@ -83,10 +86,10 @@ export default function NavBar({ themeMode, onToggleTheme }: NavBarProps) {
                                     component={Link}
                                     to="/login"
                                     variant="contained"
-                                    startIcon={<PersonIcon />}
+                                    startIcon={!isMobile ? <PersonIcon /> : undefined}
                                     sx={commonSx.navBarLoginButton}
                                 >
-                                    Войти
+                                    {isMobile ? <PersonIcon fontSize="small" /> : "Войти"}
                                 </Button>
                             )}
                         </Box>

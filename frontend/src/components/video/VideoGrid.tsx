@@ -12,7 +12,7 @@ export default function VideoGrid({ videos }: VideoGridProps) {
             sx={{
                 display: "grid",
                 gridTemplateColumns: {
-                    xs: "repeat(auto-fill, minmax(220px, 1fr))",
+                    xs: "1fr",
                     sm: "repeat(auto-fill, minmax(280px, 1fr))",
                 },
                 gap: 2.5,

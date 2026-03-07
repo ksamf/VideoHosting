@@ -32,6 +32,8 @@ export default function SelectVolume({
             <Box
                 onMouseEnter={() => setHoveredVolume(true)}
                 onMouseLeave={() => setHoveredVolume(false)}
+                onClick={() => setHoveredVolume((v) => !v)}
+                onTouchStart={() => setHoveredVolume(true)}
                 sx={videoSx.volumeRoot}
             >
                 {volume === 0 ? (
