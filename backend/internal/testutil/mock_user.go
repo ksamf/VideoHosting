@@ -14,7 +14,7 @@ type MockUser struct {
 	GetByVideoIdFunc             func(id uuid.UUID) (*database.User, error)
 	UpdateAvatarFunc             func(userId uuid.UUID, avatarURL string) error
 	GetSubscriptionsCountFunc    func(channelId uuid.UUID, period int) (int, error)
-	GetSubscriptionsVideoFunc    func(userId uuid.UUID) ([]*database.Video, error)
+	GetSubscriptionsVideoFunc    func(userId uuid.UUID, limit, offset int) ([]*database.Video, error)
 	GetSubscriptionsFunc         func(userId uuid.UUID) ([]*database.User, error)
 	VideosFunc                   func(userId uuid.UUID) ([]*database.Video, error)
 	VideosWithURLFunc            func(userId uuid.UUID, getURL func(uuid.UUID) string) ([]*database.Video, error)
@@ -78,9 +78,9 @@ func (m *MockUser) GetSubscriptionsCount(channelId uuid.UUID, period int) (int, 
 	return 0, nil
 }
 
-func (m *MockUser) GetSubscriptionsVideo(userId uuid.UUID) ([]*database.Video, error) {
+func (m *MockUser) GetSubscriptionsVideo(userId uuid.UUID, limit, offset int) ([]*database.Video, error) {
 	if m.GetSubscriptionsVideoFunc != nil {
-		return m.GetSubscriptionsVideoFunc(userId)
+		return m.GetSubscriptionsVideoFunc(userId, limit, offset)
 	}
 	return []*database.Video{}, nil
 }

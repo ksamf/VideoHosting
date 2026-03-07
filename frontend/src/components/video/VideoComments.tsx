@@ -1,11 +1,10 @@
-import { Stack, Typography, Input, IconButton } from "@mui/material";
+import { Box, CircularProgress, IconButton, Input, Stack, Typography } from "@mui/material";
 import SendIcon from "@mui/icons-material/Send";
 import ReactTimeAgo from "react-time-ago";
 import { getComments } from "../../api/videos";
-import useFetch from "../../hooks/useFetch";
 import useCommentForm from "../../hooks/useCommentForm";
 import UserAvatar from "../common/UserAvatar";
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { Comment } from "../../types/action";
 import type { VideoDetails } from "../../types/video";
 import type { User } from "../../types/user";
@@ -16,9 +15,8 @@ type VideoCommentsProps = {
     isAuth: boolean;
 };
 
-type UIComment = Comment & {
-    comment_text?: string;
-};
+type UIComment = Comment;
+type OptimisticComment = UIComment & { _videoId: string };
 
 type NewCommentPayload =
     | string
@@ -29,27 +27,104 @@ type NewCommentPayload =
         created_at?: string;
     };
 
+const COMMENTS_PAGE_SIZE = 20;
+
 export default function VideoComments({ video, user, isAuth }: VideoCommentsProps) {
     const videoId = video?.video_id ?? null;
-    const fetchComments = useCallback(
-        () => (videoId ? getComments(videoId) : Promise.resolve([])),
-        [videoId]
-    );
+    const loadMoreRef = useRef<HTMLDivElement | null>(null);
 
-    const { data: fetchedComments = [], loading: commentsLoading, refetch } = useFetch(fetchComments);
-    const [optimistic, setOptimistic] = useState<UIComment[]>([]);
+    const [fetchedComments, setFetchedComments] = useState<Comment[]>([]);
+    const [loadingInitial, setLoadingInitial] = useState<boolean>(true);
+    const [loadingMore, setLoadingMore] = useState<boolean>(false);
+    const [loadError, setLoadError] = useState<string | null>(null);
+    const [offset, setOffset] = useState<number>(0);
+    const [hasMore, setHasMore] = useState<boolean>(false);
+    const [optimistic, setOptimistic] = useState<OptimisticComment[]>([]);
 
-    const safeFetchedComments = useMemo(
-        () => (Array.isArray(fetchedComments) ? fetchedComments : []),
-        [fetchedComments]
-    );
+    const loadFirstPage = useCallback(async () => {
+        if (!videoId) {
+            setFetchedComments([]);
+            setOffset(0);
+            setHasMore(false);
+            setLoadError(null);
+            setOptimistic([]);
+            setLoadingInitial(false);
+            return;
+        }
+
+        setLoadingInitial(true);
+        setLoadError(null);
+        try {
+            const page = await getComments(videoId, { limit: COMMENTS_PAGE_SIZE, offset: 0 });
+            const safePage = Array.isArray(page) ? page : [];
+            setFetchedComments(safePage);
+            setOffset(safePage.length);
+            setHasMore(safePage.length === COMMENTS_PAGE_SIZE);
+        } catch (err: unknown) {
+            setFetchedComments([]);
+            setOffset(0);
+            setHasMore(false);
+            setLoadError(err instanceof Error ? err.message : "Не удалось загрузить комментарии");
+        } finally {
+            setLoadingInitial(false);
+        }
+    }, [videoId]);
+
+    const loadMoreComments = useCallback(async () => {
+        if (!videoId || loadingInitial || loadingMore || !hasMore) {
+            return;
+        }
+
+        setLoadingMore(true);
+        setLoadError(null);
+        try {
+            const page = await getComments(videoId, { limit: COMMENTS_PAGE_SIZE, offset });
+            const safePage = Array.isArray(page) ? page : [];
+
+            setFetchedComments((prev) => {
+                const seen = new Set(prev.map((comment) => comment.comment_id));
+                const unique = safePage.filter((comment) => !seen.has(comment.comment_id));
+                return [...prev, ...unique];
+            });
+            setOffset((prev) => prev + safePage.length);
+            setHasMore(safePage.length === COMMENTS_PAGE_SIZE);
+        } catch (err: unknown) {
+            setLoadError(err instanceof Error ? err.message : "Не удалось загрузить комментарии");
+        } finally {
+            setLoadingMore(false);
+        }
+    }, [hasMore, loadingInitial, loadingMore, offset, videoId]);
+
+    useEffect(() => {
+        void loadFirstPage();
+    }, [loadFirstPage]);
+
+    useEffect(() => {
+        if (!hasMore || loadingInitial || loadingMore || !loadMoreRef.current) {
+            return;
+        }
+
+        const observer = new IntersectionObserver(
+            (entries) => {
+                if (entries[0]?.isIntersecting) {
+                    void loadMoreComments();
+                }
+            },
+            { rootMargin: "200px 0px" }
+        );
+
+        observer.observe(loadMoreRef.current);
+        return () => observer.disconnect();
+    }, [hasMore, loadingInitial, loadingMore, loadMoreComments]);
+
+    const safeFetchedComments = useMemo(() => fetchedComments, [fetchedComments]);
     const persistedIds = useMemo(
         () => new Set(safeFetchedComments.map((c) => c.comment_id)),
         [safeFetchedComments]
     );
     const visibleOptimistic = useMemo(
-        () => optimistic.filter((c) => !persistedIds.has(c.comment_id)),
-        [optimistic, persistedIds]
+        () => optimistic.filter((c) => c._videoId === videoId && !persistedIds.has(c.comment_id)),
+        [optimistic, persistedIds, videoId]
     );
     const comments = useMemo(
         () => [...visibleOptimistic, ...safeFetchedComments],
@@ -61,27 +136,29 @@ export default function VideoComments({ video, user, isAuth }: VideoCommentsProp
         commentText,
         setCommentText,
         sendingComment,
-        error,
+        error: sendError,
         isDisabledSend,
         handleSubmitComment,
-    } = useCommentForm(video?.video_id, (newComment: NewCommentPayload, rawText: string) => {
+    } = useCommentForm(videoId ?? "", (newComment: NewCommentPayload, rawText: string) => {
         const commentPayload = typeof newComment === "string" ? null : newComment;
-        const createdCommentId =
-            typeof newComment === "string"
-                ? newComment
-                : (commentPayload?.comment_id ?? crypto.randomUUID());
-        const optimistic: UIComment = {
-            comment_id: createdCommentId,
+        const createdCommentID = typeof newComment === "string"
+            ? newComment
+            : (commentPayload?.comment_id ?? crypto.randomUUID());
+
+        const optimisticComment: OptimisticComment = {
+            comment_id: createdCommentID,
             text: commentPayload?.text ?? commentPayload?.comment_text ?? rawText,
             created_at: commentPayload?.created_at ?? new Date().toISOString(),
             username: user?.username ?? "Вы",
             user_avatar_url: user?.avatar_url ?? "",
+            _videoId: videoId ?? "",
         };
-        setOptimistic((prev) => [optimistic, ...prev]);
-        refetch();
+
+        setOptimistic((prev) => [optimisticComment, ...prev]);
+        void loadFirstPage();
     });
 
-    if (commentsLoading) {
+    if (loadingInitial) {
         return (
             <Typography sx={(theme) => ({ color: theme.palette.text.secondary })}>
                 Загрузка...
@@ -95,7 +172,7 @@ export default function VideoComments({ video, user, isAuth }: VideoCommentsProp
                 {comments == null ? 0 : comments.length} комментариев
             </Typography>
 
-            {isAuth && (
+            {isAuth && user && (
                 <Stack
                     component="form"
                     direction={{ xs: "column", sm: "row" }}
@@ -104,7 +181,9 @@ export default function VideoComments({ video, user, isAuth }: VideoCommentsProp
                     mb={3}
                     onSubmit={(e) => {
                         e.preventDefault();
-                        handleSubmitComment();
+                        if (videoId) {
+                            void handleSubmitComment();
+                        }
                     }}
                 >
                     <UserAvatar username={user.username} avatar_url={user.avatar_url} />
@@ -137,9 +216,15 @@ export default function VideoComments({ video, user, isAuth }: VideoCommentsProp
                 </Stack>
             )}
 
-            {error && (
+            {sendError && (
                 <Typography color="error" fontSize={12} mb={2}>
-                    {error}
+                    {sendError}
+                </Typography>
+            )}
+
+            {loadError && (
+                <Typography color="error" fontSize={12} mb={2}>
+                    {loadError}
                 </Typography>
             )}
 
@@ -158,13 +243,19 @@ export default function VideoComments({ video, user, isAuth }: VideoCommentsProp
                                     </Typography>
                                 </Stack>
                                 <Typography fontSize={13} sx={{ mt: 0.5 }} color="text.primary">
-                                    {comment.text ?? comment.comment_text}
+                                    {comment.text}
                                 </Typography>
                             </Stack>
                         </Stack>
                     </Stack>
                 ))}
             </Stack>
+
+            {(hasMore || loadingMore) && (
+                <Box ref={loadMoreRef} sx={{ display: "flex", justifyContent: "center", py: 2 }}>
+                    {loadingMore && <CircularProgress size={22} />}
+                </Box>
+            )}
         </Stack >
     );
 }

@@ -125,7 +125,7 @@ func (m *ActionModel) ClearReaction(userId, videoId uuid.UUID) error {
 
 	return nil
 }
-func (m *ActionModel) GetComments(videoId uuid.UUID) ([]*Comment, error) {
+func (m *ActionModel) GetComments(videoId uuid.UUID, limit, offset int) ([]*Comment, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
 	defer cancel()
 	query := `
@@ -133,9 +133,11 @@ func (m *ActionModel) GetComments(videoId uuid.UUID) ([]*Comment, error) {
 	FROM comments c
 	INNER JOIN users u ON u.user_id=c.user_id
 	WHERE video_id=$1
+	ORDER BY c.created_at DESC, c.comment_id DESC
+	LIMIT $2 OFFSET $3
 	`
 	var comments []*Comment
-	rows, err := m.Pool.Query(ctx, query, videoId)
+	rows, err := m.Pool.Query(ctx, query, videoId, limit, offset)
 	if err != nil {
 		return nil, fmt.Errorf("failed get rows:%w", err)
 	}
@@ -201,7 +203,7 @@ func (m *ActionModel) SubUnsub(userId, channelId uuid.UUID, action string) error
 	}
 	return nil
 }
-func (m *ActionModel) GetWatchedVideo(userId uuid.UUID) ([]*Video, error) {
+func (m *ActionModel) GetWatchedVideo(userId uuid.UUID, limit, offset int) ([]*Video, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
 
@@ -209,8 +211,10 @@ func (m *ActionModel) GetWatchedVideo(userId uuid.UUID) ([]*Video, error) {
 	FROM user_video_actions uva 
 	INNER JOIN videos v ON v.video_id=uva.video_id 
 	INNER JOIN users u ON u.user_id=v.user_id
-	WHERE uva.user_id=$1`
-	rows, err := m.Pool.Query(ctx, query, userId)
+	WHERE uva.user_id=$1
+	ORDER BY uva.last_viewed_at DESC NULLS LAST, uva.created_at DESC, v.video_id DESC
+	LIMIT $2 OFFSET $3`
+	rows, err := m.Pool.Query(ctx, query, userId, limit, offset)
 	if err != nil {
 		return nil, fmt.Errorf("failed get watched videos:%w", err)
 	}
@@ -234,7 +238,7 @@ func (m *ActionModel) GetWatchedVideo(userId uuid.UUID) ([]*Video, error) {
 	}
 	return videos, nil
 }
-func (m *ActionModel) GetLikedVideo(userId uuid.UUID) ([]*Video, error) {
+func (m *ActionModel) GetLikedVideo(userId uuid.UUID, limit, offset int) ([]*Video, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
 
@@ -242,8 +246,10 @@ func (m *ActionModel) GetLikedVideo(userId uuid.UUID) ([]*Video, error) {
 	FROM user_video_actions uva 
 	INNER JOIN videos v ON v.video_id=uva.video_id 
 	INNER JOIN users u ON u.user_id=v.user_id
-	WHERE uva.user_id=$1 AND uva.reaction='like'`
-	rows, err := m.Pool.Query(ctx, query, userId)
+	WHERE uva.user_id=$1 AND uva.reaction='like'
+	ORDER BY uva.created_at DESC, v.video_id DESC
+	LIMIT $2 OFFSET $3`
+	rows, err := m.Pool.Query(ctx, query, userId, limit, offset)
 	if err != nil {
 		return nil, fmt.Errorf("failed get liked videos:%w", err)
 	}

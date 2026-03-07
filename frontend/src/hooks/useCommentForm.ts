@@ -1,9 +1,10 @@
 import { useState } from "react";
 import { addComment } from "../api/videos";
+import type { AddComment } from "../types/action";
 
 export default function useCommentForm(
     videoId: string,
-    onCommentAdded: (newComment: string, rawText: string) => void
+    onCommentAdded?: (newComment: AddComment, rawText: string) => void
 ) {
     const [commentText, setCommentText] = useState<string>("");
     const [sendingComment, setSendingComment] = useState<boolean>(false);

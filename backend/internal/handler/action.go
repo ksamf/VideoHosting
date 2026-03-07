@@ -3,6 +3,7 @@ package handler
 import (
 	"encoding/json"
 	"net/http"
+	"strconv"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -84,13 +85,25 @@ func (h *ActionHandler) Comments(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-	cacheKey := "comments:" + videoId.String() + ":all"
+	limit, err := strconv.Atoi(c.DefaultQuery("limit", "20"))
+	if err != nil || limit <= 0 {
+		limit = 20
+	}
+	if limit > 100 {
+		limit = 100
+	}
+	offset, err := strconv.Atoi(c.DefaultQuery("offset", "0"))
+	if err != nil || offset < 0 {
+		offset = 0
+	}
+
+	cacheKey := "comments:" + videoId.String() + ":" + strconv.Itoa(limit) + ":" + strconv.Itoa(offset)
 	if cached := h.redis.Get(cacheKey); cached != "" {
 		c.Data(http.StatusOK, "application/json; charset=utf-8", []byte(cached))
 		return
 	}
 
-	comments, err := h.action.GetComments(videoId)
+	comments, err := h.action.GetComments(videoId, limit, offset)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return

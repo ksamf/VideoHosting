@@ -161,15 +161,17 @@ func (m *UserModel) GetSubscriptions(userId uuid.UUID) ([]*User, error) {
 	}
 	return subs, nil
 }
-func (m *UserModel) GetSubscriptionsVideo(userId uuid.UUID) ([]*Video, error) {
+func (m *UserModel) GetSubscriptionsVideo(userId uuid.UUID, limit, offset int) ([]*Video, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
 	query := `SELECT u.avatar_url, u.username, v.video_id, v.video_url, v.views, v.preview_url, v.created_at
 			FROM user_subscriptions us
     			INNER JOIN videos v ON us.channel_id = v.user_id
     			INNER JOIN users u ON u.user_id = us.channel_id
-			WHERE us.user_id =$1`
-	rows, err := m.Pool.Query(ctx, query, userId)
+			WHERE us.user_id =$1
+			ORDER BY v.created_at DESC, v.video_id DESC
+			LIMIT $2 OFFSET $3`
+	rows, err := m.Pool.Query(ctx, query, userId, limit, offset)
 	if err != nil {
 		return nil, fmt.Errorf("failed to query subscriptions videos:%w", err)
 	}

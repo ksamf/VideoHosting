@@ -10,12 +10,12 @@ type MockAction struct {
 	GetFunc          func(userId, videoId uuid.UUID) (*database.Action, error)
 	UpdateReactionFn func(userId, videoId uuid.UUID, reaction string) error
 	ClearReactionFn  func(userId, videoId uuid.UUID) error
-	GetCommentsFn    func(videoId uuid.UUID) ([]*database.Comment, error)
+	GetCommentsFn    func(videoId uuid.UUID, limit, offset int) ([]*database.Comment, error)
 	AddCommentFn     func(commentId, userId, videoId uuid.UUID, comment string) error
 	CountReactionsFn func(videoId uuid.UUID) (int, int, error)
 	SubUnsubFn       func(userId, channelId uuid.UUID, action string) error
-	GetWatchedFn     func(userId uuid.UUID) ([]*database.Video, error)
-	GetLikedFn       func(userId uuid.UUID) ([]*database.Video, error)
+	GetWatchedFn     func(userId uuid.UUID, limit, offset int) ([]*database.Video, error)
+	GetLikedFn       func(userId uuid.UUID, limit, offset int) ([]*database.Video, error)
 	UpdateViewFn     func(userId, videoId uuid.UUID, view int) error
 	GetVideoViewsFn  func(videoId uuid.UUID) (int, error)
 }
@@ -48,9 +48,9 @@ func (m *MockAction) ClearReaction(userId, videoId uuid.UUID) error {
 	return nil
 }
 
-func (m *MockAction) GetComments(videoId uuid.UUID) ([]*database.Comment, error) {
+func (m *MockAction) GetComments(videoId uuid.UUID, limit, offset int) ([]*database.Comment, error) {
 	if m.GetCommentsFn != nil {
-		return m.GetCommentsFn(videoId)
+		return m.GetCommentsFn(videoId, limit, offset)
 	}
 	return []*database.Comment{}, nil
 }
@@ -76,16 +76,16 @@ func (m *MockAction) SubUnsub(userId, channelId uuid.UUID, action string) error 
 	return nil
 }
 
-func (m *MockAction) GetWatchedVideo(userId uuid.UUID) ([]*database.Video, error) {
+func (m *MockAction) GetWatchedVideo(userId uuid.UUID, limit, offset int) ([]*database.Video, error) {
 	if m.GetWatchedFn != nil {
-		return m.GetWatchedFn(userId)
+		return m.GetWatchedFn(userId, limit, offset)
 	}
 	return []*database.Video{}, nil
 }
 
-func (m *MockAction) GetLikedVideo(userId uuid.UUID) ([]*database.Video, error) {
+func (m *MockAction) GetLikedVideo(userId uuid.UUID, limit, offset int) ([]*database.Video, error) {
 	if m.GetLikedFn != nil {
-		return m.GetLikedFn(userId)
+		return m.GetLikedFn(userId, limit, offset)
 	}
 	return []*database.Video{}, nil
 }

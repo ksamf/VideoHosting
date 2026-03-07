@@ -32,8 +32,16 @@ export const uploadVideo = async (form: FormData): Promise<UploadVideoResponse> 
     ));
 };
 
-export const getComments = async (id: string): Promise<Comment[]> => {
-    return unwrapApi(await api<Comment[]>(`/video/${id}/comments`));
+export const getComments = async (
+    id: string,
+    params: PaginatedQuery = { limit: 20, offset: 0 },
+): Promise<Comment[]> => {
+    return unwrapApi(await api<Comment[]>(
+        "/video/" + id + "/comments?" + new URLSearchParams({
+            limit: String(params.limit),
+            offset: String(params.offset),
+        }),
+    ));
 };
 
 export const addComment = async (id: string, comment: string): Promise<AddComment> => {

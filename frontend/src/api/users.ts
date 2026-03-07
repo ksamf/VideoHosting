@@ -35,12 +35,28 @@ export const getUserSubscriptions = async (userId: string): Promise<User[]> => {
     return unwrapApi(await api<User[]>(`/user/${userId}/sub`));
 }
 
-export const getUserWatchedVideo = async (userId: string): Promise<VideosResponse> => {
-    return unwrapApi(await api<VideosResponse>(`/user/${userId}/watched`));
+export const getUserWatchedVideo = async (
+    userId: string,
+    params: PaginatedQuery = { limit: 20, offset: 0 },
+): Promise<VideosResponse> => {
+    return unwrapApi(await api<VideosResponse>(
+        `/user/${userId}/watched?` + new URLSearchParams({
+            limit: String(params.limit),
+            offset: String(params.offset),
+        }),
+    ));
 }
 
-export const getUserLikedVideo = async (userId: string): Promise<VideosResponse> => {
-    return unwrapApi(await api<VideosResponse>(`/user/${userId}/liked`));
+export const getUserLikedVideo = async (
+    userId: string,
+    params: PaginatedQuery = { limit: 20, offset: 0 },
+): Promise<VideosResponse> => {
+    return unwrapApi(await api<VideosResponse>(
+        `/user/${userId}/liked?` + new URLSearchParams({
+            limit: String(params.limit),
+            offset: String(params.offset),
+        }),
+    ));
 }
 
 export const getUserVideos = async (userId: string): Promise<VideosResponse> => {
@@ -57,8 +73,16 @@ export const uploadUserAvatar = async (userId: string, file: File): Promise<Uplo
     return unwrapApi(await api<UploadAvatarResponse>(`/user/${userId}/upload`, { method: "POST", body: form }));
 };
 
-export const getUserSubscriptionsVideo = async (userId: string): Promise<VideosResponse> => {
-    return unwrapApi(await api<VideosResponse>(`/user/${userId}/sub/video`));
+export const getUserSubscriptionsVideo = async (
+    userId: string,
+    params: PaginatedQuery = { limit: 20, offset: 0 },
+): Promise<VideosResponse> => {
+    return unwrapApi(await api<VideosResponse>(
+        `/user/${userId}/sub/video?` + new URLSearchParams({
+            limit: String(params.limit),
+            offset: String(params.offset),
+        }),
+    ));
 }
 
 export const getUserRecommendations = async (userId: string, limit: number = 20, offset: number = 0): Promise<Video[]> => {

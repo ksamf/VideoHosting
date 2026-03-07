@@ -13,7 +13,7 @@ type User interface {
 	GetByVideoId(id uuid.UUID) (*database.User, error)
 	UpdateAvatar(userId uuid.UUID, avatar_url string) error
 	GetSubscriptionsCount(channelId uuid.UUID, period int) (int, error)
-	GetSubscriptionsVideo(userId uuid.UUID) ([]*database.Video, error)
+	GetSubscriptionsVideo(userId uuid.UUID, limit, offset int) ([]*database.Video, error)
 	GetSubscriptions(userId uuid.UUID) ([]*database.User, error)
 	Videos(userId uuid.UUID) ([]*database.Video, error)
 	GetViewsCount(channelId uuid.UUID, periodDays int) (int, error)
@@ -46,12 +46,12 @@ type Action interface {
 	Get(userId, videoId uuid.UUID) (*database.Action, error)
 	UpdateReaction(userId, videoId uuid.UUID, reaction string) error
 	ClearReaction(userId, videoId uuid.UUID) error
-	GetComments(videoId uuid.UUID) ([]*database.Comment, error)
+	GetComments(videoId uuid.UUID, limit, offset int) ([]*database.Comment, error)
 	AddComment(commentId, userId, videoId uuid.UUID, comment string) error
 	CountReactions(videoId uuid.UUID) (int, int, error)
 	SubUnsub(userId, channelId uuid.UUID, action string) error
-	GetWatchedVideo(userId uuid.UUID) ([]*database.Video, error)
-	GetLikedVideo(userId uuid.UUID) ([]*database.Video, error)
+	GetWatchedVideo(userId uuid.UUID, limit, offset int) ([]*database.Video, error)
+	GetLikedVideo(userId uuid.UUID, limit, offset int) ([]*database.Video, error)
 	UpdateView(userId, videoId uuid.UUID, view int) error
 	GetVideoViews(videoId uuid.UUID) (int, error)
 }
