@@ -9,8 +9,9 @@ import (
 )
 
 func NewBucket(conn *minio.Client, conf *config.Config) *Storage {
+	endpoint := normalizeEndpoint(conf.S3.EndpointURL)
 	storage := &Storage{
-		Endpoint:        conf.S3.EndpointURL,
+		Endpoint:        endpoint.publicBaseURL,
 		AccessKeyID:     conf.S3.AccessKeyID,
 		SecretAccessKey: conf.S3.SecretAccessKey,
 		BucketName:      conf.S3.BucketName,

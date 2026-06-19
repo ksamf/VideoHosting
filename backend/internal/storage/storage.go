@@ -6,6 +6,7 @@ import (
 	"io"
 	"log"
 	"os"
+	"strings"
 
 	"github.com/google/uuid"
 	"github.com/minio/minio-go/v7"
@@ -98,5 +99,5 @@ func (s3 *Storage) ExitsObjects(object string) bool {
 }
 
 func (s3 *Storage) GetURL(id uuid.UUID, folder string) string {
-	return fmt.Sprintf("https://%s/%s/%s/%s", s3.Endpoint, s3.BucketName, folder, id.String())
+	return fmt.Sprintf("%s/%s/%s/%s", strings.TrimRight(s3.Endpoint, "/"), s3.BucketName, folder, id.String())
 }
