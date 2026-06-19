@@ -23,6 +23,11 @@ type PlayerState = {
 
 type ShortcutHandler = (event: KeyboardEvent) => void;
 
+type WebKitVideoElement = HTMLVideoElement & {
+    webkitDisplayingFullscreen?: boolean;
+    webkitEnterFullscreen?: () => void;
+    webkitExitFullscreen?: () => void;
+};
 
 export default function useVideoPlayer(videoId: string) {
     const videoRef = useRef<HTMLVideoElement | null>(null);
@@ -152,6 +157,28 @@ export default function useVideoPlayer(videoId: string) {
         }
     }, [buffering, updatePlayer, showControls]);
 
+    const handleVideoClick = useCallback(() => {
+        const video = videoRef.current;
+        if (!video) return;
+
+        if (video.paused) {
+            void video.play()
+                .then(() => {
+                    updatePlayer({ playing: true });
+                    showControls();
+                })
+                .catch((err) => console.error("Play failed", err));
+            return;
+        }
+
+        video.pause();
+        updatePlayer({ playing: false });
+        setControlsVisible(true);
+        if (hideTimerRef.current) {
+            clearTimeout(hideTimerRef.current);
+        }
+    }, [updatePlayer, showControls]);
+
     const changeSpeed = useCallback(
         (direction: number) => {
             const idx = SPEEDS.indexOf(playbackRate);
@@ -190,17 +217,35 @@ export default function useVideoPlayer(videoId: string) {
 
     const handleFullscreen = useCallback(async () => {
         const container = containerRef.current;
-        if (!container) return;
+        const video = videoRef.current;
+        if (!container || !video) return;
 
         const fullscreenElement = document.fullscreenElement;
         const isCurrentFullscreen = fullscreenElement === container;
+        const webKitVideo = video as WebKitVideoElement;
 
         try {
             if (isCurrentFullscreen) {
                 await document.exitFullscreen?.();
                 return;
             }
-            await container.requestFullscreen?.();
+
+            if (container.requestFullscreen) {
+                await container.requestFullscreen();
+                return;
+            }
+
+            if (video.requestFullscreen) {
+                await video.requestFullscreen();
+                return;
+            }
+
+            if (webKitVideo.webkitDisplayingFullscreen) {
+                webKitVideo.webkitExitFullscreen?.();
+                return;
+            }
+
+            webKitVideo.webkitEnterFullscreen?.();
         } catch (err) {
             console.error("Fullscreen toggle failed", err);
         }
@@ -313,6 +358,7 @@ export default function useVideoPlayer(videoId: string) {
         showControls,
         hideControls,
         togglePlay,
+        handleVideoClick,
         seek,
         handleFullscreen,
         handleTimeUpdate,

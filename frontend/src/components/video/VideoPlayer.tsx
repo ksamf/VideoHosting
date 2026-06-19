@@ -39,6 +39,7 @@ export default function VideoPlayer({ src, poster, qualities = [], videoId }: Vi
         showControls,
         hideControls,
         togglePlay,
+        handleVideoClick,
         handleFullscreen,
         handleTimeUpdate,
         handleLoadedMetadata,
@@ -79,10 +80,11 @@ export default function VideoPlayer({ src, poster, qualities = [], videoId }: Vi
                     ref={videoRef}
                     src={videoSrc}
                     poster={poster}
+                    preload="auto"
                     style={videoSx.playerVideo}
                     onTimeUpdate={handleTimeUpdate}
                     onLoadedMetadata={handleLoadedMetadata}
-                    onClick={togglePlay}
+                    onClick={handleVideoClick}
                     onWaiting={startBuffering}
                     onPlaying={stopBuffering}
                     onCanPlay={stopBuffering}
