@@ -23,6 +23,7 @@ type User struct {
 	Password      string
 	AvatarUrl     string    `json:"avatar_url"`
 	Subscriptions int       `json:"subscriptions"`
+	VideosCount   int       `json:"videos_count"`
 	Interests     []string  `json:"interests"`
 	CreatedAt     time.Time `json:"created_at"`
 	UpdatedAt     time.Time `json:"updated_at"`
@@ -39,6 +40,21 @@ func (m *UserModel) Insert(userId uuid.UUID, username, email, password string) e
 	}
 	return nil
 }
+
+func (m *UserModel) RecordPersonalDataConsent(userId uuid.UUID, version, ip string) error {
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*3)
+	defer cancel()
+	query := `
+		INSERT INTO user_consents(user_id, consent_type, version, ip_address)
+		VALUES($1, 'personal_data_processing', $2, $3)
+	`
+	_, err := m.Pool.Exec(ctx, query, userId, version, ip)
+	if err != nil {
+		return fmt.Errorf("failed record personal data consent: %w", err)
+	}
+	return nil
+}
+
 func (m *UserModel) GetByEmail(email string) (*User, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*3)
 	defer cancel()
@@ -79,10 +95,21 @@ func (m *UserModel) SearchChannels(query string, limit, offset int) ([]*User, er
 	}
 
 	const sqlQuery = `
-	SELECT user_id, username, avatar_url
-	FROM users
-	WHERE username ILIKE '%' || $1 || '%'
-	ORDER BY username ASC
+	SELECT
+		u.user_id,
+		u.username,
+		COALESCE(u.avatar_url, ''),
+		COALESCE(u.subscriptions, 0) AS subscriptions,
+		COALESCE((
+			SELECT COUNT(*)::int
+			FROM videos v
+			WHERE v.user_id = u.user_id
+		), 0) AS videos_count
+	FROM users u
+	WHERE u.username ILIKE '%' || $1 || '%'
+	ORDER BY
+		CASE WHEN u.username ILIKE $1 || '%' THEN 0 ELSE 1 END,
+		u.username ASC
 	LIMIT $2 OFFSET $3
 	`
 	rows, err := m.Pool.Query(ctx, sqlQuery, query, limit, offset)
@@ -94,7 +121,7 @@ func (m *UserModel) SearchChannels(query string, limit, offset int) ([]*User, er
 	channels := make([]*User, 0, limit)
 	for rows.Next() {
 		var u User
-		if err := rows.Scan(&u.UserId, &u.UserName, &u.AvatarUrl); err != nil {
+		if err := rows.Scan(&u.UserId, &u.UserName, &u.AvatarUrl, &u.Subscriptions, &u.VideosCount); err != nil {
 			return nil, fmt.Errorf("failed to scan channel: %w", err)
 		}
 		channels = append(channels, &u)
@@ -207,11 +234,12 @@ func (m *UserModel) GetSubscriptions(userId uuid.UUID) ([]*User, error) {
 func (m *UserModel) GetSubscriptionsVideo(userId uuid.UUID, limit, offset int) ([]*Video, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
-	query := `SELECT u.avatar_url, u.username, v.video_id, v.video_url, v.views, v.preview_url, v.created_at
+	query := `SELECT u.avatar_url, u.username, v.video_id, v.video_url, v.views, v.preview_url, v.created_at, COALESCE(v.duration_seconds, 0)
 			FROM user_subscriptions us
     			INNER JOIN videos v ON us.channel_id = v.user_id
     			INNER JOIN users u ON u.user_id = us.channel_id
 			WHERE us.user_id =$1
+			  AND v.status = 'uploaded'
 			ORDER BY v.created_at DESC, v.video_id DESC
 			LIMIT $2 OFFSET $3`
 	rows, err := m.Pool.Query(ctx, query, userId, limit, offset)
@@ -221,7 +249,7 @@ func (m *UserModel) GetSubscriptionsVideo(userId uuid.UUID, limit, offset int) (
 	var videos []*Video
 	for rows.Next() {
 		var v Video
-		if err := rows.Scan(&v.UserAvatarUrl, &v.UserName, &v.VideoId, &v.VideoUrl, &v.Views, &v.PreviewUrl, &v.CreatedAt); err != nil {
+		if err := rows.Scan(&v.UserAvatarUrl, &v.UserName, &v.VideoId, &v.VideoUrl, &v.Views, &v.PreviewUrl, &v.CreatedAt, &v.DurationSeconds); err != nil {
 			return nil, fmt.Errorf("failed to scan subscription videos:%w", err)
 		}
 		videos = append(videos, &v)
@@ -234,16 +262,16 @@ func (m *UserModel) Videos(userId uuid.UUID) ([]*Video, error) {
 	defer cancel()
 	query := `SELECT 
 				v.video_id,
+				v.user_id,
     			v.video_url,
     			v.preview_url,
     			v.name,
     			v.created_at,
     			v.views,
-				( 
-					SELECT avatar_url
-				 	FROM users 
-				 	WHERE users.user_id = v.user_id
-				) AS user_avatar_url,
+				v.status,
+				u.avatar_url AS user_avatar_url,
+				u.username,
+				COALESCE(v.duration_seconds, 0) AS duration_seconds,
     			(
     			    SELECT COUNT(*) 
     			    FROM comments c 
@@ -252,6 +280,7 @@ func (m *UserModel) Videos(userId uuid.UUID) ([]*Video, error) {
     			v.likes,
     			v.dislikes
 			FROM videos v
+			INNER JOIN users u ON u.user_id = v.user_id
 			WHERE v.user_id = $1
 			ORDER BY v.created_at DESC;
 			`
@@ -262,7 +291,22 @@ func (m *UserModel) Videos(userId uuid.UUID) ([]*Video, error) {
 	var videos []*Video
 	for rows.Next() {
 		var v Video
-		if err := rows.Scan(&v.VideoId, &v.VideoUrl, &v.PreviewUrl, &v.Name, &v.CreatedAt, &v.Views, &v.UserAvatarUrl, &v.CommentCount, &v.Likes, &v.Dislikes); err != nil {
+		if err := rows.Scan(
+			&v.VideoId,
+			&v.UserId,
+			&v.VideoUrl,
+			&v.PreviewUrl,
+			&v.Name,
+			&v.CreatedAt,
+			&v.Views,
+			&v.Status,
+			&v.UserAvatarUrl,
+			&v.UserName,
+			&v.DurationSeconds,
+			&v.CommentCount,
+			&v.Likes,
+			&v.Dislikes,
+		); err != nil {
 			return nil, fmt.Errorf("failed to scan user videos:%w", err)
 		}
 		videos = append(videos, &v)

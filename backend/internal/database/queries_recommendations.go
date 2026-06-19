@@ -33,7 +33,7 @@ WITH candidates AS (
   LEFT JOIN video_stats vs ON vs.video_id = v.video_id
   LEFT JOIN user_author_affinity uaa ON uaa.user_id = $1 AND uaa.author_id = v.user_id
   LEFT JOIN user_video_actions uva ON uva.user_id = $1 AND uva.video_id = v.video_id
-  WHERE v.status = 'processed'
+  WHERE v.status = 'uploaded'
     AND v.user_id <> $1
     AND uva.video_id IS NULL
 ),

@@ -121,6 +121,7 @@ export default function Liked() {
 
     return (
         <Box sx={pageSx.pageContainer}>
+            <Typography sx={pageSx.pageSectionTitle}>Понравившиеся видео</Typography>
             {videos.length === 0 ? (
                 <Typography sx={pageSx.pageStateText}>Нет понравившихся.</Typography>
             ) : (

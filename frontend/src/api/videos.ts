@@ -44,6 +44,10 @@ export const uploadVideo = async (form: FormData): Promise<UploadVideoResponse> 
     ));
 };
 
+export const deleteVideo = async (videoId: string): Promise<{ message: string }> => {
+    return unwrapApi(await api<{ message: string }>(`/video/${videoId}`, { method: "DELETE" }));
+};
+
 export const getComments = async (
     id: string,
     params: PaginatedQuery = { limit: 20, offset: 0 },
@@ -56,17 +60,17 @@ export const getComments = async (
     ));
 };
 
-export const addComment = async (id: string, comment: string): Promise<AddComment> => {
+export const addComment = async (id: string, comment: string, publicContentConsent: boolean): Promise<AddComment> => {
     return unwrapApi(await api<AddComment>(`/video/${id}/comment`,
-        { method: "POST", body: JSON.stringify({ comment }) }
+        { method: "POST", body: JSON.stringify({ comment, public_content_consent: publicContentConsent }) }
     ));
 }
 
-export const addReaction = async (id: string, reaction: string): Promise<AddReaction> => {
+export const addReaction = async (id: string, reaction: "like" | "dislike"): Promise<AddReaction> => {
     const query = new URLSearchParams();
-    if (reaction) query.set("r", reaction);
+    query.set("r", reaction);
 
-    return unwrapApi(await api<AddReaction>(`/video/${id}/reaction` + (query.toString() ? `?${query.toString()}` : ""),
+    return unwrapApi(await api<AddReaction>(`/video/${id}/reaction?${query.toString()}`,
         { method: "POST", }
     ));
 }

@@ -113,6 +113,7 @@ export default function Subscriptions() {
 
     return (
         <Box sx={pageSx.pageContainer}>
+            <Typography sx={pageSx.pageSectionTitle}>Видео по подпискам</Typography>
             {!id ? (
                 <Typography sx={pageSx.pageStateText}>Некорректный id пользователя.</Typography>
             ) : (

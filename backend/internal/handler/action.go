@@ -52,6 +52,7 @@ func (h *ActionHandler) Reaction(c *gin.Context) {
 		"videos:*",
 		"search:*",
 	)
+	invalidateRecommendationCache(h.redis, userId)
 
 	c.JSON(http.StatusOK, gin.H{
 		"message": "reaction recorded",
@@ -128,13 +129,26 @@ func (h *ActionHandler) AddComment(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid user id"})
 		return
 	}
-	videoId, _ := uuid.Parse(c.Param("id"))
+	videoId, err := uuid.Parse(c.Param("id"))
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid video id"})
+		return
+	}
 	var body struct {
-		Comment string `json:"comment"`
+		Comment              string `json:"comment"`
+		PublicContentConsent bool   `json:"public_content_consent"`
 	}
 
 	if err := c.ShouldBindJSON(&body); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	if !body.PublicContentConsent {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "public content consent is required"})
+		return
+	}
+	if len(body.Comment) == 0 || len(body.Comment) > 2000 {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid comment"})
 		return
 	}
 	commentId := uuid.New()
@@ -185,6 +199,7 @@ func (h *ActionHandler) SubUnsubAction(c *gin.Context) {
 		"user:"+channelId.String(),
 		"channel_subcount:"+channelId.String()+":*",
 	)
+	invalidateRecommendationCache(h.redis, userId)
 	c.JSON(http.StatusOK, gin.H{
 		"message": "subscribe processed",
 	})

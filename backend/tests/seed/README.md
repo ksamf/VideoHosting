@@ -25,6 +25,8 @@ node backend/tests/seed/seed.js \
   --title-template "Видео {u}-{v}: {file}" \
   --description-template "Описание видео {v} пользователя {u}" \
   --tags "seed,user_{u},video_{v},demo" \
+  --generated-durations "3,15,45,90" \
+  --test-cases mixed \
   --password Qwerty123! \
   --prefix seed_user
 ```
@@ -42,6 +44,8 @@ node backend/tests/seed/seed.js \
 - `--tags` - теги через запятую (шаблон)
 - `--password` - пароль для всех seed-пользователей
 - `--prefix` - префикс имени/email пользователя
+- `--generated-durations` - длительности (в секундах) для автогенерации видео через запятую (по умолчанию `3,15,45,90`)
+- `--test-cases` - профиль тест-кейсов: `mixed | minimal | rich` (по умолчанию выключен)
 
 ### Плейсхолдеры в шаблонах
 
@@ -51,6 +55,7 @@ node backend/tests/seed/seed.js \
 - `{v}` - индекс видео
 - `{file}` - имя файла видео без расширения
 - `{ext}` - расширение видео без точки
+- `{case}` - имя текущего test-case профиля видео (`full`, `no_description`, `no_tags`, `minimal`)
 
 Пример:
 
@@ -63,7 +68,21 @@ node backend/tests/seed/seed.js \
 
 - Если пользователь с email уже существует, шаг `signup` пропускается.
 - Если указан `--avatar-dir`, каждому пользователю загружается аватар (`POST /api/user/:id/upload`).
+- Если `--avatar-dir` не указан, скрипт генерирует аватарки: разные цвета + первая буква ника.
 - Если указан `--preview-dir`, к видео прикладывается `preview` в multipart upload.
+- Если `--preview-dir` не указан, скрипт генерирует превью под каждый upload: черный фон и название видео по центру.
 - Если `--dir` не указан, скрипт генерирует тестовые mp4 через `ffmpeg`.
-- Если `--preview-dir` не указан, скрипт генерирует тестовые `.jpg` превью через `ffmpeg`.
+- Если генерация включена, в логах показывается путь `generatedAssetsDir`.
 - Загрузка видео асинхронная: после upload worker еще обрабатывает файл.
+
+## Профили test-cases
+
+- `mixed`:
+  - пользователи: аватар через одного (с/без)
+  - видео-циклы: `full`, `no_description`, `no_tags`, `minimal`
+- `minimal`:
+  - пользователи без аватаров
+  - видео без описания и тегов
+- `rich`:
+  - у всех пользователей есть аватар (если есть файлы в `--avatar-dir`)
+  - все видео с описанием, тегами и превью (если есть `--preview-dir`)

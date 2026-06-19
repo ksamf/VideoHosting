@@ -1,4 +1,5 @@
 interface VideoSxStyles {
+  gridRoot: Record<string, any>;
   playerContainer: (controlsVisible: boolean) => Record<string, any>;
   playerVideo: Record<string, any>;
   playerUnavailable: (theme: any) => Record<string, any>;
@@ -12,10 +13,13 @@ interface VideoSxStyles {
   videoInfoChannelText: Record<string, any>;
   videoInfoSubsText: Record<string, any>;
   cardRoot: (theme: any) => Record<string, any>;
+  cardLink: Record<string, any>;
   cardPreviewBox: (theme: any) => Record<string, any>;
   cardMedia: Record<string, any>;
-  cardHeader: Record<string, any>;
-  cardAvatarButton: Record<string, any>;
+  cardDurationBadge: Record<string, any>;
+  cardMetaRow: Record<string, any>;
+  cardAvatarWrap: Record<string, any>;
+  cardTextWrap: Record<string, any>;
   cardActionIcon: (theme: any) => Record<string, any>;
   cardTitle: Record<string, any>;
   cardMetaText: (theme: any) => Record<string, any>;
@@ -36,6 +40,20 @@ interface VideoSxStyles {
 }
 
 export const videoSx: VideoSxStyles = {
+  gridRoot: {
+    display: "grid",
+    gridTemplateColumns: {
+      xs: "1fr",
+      sm: "repeat(2, minmax(0, 1fr))",
+      md: "repeat(3, minmax(0, 1fr))",
+      lg: "repeat(4, minmax(0, 1fr))",
+    },
+    gap: { xs: 1.5, sm: 2.25, md: 2.5 },
+    px: { xs: 0.5, sm: 1, md: 1.5 },
+    py: { xs: 0.5, sm: 1 },
+    width: "100%",
+    alignItems: "start",
+  },
   playerContainer: (controlsVisible) => ({
     width: "100%",
     maxWidth: 1200,
@@ -43,6 +61,7 @@ export const videoSx: VideoSxStyles = {
     borderRadius: 2,
     overflow: "hidden",
     position: "relative",
+    boxShadow: "0 12px 28px rgba(0,0,0,0.28)",
     cursor: controlsVisible ? "default" : "none",
   }),
   playerVideo: { width: "100%", display: "block", position: "relative" },
@@ -76,20 +95,27 @@ export const videoSx: VideoSxStyles = {
   cardRoot: (theme) => ({
     width: "100%",
     minWidth: 0,
-    maxWidth: { xs: "100%", md: 360, xl: 320 },
     borderRadius: 2,
-    backgroundColor: theme.palette.background.default,
-    display: "flex",
-    flexDirection: "column",
-    cursor: "pointer",
-    transition: "transform 0.2s ease, box-shadow 0.2s ease",
-    "&:hover": { boxShadow: "0 12px 24px rgba(15, 23, 42, 0.12)" },
+    overflow: "hidden",
+    backgroundColor: "transparent",
+    transition: "background-color 0.2s ease",
+    "&:hover": { backgroundColor: theme.palette.action.hover },
   }),
+  cardLink: {
+    color: "inherit",
+    textDecoration: "none",
+    display: "block",
+    width: "100%",
+    "&:hover .video-preview": {
+      transform: "scale(1.03)",
+    },
+  },
   cardPreviewBox: (theme) => ({
     position: "relative",
     width: "100%",
     aspectRatio: "16 / 9",
     overflow: "hidden",
+    borderRadius: 2,
     backgroundColor: theme.palette.common.black,
   }),
   cardMedia: {
@@ -98,17 +124,56 @@ export const videoSx: VideoSxStyles = {
     objectFit: "cover",
     transition: "transform 0.25s ease",
   },
-  cardHeader: { p: 1.5, textAlign: "left" },
-  cardAvatarButton: { p: 0 },
-  cardActionIcon: (theme) => ({ color: theme.palette.text.secondary }),
+  cardDurationBadge: {
+    position: "absolute",
+    right: 8,
+    bottom: 8,
+    px: 0.65,
+    py: 0.2,
+    borderRadius: 0.8,
+    fontSize: 12,
+    fontWeight: 600,
+    lineHeight: 1.2,
+    color: "#fff",
+    backgroundColor: "rgba(0,0,0,0.82)",
+  },
+  cardMetaRow: {
+    display: "grid",
+    gridTemplateColumns: "auto minmax(0, 1fr) auto",
+    alignItems: "start",
+    gap: 1.2,
+    px: { xs: 0.35, sm: 0.5 },
+    py: 1.1,
+  },
+  cardAvatarWrap: {
+    pt: 0.1,
+  },
+  cardTextWrap: {
+    minWidth: 0,
+  },
+  cardActionIcon: (theme) => ({
+    mt: 0.1,
+    color: theme.palette.text.secondary,
+    borderRadius: 2,
+    display: { xs: "none", sm: "inline-flex" },
+  }),
   cardTitle: {
+    fontSize: 15,
+    fontWeight: 600,
     display: "-webkit-box",
     WebkitLineClamp: 2,
     WebkitBoxOrient: "vertical",
     overflow: "hidden",
-    lineHeight: 1.3,
+    lineHeight: 1.28,
   },
-  cardMetaText: (theme) => ({ color: theme.palette.text.secondary }),
+  cardMetaText: (theme) => ({
+    color: theme.palette.text.secondary,
+    fontSize: 13,
+    lineHeight: 1.3,
+    whiteSpace: "nowrap",
+    overflow: "hidden",
+    textOverflow: "ellipsis",
+  }),
   sliderBufferOverlay: {
     position: "absolute",
     inset: 0,

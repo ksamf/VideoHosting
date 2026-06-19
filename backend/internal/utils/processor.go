@@ -9,15 +9,16 @@ import (
 	"time"
 
 	"github.com/ksamf/VideoHosting/backend/internal/broker"
+	"github.com/ksamf/VideoHosting/backend/internal/database"
 	"github.com/ksamf/VideoHosting/backend/internal/interfaces"
 )
 
 var StandardHeights = []int{144, 240, 360, 480, 720, 1080, 1440, 2160, 4320}
 
 type VideoProcessOptions struct {
-	SourceCRF            int
-	SourcePreset         string
-	Encoder              string
+	SourceCRF    int
+	SourcePreset string
+	Encoder      string
 }
 
 func ProcessVideo(job *broker.VideoProcessor, db interfaces.Video, s3 interfaces.ObjectStorage, opts VideoProcessOptions) error {
@@ -34,7 +35,7 @@ func ProcessVideo(job *broker.VideoProcessor, db interfaces.Video, s3 interfaces
 	if video == nil {
 		return fmt.Errorf("video not found: %s", job.VideoID)
 	}
-	if video.Status == "uploaded" || video.Status == "processed" {
+	if database.IsFinalVideoStatus(video.Status) {
 		return nil
 	}
 
@@ -75,10 +76,10 @@ func ProcessVideo(job *broker.VideoProcessor, db interfaces.Video, s3 interfaces
 	transcodeCtx, cancel := context.WithTimeout(context.Background(), 2*time.Hour)
 	defer cancel()
 	if err := TranscodeLadder(transcodeCtx, s3, tmpCompressedPath, videoID, qualities, opts.Encoder); err != nil {
-		_ = db.UpdateStatus(job.VideoID, "failed")
+		_ = db.UpdateStatus(job.VideoID, database.VideoStatusFailed)
 		return fmt.Errorf("processing failed: %w", err)
 	}
 
-	_ = db.UpdateStatus(job.VideoID, "uploaded")
+	_ = db.UpdateStatus(job.VideoID, database.VideoStatusUploaded)
 	return nil
 }

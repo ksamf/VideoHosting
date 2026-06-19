@@ -8,6 +8,8 @@ export interface Video {
     username: string;
     user_avatar_url: string;
     views: number;
+    duration_seconds?: number;
+    status?: string;
     created_at: string;
 }
 
@@ -15,6 +17,7 @@ export interface VideoDetails extends Video {
     qualities: number[];
     likes: number;
     dislikes: number;
+    comment_count?: number;
     tags?: string[];
 }
 

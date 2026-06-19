@@ -12,14 +12,14 @@ export default function useCommentForm(
 
     const isDisabledSend = commentText.trim().length === 0;
 
-    const handleSubmitComment = async () => {
-        if (!commentText.trim() || sendingComment) return;
+    const handleSubmitComment = async (publicContentConsent: boolean) => {
+        if (!commentText.trim() || sendingComment || !publicContentConsent) return;
 
         setSendingComment(true);
         setError(null);
 
         try {
-            const newComment = await addComment(videoId, commentText);
+            const newComment = await addComment(videoId, commentText, publicContentConsent);
             onCommentAdded?.(newComment, commentText);
 
             setCommentText("");

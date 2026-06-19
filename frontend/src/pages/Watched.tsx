@@ -121,6 +121,7 @@ export default function Watched() {
 
     return (
         <Box sx={pageSx.pageContainer}>
+            <Typography sx={pageSx.pageSectionTitle}>История просмотров</Typography>
             {videos.length === 0 ? (
                 <Typography sx={pageSx.pageStateText}>Нет просмотренных.</Typography>
             ) : (

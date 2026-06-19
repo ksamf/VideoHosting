@@ -1,4 +1,4 @@
-import { Box, CircularProgress, IconButton, Input, Stack, Typography } from "@mui/material";
+import { Box, Checkbox, CircularProgress, FormControlLabel, IconButton, Input, Stack, Typography } from "@mui/material";
 import SendIcon from "@mui/icons-material/Send";
 import ReactTimeAgo from "react-time-ago";
 import { getComments } from "../../api/videos";
@@ -8,6 +8,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { Comment } from "../../types/action";
 import type { VideoDetails } from "../../types/video";
 import type { User } from "../../types/user";
+import { PUBLIC_CONTENT_CONSENT_TEXT } from "../../utils/privacy";
 
 type VideoCommentsProps = {
     video: VideoDetails;
@@ -40,6 +41,7 @@ export default function VideoComments({ video, user, isAuth }: VideoCommentsProp
     const [offset, setOffset] = useState<number>(0);
     const [hasMore, setHasMore] = useState<boolean>(false);
     const [optimistic, setOptimistic] = useState<OptimisticComment[]>([]);
+    const [publicContentConsent, setPublicContentConsent] = useState(false);
 
     const loadFirstPage = useCallback(async () => {
         if (!videoId) {
@@ -157,6 +159,7 @@ export default function VideoComments({ video, user, isAuth }: VideoCommentsProp
         setOptimistic((prev) => [optimisticComment, ...prev]);
         void loadFirstPage();
     });
+    const isSubmitDisabled = isDisabledSend || sendingComment || !publicContentConsent;
 
     if (loadingInitial) {
         return (
@@ -175,43 +178,58 @@ export default function VideoComments({ video, user, isAuth }: VideoCommentsProp
             {isAuth && user && (
                 <Stack
                     component="form"
-                    direction={{ xs: "column", sm: "row" }}
                     spacing={1}
-                    alignItems={{ xs: "stretch", sm: "center" }}
                     mb={3}
                     onSubmit={(e) => {
                         e.preventDefault();
                         if (videoId) {
-                            void handleSubmitComment();
+                            void handleSubmitComment(publicContentConsent);
                         }
                     }}
                 >
-                    <UserAvatar username={user.username} avatar_url={user.avatar_url} />
+                    <Stack direction={{ xs: "column", sm: "row" }} spacing={1} alignItems={{ xs: "stretch", sm: "center" }}>
+                        <UserAvatar username={user.username} avatar_url={user.avatar_url} />
 
-                    <Input
-                        fullWidth
-                        placeholder="Добавьте комментарий…"
-                        disableUnderline
-                        value={commentText}
-                        onChange={(e) => setCommentText(e.target.value)}
-                        sx={{
-                            px: 1.5,
-                            py: 0.5,
-                            borderRadius: 5,
-                            fontSize: 14,
-                            bgcolor: (theme) => theme.palette.background.paper,
-                            color: (theme) => theme.palette.text.primary,
-                        }}
-                        endAdornment={
-                            <IconButton type="submit" disabled={isDisabledSend || sendingComment}>
-                                <SendIcon
-                                    sx={{
-                                        color: (theme) =>
-                                            isDisabledSend ? theme.palette.text.secondary : theme.palette.text.primary,
-                                    }}
-                                />
-                            </IconButton>
+                        <Input
+                            fullWidth
+                            placeholder="Добавьте комментарий…"
+                            disableUnderline
+                            value={commentText}
+                            onChange={(e) => setCommentText(e.target.value)}
+                            sx={{
+                                px: 1.5,
+                                py: 0.5,
+                                borderRadius: 5,
+                                fontSize: 14,
+                                bgcolor: (theme) => theme.palette.background.paper,
+                                color: (theme) => theme.palette.text.primary,
+                            }}
+                            endAdornment={
+                                <IconButton type="submit" disabled={isSubmitDisabled}>
+                                    <SendIcon
+                                        sx={{
+                                            color: (theme) =>
+                                                isSubmitDisabled ? theme.palette.text.secondary : theme.palette.text.primary,
+                                        }}
+                                    />
+                                </IconButton>
+                            }
+                        />
+                    </Stack>
+                    <FormControlLabel
+                        control={
+                            <Checkbox
+                                checked={publicContentConsent}
+                                onChange={(e) => setPublicContentConsent(e.target.checked)}
+                                disabled={sendingComment}
+                            />
                         }
+                        label={
+                            <Typography fontSize={12} color="text.secondary">
+                                {PUBLIC_CONTENT_CONSENT_TEXT} Комментарий будет виден другим пользователям.
+                            </Typography>
+                        }
+                        sx={{ m: 0, alignItems: "flex-start", pl: { xs: 0, sm: 6 } }}
                     />
                 </Stack>
             )}

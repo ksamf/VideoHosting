@@ -23,6 +23,7 @@ type User interface {
 	GetRecommendations(userID uuid.UUID, limit, offset int) ([]*database.Video, error)
 	UpsertAuthorAffinityFromSubscribe(userID, channelID uuid.UUID, action string) error
 	UpsertAffinitiesFromView(userID, videoID uuid.UUID, watchedSeconds int) error
+	RecordPersonalDataConsent(userId uuid.UUID, version, ip string) error
 }
 type Video interface {
 	Insert(video *database.Video) error

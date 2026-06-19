@@ -16,7 +16,7 @@ export default function SearchField() {
 
   const goToSearch = () => {
     const q = query.trim();
-    if (q.length < 2) return;
+    if (q.length === 0) return;
     const next = `/search?q=${encodeURIComponent(q)}`;
     const current = `${location.pathname}${location.search}`;
     if (current !== next) {

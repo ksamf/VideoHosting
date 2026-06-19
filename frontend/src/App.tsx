@@ -13,6 +13,8 @@ import Channel from "./pages/Channel"
 import Subscriptions from "./pages/Subscriptions"
 import Search from "./pages/Search"
 import { appSx } from "./styles/sx/app"
+import CookieNotice from "./components/common/CookieNotice"
+import PrivacyPolicy from "./pages/PrivacyPolicy"
 
 type ThemeMode = "light" | "dark";
 
@@ -41,8 +43,10 @@ export default function App({ themeMode, onToggleTheme }: AppProps) {
           <Route path='/liked' element={<Liked />} />
           <Route path='/channel/:id' element={<Channel />} />
           <Route path='/search' element={<Search />} />
+          <Route path='/privacy' element={<PrivacyPolicy />} />
         </Routes>
       </Box>
+      <CookieNotice />
 
     </>
   )

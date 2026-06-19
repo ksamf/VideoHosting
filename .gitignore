@@ -13,3 +13,11 @@ translate/
 node_modules/
 .vite/
 *.pb
+# CocoIndex Code (ccc)
+/.cocoindex_code/
+/.gitnexus/
+*.docx
+*.log
+*.pptx
+*.txt
+dist/

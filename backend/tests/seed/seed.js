@@ -14,10 +14,12 @@
  *   --title-template "Видео {u}-{v} ({file})" \
  *   --description-template "Описание для u={u}, v={v}" \
  *   --tags "seed,author_{u},video_{v}" \
+ *   --generated-durations "3,15,45,90" \
+ *   --test-cases mixed \
  *   --password Qwerty123! \
  *   --prefix seed_user
  *
- * If --dir / --preview-dir are omitted, files are generated via ffmpeg.
+ * If --dir / --preview-dir / --avatar-dir are omitted, files are generated via ffmpeg.
  */
 
 import fs from "node:fs/promises";
@@ -40,6 +42,47 @@ const DEFAULTS = {
   tags: "seed,u{u},v{v}",
   password: "Qwerty123!",
   prefix: "seed_user",
+  generatedDurations: "3,15,45,90",
+  testCases: "",
+};
+
+const AVATAR_COLORS = [
+  "0x2563EB",
+  "0x7C3AED",
+  "0x059669",
+  "0xD97706",
+  "0xDC2626",
+  "0x0F766E",
+  "0xBE185D",
+  "0x334155",
+  "0x1D4ED8",
+  "0x9333EA",
+];
+
+const DEFAULT_VIDEO_CASE = {
+  key: "default",
+  withDescription: true,
+  withTags: true,
+};
+
+const TEST_CASE_PROFILES = {
+  mixed: {
+    userAvatarMode: "alternate",
+    videoCases: [
+      { key: "full", withDescription: true, withTags: true },
+      { key: "no_description", withDescription: false, withTags: true },
+      { key: "no_tags", withDescription: true, withTags: false },
+      { key: "minimal", withDescription: false, withTags: false },
+    ],
+  },
+  minimal: {
+    userAvatarMode: "none",
+    videoCases: [{ key: "minimal", withDescription: false, withTags: false }],
+  },
+  rich: {
+    userAvatarMode: "all",
+    videoCases: [{ key: "full", withDescription: true, withTags: true }],
+  },
 };
 
 function parseArgs(argv) {
@@ -63,9 +106,46 @@ function parseArgs(argv) {
     if (key === "tags") out.tags = value;
     if (key === "password") out.password = value;
     if (key === "prefix") out.prefix = value;
+    if (key === "generated-durations") out.generatedDurations = value;
+    if (key === "test-cases") out.testCases = value;
     i += 1;
   }
   return out;
+}
+
+function parseDurations(raw) {
+  const parsed = String(raw || "")
+    .split(",")
+    .map((v) => Number(v.trim()))
+    .filter((v) => Number.isFinite(v) && v > 0);
+  return parsed.length > 0 ? parsed : [3];
+}
+
+function resolveTestCaseProfile(name) {
+  if (!name) return null;
+  return TEST_CASE_PROFILES[name] || null;
+}
+
+function shouldUploadAvatarForUser(userIndex, mode) {
+  if (mode === "all") return true;
+  if (mode === "none") return false;
+  // alternate: 1st user with avatar, 2nd without, etc.
+  return userIndex % 2 === 1;
+}
+
+function escapeDrawText(value) {
+  return String(value || "")
+    .replaceAll("\\", "\\\\")
+    .replaceAll(":", "\\:")
+    .replaceAll("'", "\\'")
+    .replaceAll("%", "\\%");
+}
+
+function sanitizeFilePart(value) {
+  return String(value || "")
+    .replaceAll(/[^a-zA-Z0-9_-]+/g, "_")
+    .replaceAll(/_+/g, "_")
+    .slice(0, 80);
 }
 
 function isSuccessStatus(status) {
@@ -201,11 +281,11 @@ async function getImageFiles(dir) {
     .filter((p) => allowed.has(path.extname(p).toLowerCase()));
 }
 
-async function createTestMP4(outPath) {
+async function createTestMP4(outPath, durationSeconds = 1) {
   // Mirrors backend/internal/testutil/CreateTestMP4.
   await execFileAsync("ffmpeg", [
     "-f", "lavfi",
-    "-i", "color=c=black:s=480x360:d=1",
+    "-i", `color=c=black:s=480x360:d=${durationSeconds}`,
     "-f", "lavfi",
     "-i", "anullsrc",
     "-shortest",
@@ -216,27 +296,67 @@ async function createTestMP4(outPath) {
   ]);
 }
 
-async function createTestPreview(outPath) {
-  await execFileAsync("ffmpeg", [
-    "-f", "lavfi",
-    "-i", "color=c=black:s=480x360",
-    "-frames:v", "1",
-    outPath,
-    "-y",
-  ]);
+async function createTestPreview(outPath, title) {
+  const safeTitle = escapeDrawText(title || "Видео");
+  try {
+    await execFileAsync("ffmpeg", [
+      "-f", "lavfi",
+      "-i", "color=c=black:s=1280x720:d=1",
+      "-vf",
+      `drawtext=fontcolor=white:fontsize=54:text='${safeTitle}':x=(w-text_w)/2:y=(h-text_h)/2`,
+      "-frames:v", "1",
+      outPath,
+      "-y",
+    ]);
+  } catch {
+    // Fallback for ffmpeg builds without drawtext filter.
+    await execFileAsync("ffmpeg", [
+      "-f", "lavfi",
+      "-i", "color=c=black:s=1280x720:d=1",
+      "-frames:v", "1",
+      outPath,
+      "-y",
+    ]);
+  }
+}
+
+async function createTestAvatar(outPath, letter, color) {
+  const safeLetter = escapeDrawText((letter || "U").slice(0, 1).toUpperCase());
+  try {
+    await execFileAsync("ffmpeg", [
+      "-f", "lavfi",
+      "-i", `color=c=${color}:s=512x512:d=1`,
+      "-vf",
+      `drawtext=fontcolor=white:fontsize=250:text='${safeLetter}':x=(w-text_w)/2:y=(h-text_h)/2`,
+      "-frames:v", "1",
+      outPath,
+      "-y",
+    ]);
+  } catch {
+    await execFileAsync("ffmpeg", [
+      "-f", "lavfi",
+      "-i", `color=c=${color}:s=512x512:d=1`,
+      "-frames:v", "1",
+      outPath,
+      "-y",
+    ]);
+  }
 }
 
 async function ensureGeneratedAssetsIfNeeded(opts) {
   let generatedRoot = "";
-  const count = Math.max(1, Number(opts.videos) || 1);
+  const videosCount = Math.max(1, Number(opts.videos) || 1);
+  const usersCount = Math.max(1, Number(opts.users) || 1);
+  const durations = parseDurations(opts.generatedDurations);
 
   if (!opts.dir) {
     generatedRoot = await fs.mkdtemp(path.join(os.tmpdir(), "videohosting-seed-"));
     const videosDir = path.join(generatedRoot, "videos");
     await fs.mkdir(videosDir, { recursive: true });
 
-    for (let i = 1; i <= count; i += 1) {
-      await createTestMP4(path.join(videosDir, `generated_${i}.mp4`));
+    for (let i = 1; i <= videosCount; i += 1) {
+      const duration = durations[(i - 1) % durations.length];
+      await createTestMP4(path.join(videosDir, `generated_${i}_${duration}s.mp4`), duration);
     }
     opts.dir = videosDir;
   }
@@ -247,11 +367,24 @@ async function ensureGeneratedAssetsIfNeeded(opts) {
     }
     const previewsDir = path.join(generatedRoot, "previews");
     await fs.mkdir(previewsDir, { recursive: true });
-
-    for (let i = 1; i <= count; i += 1) {
-      await createTestPreview(path.join(previewsDir, `generated_${i}.jpg`));
-    }
     opts.previewDir = previewsDir;
+    opts._generatedPreviewDir = previewsDir;
+  }
+
+  if (!opts.avatarDir) {
+    if (!generatedRoot) {
+      generatedRoot = await fs.mkdtemp(path.join(os.tmpdir(), "videohosting-seed-"));
+    }
+    const avatarsDir = path.join(generatedRoot, "avatars");
+    await fs.mkdir(avatarsDir, { recursive: true });
+
+    for (let i = 1; i <= usersCount; i += 1) {
+      const username = `${opts.prefix}_${i}`;
+      const color = AVATAR_COLORS[(i - 1) % AVATAR_COLORS.length];
+      const letter = username[0] || "U";
+      await createTestAvatar(path.join(avatarsDir, `generated_avatar_${i}.png`), letter, color);
+    }
+    opts.avatarDir = avatarsDir;
   }
 
   return generatedRoot;
@@ -261,6 +394,7 @@ function renderTemplate(template, context) {
   return String(template)
     .replaceAll("{u}", String(context.u))
     .replaceAll("{v}", String(context.v))
+    .replaceAll("{case}", context.case || "")
     .replaceAll("{file}", context.file || "")
     .replaceAll("{ext}", context.ext || "");
 }
@@ -339,7 +473,7 @@ async function uploadAvatar(apiBase, jar, userId, avatarPath) {
   }
 }
 
-async function uploadVideo(apiBase, jar, filePath, previewPath, context, opts) {
+async function uploadVideo(apiBase, jar, filePath, previewPath, context, opts, videoCase) {
   const fileName = path.basename(filePath);
   const ext = path.extname(fileName);
   const bytes = await fs.readFile(filePath);
@@ -348,19 +482,21 @@ async function uploadVideo(apiBase, jar, filePath, previewPath, context, opts) {
   const form = new FormData();
   form.append("video", blob, fileName);
   form.append("name", renderTemplate(opts.titleTemplate, context));
-  form.append("description", renderTemplate(opts.descriptionTemplate, context));
-
-  for (const tag of buildTags(opts.tags, context)) {
-    form.append("tags[]", tag);
+  if (videoCase.withDescription) {
+    form.append("description", renderTemplate(opts.descriptionTemplate, context));
   }
 
-  if (previewPath) {
-    const previewName = path.basename(previewPath);
-    const previewExt = path.extname(previewName);
-    const previewBytes = await fs.readFile(previewPath);
-    const previewBlob = new Blob([previewBytes], { type: imageExtToMime(previewExt) });
-    form.append("preview", previewBlob, previewName);
+  if (videoCase.withTags) {
+    for (const tag of buildTags(opts.tags, context)) {
+      form.append("tags[]", tag);
+    }
   }
+
+  const previewName = path.basename(previewPath);
+  const previewExt = path.extname(previewName);
+  const previewBytes = await fs.readFile(previewPath);
+  const previewBlob = new Blob([previewBytes], { type: imageExtToMime(previewExt) });
+  form.append("preview", previewBlob, previewName);
 
   const { res, body } = await requestForm(`${apiBase}/video/upload`, form, jar);
   if (!isSuccessStatus(res.status)) {
@@ -377,6 +513,10 @@ async function main() {
   if (!Number.isFinite(opts.videos) || opts.videos <= 0) {
     throw new Error("--videos must be > 0");
   }
+  const testCaseProfile = resolveTestCaseProfile(opts.testCases);
+  if (opts.testCases && !testCaseProfile) {
+    throw new Error(`unknown --test-cases value "${opts.testCases}". Available: ${Object.keys(TEST_CASE_PROFILES).join(", ")}`);
+  }
 
   const generatedRoot = await ensureGeneratedAssetsIfNeeded(opts);
 
@@ -392,11 +532,14 @@ async function main() {
   console.log(`[seed] sourceFiles=${videoFiles.length}`);
   console.log(`[seed] previewFiles=${previewFiles.length}`);
   console.log(`[seed] avatarFiles=${avatarFiles.length}`);
+  console.log(`[seed] generatedDurations=${parseDurations(opts.generatedDurations).join(",")}`);
+  console.log(`[seed] testCases=${opts.testCases || "off"}`);
   if (generatedRoot) {
     console.log(`[seed] generatedAssetsDir=${generatedRoot}`);
   }
 
   let uploadsTotal = 0;
+  const generatedPreviewCache = new Map();
   for (let i = 1; i <= opts.users; i += 1) {
     const email = `${opts.prefix}_${i}@test.local`;
     const username = `${opts.prefix}_${i}`;
@@ -410,24 +553,63 @@ async function main() {
       throw new Error(`user id not found in /me response for user ${email}`);
     }
 
-    if (avatarFiles.length > 0) {
+    const shouldUploadAvatar =
+      avatarFiles.length > 0 &&
+      shouldUploadAvatarForUser(i, testCaseProfile?.userAvatarMode || "all");
+
+    if (shouldUploadAvatar) {
       const avatarPath = avatarFiles[(i - 1) % avatarFiles.length];
       await uploadAvatar(opts.api, jar, userId, avatarPath);
       console.log(`[seed] avatar uploaded u=${i} file=${path.basename(avatarPath)}`);
+    } else if (avatarFiles.length > 0) {
+      console.log(`[seed] avatar skipped u=${i}`);
     }
 
     for (let j = 1; j <= opts.videos; j += 1) {
+      const videoCase = testCaseProfile
+        ? testCaseProfile.videoCases[(j - 1) % testCaseProfile.videoCases.length]
+        : DEFAULT_VIDEO_CASE;
       const filePath = videoFiles[(j - 1) % videoFiles.length];
-      const previewPath = previewFiles.length > 0 ? previewFiles[(j - 1) % previewFiles.length] : "";
       const context = {
         u: i,
         v: j,
+        case: videoCase.key,
         file: path.basename(filePath, path.extname(filePath)),
         ext: path.extname(filePath).replace(".", ""),
       };
-      const data = await uploadVideo(opts.api, jar, filePath, previewPath, context, opts);
+      const renderedTitle = renderTemplate(opts.titleTemplate, context);
+      let previewPath = "";
+      if (previewFiles.length > 0) {
+        previewPath = previewFiles[(j - 1) % previewFiles.length];
+      } else if (opts._generatedPreviewDir) {
+        const cacheKey = `${i}:${j}:${renderedTitle}`;
+        const cached = generatedPreviewCache.get(cacheKey);
+        if (cached) {
+          previewPath = cached;
+        } else {
+          const fileSafe = sanitizeFilePart(`u${i}_v${j}_${renderedTitle}`);
+          const generatedPath = path.join(opts._generatedPreviewDir, `${fileSafe}.jpg`);
+          await createTestPreview(generatedPath, renderedTitle);
+          generatedPreviewCache.set(cacheKey, generatedPath);
+          previewPath = generatedPath;
+        }
+      }
+
+      if (!previewPath) {
+        if (!opts._generatedPreviewDir) {
+          const generatedRoot = await fs.mkdtemp(path.join(os.tmpdir(), "videohosting-seed-preview-"));
+          opts._generatedPreviewDir = path.join(generatedRoot, "previews");
+          await fs.mkdir(opts._generatedPreviewDir, { recursive: true });
+        }
+        const fileSafe = sanitizeFilePart(`u${i}_v${j}_${renderedTitle}`);
+        previewPath = path.join(opts._generatedPreviewDir, `${fileSafe}.jpg`);
+        await createTestPreview(previewPath, renderedTitle);
+      }
+      const data = await uploadVideo(opts.api, jar, filePath, previewPath, context, opts, videoCase);
       uploadsTotal += 1;
-      console.log(`[seed] uploaded u=${i} v=${j} id=${data?.video_id ?? "unknown"}`);
+      console.log(
+        `[seed] uploaded u=${i} v=${j} case=${videoCase.key} preview=yes desc=${videoCase.withDescription ? "yes" : "no"} tags=${videoCase.withTags ? "yes" : "no"} id=${data?.video_id ?? "unknown"}`
+      );
     }
   }
 

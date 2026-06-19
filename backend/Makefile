@@ -23,12 +23,14 @@ SEED_PREFIX?=seed_user
 SEED_TITLE_TEMPLATE?=seed_u{u}_v{v}
 SEED_DESCRIPTION_TEMPLATE?=seed upload user={u} video={v}
 SEED_TAGS?=seed,u{u},v{v}
+SEED_GENERATED_DURATIONS?=3,15,45,90
+SEED_TEST_CASES?=
 
 SEED_DIR_ARG=$(if $(SEED_DIR),--dir "$(SEED_DIR)",)
 SEED_PREVIEW_DIR_ARG=$(if $(SEED_PREVIEW_DIR),--preview-dir "$(SEED_PREVIEW_DIR)",)
 SEED_AVATAR_DIR_ARG=$(if $(SEED_AVATAR_DIR),--avatar-dir "$(SEED_AVATAR_DIR)",)
 
-.PHONY: all run create_migration migrate_up migrate_down migrate_force add_all add_air add_migrate pprof_cpu pprof_heap pprof_goroutine pprof_block pprof_mutex pprof_all pprof_top pprof_web pprof_diff seed seed_quick seed_custom
+.PHONY: all run create_migration migrate_up migrate_down migrate_force add_all add_air add_migrate pprof_cpu pprof_heap pprof_goroutine pprof_block pprof_mutex pprof_all pprof_top pprof_web pprof_diff seed seed_quick seed_custom seed_cases_mixed seed_cases_minimal seed_cases_rich
 
 all:
 	make migrate_up && air
@@ -95,6 +97,8 @@ seed:
 		--title-template "$(SEED_TITLE_TEMPLATE)" \
 		--description-template "$(SEED_DESCRIPTION_TEMPLATE)" \
 		--tags "$(SEED_TAGS)" \
+		--generated-durations "$(SEED_GENERATED_DURATIONS)" \
+		$(if $(SEED_TEST_CASES),--test-cases "$(SEED_TEST_CASES)",) \
 		--password "$(SEED_PASSWORD)" \
 		--prefix "$(SEED_PREFIX)"
 
@@ -103,3 +107,12 @@ seed_quick:
 
 seed_custom:
 	$(MAKE) seed
+
+seed_cases_mixed:
+	$(MAKE) seed SEED_TEST_CASES=mixed
+
+seed_cases_minimal:
+	$(MAKE) seed SEED_TEST_CASES=minimal
+
+seed_cases_rich:
+	$(MAKE) seed SEED_TEST_CASES=rich

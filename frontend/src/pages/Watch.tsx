@@ -1,7 +1,6 @@
 import VideoPlayer from "../components/video/VideoPlayer";
 import Box from "@mui/material/Box";
 import CircularProgress from "@mui/material/CircularProgress";
-import Divider from "@mui/material/Divider";
 import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
 import { Link, useParams } from "react-router-dom";
@@ -10,7 +9,7 @@ import { getVideoById } from "../api/videos";
 import { getUserByVideoId } from "../api/users";
 import useFetch from "../hooks/useFetch";
 import useAuth from "../hooks/useAuth";
-import { useCallback } from "react";
+import { useCallback, useMemo } from "react";
 import { PageError } from "../components/common/PageState";
 import { pageSx } from "../styles/sx/page";
 import WatchSkeleton from "../skeleton/WatchSkeleton";
@@ -18,7 +17,11 @@ import { shortenNumRu } from "../utils/ShortenNumRu";
 import useWatchSidebar from "../hooks/useWatchSidebar";
 import type { Video } from "../types/video";
 
-function SidebarVideoItem({ video }: { video: Video }) {
+type SidebarItemSource = "channel" | "recommendation";
+
+function SidebarVideoItem({ video, source }: { video: Video; source: SidebarItemSource }) {
+    const createdDate = video?.created_at ? new Date(video.created_at).toLocaleDateString("ru-RU") : "";
+
     return (
         <Box component={Link} to={`/watch/${video.video_id}`} sx={pageSx.watchSidebarItem}>
             <Box
@@ -28,14 +31,15 @@ function SidebarVideoItem({ video }: { video: Video }) {
                 sx={pageSx.watchSidebarThumb}
             />
             <Box sx={pageSx.watchSidebarMeta}>
-                <Typography variant="body2" fontWeight={600} noWrap>
+                <Typography sx={pageSx.watchSidebarMetaTitle}>
                     {video.name}
                 </Typography>
-                <Typography variant="caption" color="text.secondary" noWrap>
-                    {video.username}
+                <Typography sx={pageSx.watchSidebarMetaSecondary}>
+                    {video.username} • {source === "channel" ? "С этого канала" : "Рекомендуем"}
                 </Typography>
-                <Typography variant="caption" color="text.secondary">
+                <Typography sx={pageSx.watchSidebarMetaSecondary}>
                     {shortenNumRu(Number(video.views || 0))} просмотров
+                    {createdDate ? ` • ${createdDate}` : ""}
                 </Typography>
             </Box>
         </Box>
@@ -91,6 +95,36 @@ export default function Watch() {
 
     const loading = videoLoading || channelLoading;
     const error = videoError || channelError;
+    const mixedSidebarVideos = useMemo(() => {
+        const result: Array<{ video: Video; source: SidebarItemSource }> = [];
+        const seen = new Set<string>();
+        let channelIndex = 0;
+        let recommendationIndex = 0;
+
+        while (channelIndex < channelVideoList.length || recommendationIndex < recommendationList.length) {
+            if (channelIndex < channelVideoList.length) {
+                const item = channelVideoList[channelIndex++];
+                if (!seen.has(item.video_id)) {
+                    seen.add(item.video_id);
+                    result.push({ video: item, source: "channel" });
+                }
+            }
+
+            if (recommendationIndex < recommendationList.length) {
+                const item = recommendationList[recommendationIndex++];
+                if (!seen.has(item.video_id)) {
+                    seen.add(item.video_id);
+                    result.push({ video: item, source: "recommendation" });
+                }
+            }
+        }
+
+        return result;
+    }, [channelVideoList, recommendationList]);
+    const loadingInitialSidebar = channelLoadingInitial || (isAuth && recommendationLoadingInitial);
+    const loadingMoreSidebar = channelLoadingMore || (isAuth && recommendationLoadingMore);
+    const hasMoreSidebar = channelHasMore || (isAuth && recommendationHasMore);
+    const sidebarError = channelVideosError || (isAuth ? recommendationsError : null);
 
     if (loading) {
         return <WatchSkeleton />;
@@ -130,69 +164,38 @@ export default function Watch() {
                 </Box>
 
                 <Box sx={pageSx.watchSidebar}>
-                    <Typography variant="subtitle1" fontWeight={600} sx={pageSx.watchSidebarTitle}>
-                        С этого канала
-                    </Typography>
-                    {channelLoadingInitial ? (
-                        <Box sx={pageSx.watchSidebarLoader}>
-                            <CircularProgress size={20} />
-                        </Box>
-                    ) : channelVideosError ? (
-                        <Typography sx={pageSx.searchMuted}>
-                            Не удалось загрузить видео канала.
+                    <Box sx={pageSx.watchSidebarSection}>
+                        <Typography variant="subtitle1" fontWeight={600} sx={pageSx.watchSidebarTitle}>
+                            Следующее
                         </Typography>
-                    ) : channelVideoList.length === 0 ? (
-                        <Typography sx={pageSx.searchMuted}>
-                            Других видео пока нет.
-                        </Typography>
-                    ) : (
-                        <Stack spacing={1}>
-                            {channelVideoList.map((item) => (
-                                <SidebarVideoItem key={item.video_id} video={item} />
-                            ))}
-                        </Stack>
-                    )}
-                    {channelHasMore && <Box ref={channelLoadMoreRef} sx={{ height: 1 }} />}
-                    {channelLoadingMore && (
-                        <Box sx={pageSx.watchSidebarLoader}>
-                            <CircularProgress size={18} />
-                        </Box>
-                    )}
-
-                    <Divider sx={{ my: 2 }} />
-
-                    <Typography variant="subtitle1" fontWeight={600} sx={pageSx.watchSidebarTitle}>
-                        Рекомендуем
-                    </Typography>
-                    {!isAuth ? (
-                        <Typography sx={pageSx.searchMuted}>
-                            Войдите в аккаунт, чтобы видеть персональные рекомендации.
-                        </Typography>
-                    ) : recommendationLoadingInitial ? (
-                        <Box sx={pageSx.watchSidebarLoader}>
-                            <CircularProgress size={20} />
-                        </Box>
-                    ) : recommendationsError ? (
-                        <Typography sx={pageSx.searchMuted}>
-                            Не удалось загрузить рекомендации.
-                        </Typography>
-                    ) : recommendationList.length === 0 ? (
-                        <Typography sx={pageSx.searchMuted}>
-                            Рекомендаций пока нет.
-                        </Typography>
-                    ) : (
-                        <Stack spacing={1}>
-                            {recommendationList.map((item) => (
-                                <SidebarVideoItem key={item.video_id} video={item} />
-                            ))}
-                        </Stack>
-                    )}
-                    {isAuth && recommendationHasMore && <Box ref={recommendationLoadMoreRef} sx={{ height: 1 }} />}
-                    {isAuth && recommendationLoadingMore && (
-                        <Box sx={pageSx.watchSidebarLoader}>
-                            <CircularProgress size={18} />
-                        </Box>
-                    )}
+                        {loadingInitialSidebar && mixedSidebarVideos.length === 0 ? (
+                            <Box sx={pageSx.watchSidebarLoader}>
+                                <CircularProgress size={20} />
+                            </Box>
+                        ) : mixedSidebarVideos.length === 0 ? (
+                            <Typography sx={pageSx.searchMuted}>
+                                {sidebarError ?? "Пока нет видео для продолжения просмотра."}
+                            </Typography>
+                        ) : (
+                            <Stack spacing={0.4}>
+                                {mixedSidebarVideos.map(({ video: item, source }) => (
+                                    <SidebarVideoItem key={item.video_id} video={item} source={source} />
+                                ))}
+                            </Stack>
+                        )}
+                        {mixedSidebarVideos.length > 0 && sidebarError && (
+                            <Typography sx={pageSx.searchMuted}>
+                                Часть ленты временно недоступна.
+                            </Typography>
+                        )}
+                        {channelHasMore && <Box ref={channelLoadMoreRef} sx={{ height: 1 }} />}
+                        {isAuth && recommendationHasMore && <Box ref={recommendationLoadMoreRef} sx={{ height: 1 }} />}
+                        {hasMoreSidebar && loadingMoreSidebar && (
+                            <Box sx={pageSx.watchSidebarLoader}>
+                                <CircularProgress size={18} />
+                            </Box>
+                        )}
+                    </Box>
                 </Box>
             </Box>
         </Box>

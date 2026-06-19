@@ -3,6 +3,7 @@ package handler
 import (
 	"encoding/json"
 	"fmt"
+	"mime/multipart"
 	"net/http"
 	"path/filepath"
 	"strconv"
@@ -74,6 +75,10 @@ func (h *VideoHandler) Upload(c *gin.Context) {
 	description := c.PostForm("description")
 	tags := c.PostFormArray("tags[]")
 
+	if !requirePublicContentConsent(c, c.PostForm("public_content_consent")) {
+		return
+	}
+
 	if name == "" || len(name) > 100 {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid title"})
 		return
@@ -82,6 +87,30 @@ func (h *VideoHandler) Upload(c *gin.Context) {
 	if len(description) > 5000 {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "description too long"})
 		return
+	}
+
+	var defaultPreview multipart.File
+	var defaultPreviewHeader *multipart.FileHeader
+	if file, header, err := c.Request.FormFile("default_preview"); err == nil {
+		defer file.Close()
+		if err := validateImageUpload(header); err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			return
+		}
+		defaultPreview = file
+		defaultPreviewHeader = header
+	}
+
+	var previewFile multipart.File
+	var previewHeader *multipart.FileHeader
+	if file, header, err := c.Request.FormFile("preview"); err == nil {
+		defer file.Close()
+		if err := validateImageUpload(header); err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			return
+		}
+		previewFile = file
+		previewHeader = header
 	}
 
 	videoID := uuid.New()
@@ -99,8 +128,7 @@ func (h *VideoHandler) Upload(c *gin.Context) {
 	}
 
 	var previewKey *string
-	if defaultPreview, defaultPreviewHeader, err := c.Request.FormFile("default_preview"); err == nil {
-		defer defaultPreview.Close()
+	if defaultPreview != nil {
 		previewExt := strings.ToLower(filepath.Ext(defaultPreviewHeader.Filename))
 
 		key := fmt.Sprintf("video/%s/default_preview%s", videoID, previewExt)
@@ -118,14 +146,8 @@ func (h *VideoHandler) Upload(c *gin.Context) {
 
 	}
 
-	if previewFile, previewHeader, err := c.Request.FormFile("preview"); err == nil {
-		defer previewFile.Close()
-
+	if previewFile != nil {
 		previewExt := strings.ToLower(filepath.Ext(previewHeader.Filename))
-		if previewExt != ".jpg" && previewExt != ".png" && previewExt != ".webp" {
-			c.JSON(http.StatusBadRequest, gin.H{"error": "invalid preview format"})
-			return
-		}
 
 		key := fmt.Sprintf("video/%s/preview%s", videoID, previewExt)
 
@@ -155,7 +177,7 @@ func (h *VideoHandler) Upload(c *gin.Context) {
 		PreviewUrl:  previewUrl,
 		Description: description,
 		Tags:        tags,
-		Status:      "processing",
+		Status:      database.VideoStatusProcessing,
 	})
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "db error"})
@@ -178,7 +200,7 @@ func (h *VideoHandler) Upload(c *gin.Context) {
 
 	c.JSON(http.StatusOK, gin.H{
 		"video_id": videoID,
-		"status":   "uploading",
+		"status":   database.VideoStatusProcessing,
 	})
 }
 
@@ -213,17 +235,7 @@ func (h *VideoHandler) Get(c *gin.Context) {
 }
 
 func (h *VideoHandler) GetAll(c *gin.Context) {
-	limit := c.Query("limit")
-	offset := c.Query("offset")
-
-	intLimit, err := strconv.Atoi(limit)
-	if err != nil {
-		intLimit = 10
-	}
-	intOffset, err := strconv.Atoi(offset)
-	if err != nil {
-		intOffset = 0
-	}
+	intLimit, intOffset := pagination(c, "10")
 
 	cacheKey := fmt.Sprintf("videos:%d:%d", intLimit, intOffset)
 	h.respondWithCachedJSON(c, cacheKey, 2*time.Minute, func() (any, error) {
@@ -263,14 +275,7 @@ func (h *VideoHandler) Search(c *gin.Context) {
 		return
 	}
 
-	limit, err := strconv.Atoi(c.DefaultQuery("limit", "20"))
-	if err != nil {
-		limit = 20
-	}
-	offset, err := strconv.Atoi(c.DefaultQuery("offset", "0"))
-	if err != nil {
-		offset = 0
-	}
+	limit, offset := pagination(c, "20")
 
 	cacheKey := fmt.Sprintf("search:%s:%d:%d", strings.ToLower(query), limit, offset)
 	h.respondWithCachedJSON(c, cacheKey, time.Minute, func() (any, error) {
@@ -320,6 +325,47 @@ func (h *VideoHandler) respondWithCachedJSON(
 	c.Data(http.StatusOK, "application/json; charset=utf-8", payload)
 }
 
+func pagination(c *gin.Context, defaultLimit string) (int, int) {
+	limit, err := strconv.Atoi(c.DefaultQuery("limit", defaultLimit))
+	if err != nil || limit <= 0 {
+		limit, _ = strconv.Atoi(defaultLimit)
+	}
+	if limit > 100 {
+		limit = 100
+	}
+
+	offset, err := strconv.Atoi(c.DefaultQuery("offset", "0"))
+	if err != nil || offset < 0 {
+		offset = 0
+	}
+
+	return limit, offset
+}
+
+func validateImageUpload(header *multipart.FileHeader) error {
+	if header == nil {
+		return fmt.Errorf("image is required")
+	}
+	if header.Size <= 0 {
+		return fmt.Errorf("empty image file")
+	}
+
+	ext := strings.ToLower(filepath.Ext(header.Filename))
+	allowed := map[string]bool{
+		".jpg": true, ".jpeg": true, ".png": true, ".webp": true,
+	}
+	if !allowed[ext] {
+		return fmt.Errorf("unsupported image format")
+	}
+
+	contentType := strings.ToLower(header.Header.Get("Content-Type"))
+	if contentType != "" && contentType != "application/octet-stream" && !strings.HasPrefix(contentType, "image/") {
+		return fmt.Errorf("invalid image content type")
+	}
+
+	return nil
+}
+
 func (h *VideoHandler) Delete(c *gin.Context) {
 	id, err := uuid.Parse(c.Param("id"))
 	if err != nil {
@@ -328,10 +374,15 @@ func (h *VideoHandler) Delete(c *gin.Context) {
 	}
 	user, exists := c.Get("user")
 	if !exists {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "user not found"})
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorized"})
 		return
 	}
-	userId := user.(database.User).UserId
+	authUser, ok := user.(*database.User)
+	if !ok || authUser.UserId == uuid.Nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "invalid user"})
+		return
+	}
+	userId := authUser.UserId
 	videoOwner, err := h.user.GetByVideoId(id)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
@@ -346,7 +397,7 @@ func (h *VideoHandler) Delete(c *gin.Context) {
 		return
 	}
 
-	if err = h.s3.DeleteObject(id.String()); err != nil {
+	if err = h.s3.DeletePrefix("video/" + id.String() + "/"); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}

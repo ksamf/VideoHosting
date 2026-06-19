@@ -1,7 +1,6 @@
 import { Box, CircularProgress, Stack, Typography } from "@mui/material";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
-import VideoGrid from "../components/video/VideoGrid";
 import { searchVideos } from "../api/videos";
 import { searchChannels } from "../api/users";
 import { PageError } from "../components/common/PageState";
@@ -10,6 +9,9 @@ import VideoGridSkeleton from "../skeleton/VideoGridSkeleton";
 import type { Video } from "../types/video";
 import type { User } from "../types/user";
 import UserAvatar from "../components/common/UserAvatar";
+import SubscribeButton from "../components/video/SubscribeButton";
+import { shortenNumRu } from "../utils/ShortenNumRu";
+import { formattedDate } from "../utils/FormattedDate";
 
 const SEARCH_PAGE_SIZE = 20;
 const CHANNEL_SEARCH_PAGE_SIZE = 10;
@@ -37,14 +39,16 @@ export default function Search() {
   const [loadingInitial, setLoadingInitial] = useState<boolean>(false);
   const [loadingMore, setLoadingMore] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
+  const [channelsError, setChannelsError] = useState<string | null>(null);
 
   const loadInitial = useCallback(async () => {
-    if (query.length < 2) {
+    if (query.length === 0) {
       setVideos([]);
       setChannels([]);
       setOffset(0);
       setHasMore(false);
       setError(null);
+      setChannelsError(null);
       setLoadingInitial(false);
       return;
     }
@@ -55,15 +59,32 @@ export default function Search() {
     setChannels([]);
     setOffset(0);
     setHasMore(false);
+    setChannelsError(null);
 
     try {
-      const [videoResult, channelResult] = await Promise.all([
+      const [videoResult, channelResult] = await Promise.allSettled([
         searchVideos({ q: query, limit: SEARCH_PAGE_SIZE, offset: 0 }),
         searchChannels({ q: query, limit: CHANNEL_SEARCH_PAGE_SIZE, offset: 0 }),
       ]);
 
-      const safeVideos = Array.isArray(videoResult) ? videoResult : [];
-      const safeChannels = Array.isArray(channelResult) ? channelResult : [];
+      if (videoResult.status === "rejected") {
+        throw videoResult.reason;
+      }
+
+      const safeVideos = Array.isArray(videoResult.value) ? videoResult.value : [];
+      const safeChannels =
+        channelResult.status === "fulfilled" && Array.isArray(channelResult.value)
+          ? channelResult.value
+          : [];
+
+      if (channelResult.status === "rejected") {
+        setChannelsError(
+          channelResult.reason instanceof Error
+            ? channelResult.reason.message
+            : "Ошибка загрузки каналов",
+        );
+      }
+
       setVideos(uniqueByVideoID(safeVideos));
       setChannels(safeChannels);
       setOffset(safeVideos.length);
@@ -76,7 +97,7 @@ export default function Search() {
   }, [query]);
 
   const loadMore = useCallback(async () => {
-    if (query.length < 2 || loadingInitial || loadingMore || !hasMore) {
+    if (query.length === 0 || loadingInitial || loadingMore || !hasMore) {
       return;
     }
 
@@ -100,7 +121,7 @@ export default function Search() {
   }, [loadInitial]);
 
   useEffect(() => {
-    if (!hasMore || loadingInitial || loadingMore || !loadMoreRef.current || query.length < 2) {
+    if (!hasMore || loadingInitial || loadingMore || !loadMoreRef.current || query.length === 0) {
       return;
     }
 
@@ -127,46 +148,112 @@ export default function Search() {
 
   return (
     <Box sx={pageSx.searchContainer}>
-      <Typography variant="h6" sx={pageSx.searchTitle}>
+      <Typography sx={{ ...pageSx.pageSectionTitle, ...pageSx.searchTitle }}>
         Результаты поиска: {query || "пустой запрос"}
       </Typography>
-      {query.length < 2 ? (
+      {query.length === 0 ? (
         <Typography sx={pageSx.pageStateText}>
-          Введите минимум 2 символа.
+          Введите поисковый запрос.
         </Typography>
-      ) : channels.length === 0 && videos.length === 0 ? (
+      ) : channels.length === 0 && videos.length === 0 && !channelsError ? (
         <Typography sx={pageSx.pageStateText}>
           Ничего не найдено.
         </Typography>
       ) : (
         <>
           {channels.length > 0 && (
-            <Box sx={{ mb: 2 }}>
+            <Box sx={pageSx.searchResultBlock}>
               <Typography variant="subtitle1" sx={pageSx.searchSectionTitle}>
-                Каналы
+                Каналы ({channels.length})
               </Typography>
               <Stack sx={pageSx.searchChannelList}>
                 {channels.map((channel) => (
-                  <Box
-                    key={channel.user_id}
-                    component={Link}
-                    to={`/channel/${channel.user_id}`}
-                    sx={pageSx.searchChannelItem}
-                  >
-                    <UserAvatar username={channel.username} avatar_url={channel.avatar_url} size={36} />
-                    <Typography sx={pageSx.searchChannelName}>{channel.username}</Typography>
+                  <Box key={channel.user_id} sx={pageSx.searchChannelItem}>
+                    <Box
+                      component={Link}
+                      to={`/channel/${channel.user_id}`}
+                      sx={pageSx.searchChannelMainLink}
+                    >
+                      <Box sx={pageSx.searchChannelAvatarWrap}>
+                        <UserAvatar username={channel.username} avatar_url={channel.avatar_url} size={88} />
+                      </Box>
+                      <Box sx={pageSx.searchChannelTextWrap}>
+                        <Typography sx={pageSx.searchChannelName}>
+                          {channel.username}
+                        </Typography>
+                        <Typography sx={pageSx.searchChannelMeta}>
+                          {shortenNumRu(Number(channel.subscriptions ?? 0))} подписчиков •{" "}
+                          {shortenNumRu(Number(channel.videos_count ?? 0))} видео
+                        </Typography>
+                      </Box>
+                    </Box>
+                    <Box sx={pageSx.searchChannelAction}>
+                      <SubscribeButton channelId={channel.user_id} />
+                    </Box>
                   </Box>
                 ))}
               </Stack>
             </Box>
           )}
-
-          {videos.length > 0 && (
-            <Typography variant="subtitle1" sx={pageSx.searchSectionTitle}>
-              Видео
+          {channelsError && (
+            <Typography sx={pageSx.searchMuted}>
+              Каналы временно недоступны: {channelsError}
             </Typography>
           )}
-          <VideoGrid videos={videos} />
+
+          {videos.length > 0 && (
+            <Box sx={pageSx.searchResultBlock}>
+              <Typography variant="subtitle1" sx={pageSx.searchSectionTitle}>
+                Видео ({videos.length})
+              </Typography>
+              <Box sx={pageSx.searchVideoList}>
+                {videos.map((video) => (
+                  <Box
+                    key={video.video_id}
+                    component={Link}
+                    to={`/watch/${video.video_id}`}
+                    sx={pageSx.searchVideoItem}
+                  >
+                    <Box sx={pageSx.searchVideoThumbWrap}>
+                      <Box
+                        component="img"
+                        src={video.preview_url}
+                        alt={video.name}
+                        sx={pageSx.searchVideoThumb}
+                      />
+                    </Box>
+
+                    <Box sx={pageSx.searchVideoMeta}>
+                      <Typography sx={pageSx.searchVideoTitle}>
+                        {video.name}
+                      </Typography>
+
+                      <Typography sx={pageSx.searchVideoStats}>
+                        {shortenNumRu(Number(video.views || 0))} просмотров • {formattedDate(video.created_at)}
+                      </Typography>
+
+                      <Box sx={pageSx.searchVideoChannelRow}>
+                        <UserAvatar
+                          username={video.username}
+                          avatar_url={video.user_avatar_url}
+                          size={28}
+                        />
+                        <Typography sx={pageSx.searchVideoChannel}>
+                          {video.username}
+                        </Typography>
+                      </Box>
+
+                      {video.description && (
+                        <Typography sx={pageSx.searchVideoDescription}>
+                          {video.description}
+                        </Typography>
+                      )}
+                    </Box>
+                  </Box>
+                ))}
+              </Box>
+            </Box>
+          )}
           {(hasMore || loadingMore) && (
             <Box ref={loadMoreRef} sx={pageSx.infiniteLoader}>
               {loadingMore && <CircularProgress size={24} />}

@@ -33,6 +33,10 @@ export default function ChannelHeader({ channel, authUser, isAuth, countVideos }
         if (!authUser?.user_id || authUser.user_id !== channel?.user_id) {
             return;
         }
+        const accepted = window.confirm("Аватар будет опубликован и доступен другим пользователям. Продолжить?");
+        if (!accepted) {
+            return;
+        }
         await uploadUserAvatar(authUser.user_id, file);
     };
     useEffect(() => {

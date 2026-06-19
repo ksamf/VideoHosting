@@ -4,7 +4,7 @@ import { Button } from "@mui/material";
 
 type SubscribeButtonProps = {
     channelId: string;
-    setSubscriptionsCount: Dispatch<SetStateAction<number>>;
+    setSubscriptionsCount?: Dispatch<SetStateAction<number>>;
 };
 
 export default function SubscribeButton({ channelId, setSubscriptionsCount }: SubscribeButtonProps) {
@@ -22,7 +22,7 @@ export default function SubscribeButton({ channelId, setSubscriptionsCount }: Su
 
             setIsSubscribed(!isSubscribed);
 
-            setSubscriptionsCount((prev) =>
+            setSubscriptionsCount?.((prev) =>
                 isSubscribed ? prev - 1 : prev + 1
             );
         } catch (e) {

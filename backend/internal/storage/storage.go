@@ -70,6 +70,21 @@ func (s3 *Storage) DeleteObject(object string) error {
 	return nil
 }
 
+func (s3 *Storage) DeletePrefix(prefix string) error {
+	ctx := context.Background()
+	objectCh := s3.Client.ListObjects(ctx, s3.BucketName, minio.ListObjectsOptions{
+		Prefix:    prefix,
+		Recursive: true,
+	})
+
+	for err := range s3.Client.RemoveObjects(ctx, s3.BucketName, objectCh, minio.RemoveObjectsOptions{}) {
+		if err.Err != nil {
+			return fmt.Errorf("failed to delete object %s: %w", err.ObjectName, err.Err)
+		}
+	}
+	return nil
+}
+
 func (s3 *Storage) ExitsObjects(object string) bool {
 	_, err := s3.Client.StatObject(context.Background(), s3.BucketName, object, minio.StatObjectOptions{})
 	if err != nil {

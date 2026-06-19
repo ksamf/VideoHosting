@@ -6,17 +6,22 @@ export function getThemeTokens() {
   return {
     spacing: 8,
     typography: {
-      fontFamily: '"Inter", "Roboto", "Helvetica", "Arial", sans-serif',
-      h1: { fontSize: "2rem", fontWeight: 700 },
-      h2: { fontSize: "1.5rem", fontWeight: 600 },
-      body1: { fontSize: "1rem" },
-      body2: { fontSize: "0.875rem" },
+      fontFamily: '"Inter", "Segoe UI", "Roboto", "Helvetica", "Arial", sans-serif',
+      h1: { fontSize: "2rem", fontWeight: 700, lineHeight: 1.2, letterSpacing: "-0.02em" },
+      h2: { fontSize: "1.5rem", fontWeight: 700, lineHeight: 1.25, letterSpacing: "-0.01em" },
+      h3: { fontSize: "1.25rem", fontWeight: 700, lineHeight: 1.3 },
+      h4: { fontSize: "1.125rem", fontWeight: 700, lineHeight: 1.35 },
+      h5: { fontSize: "1rem", fontWeight: 700, lineHeight: 1.35 },
+      subtitle1: { fontSize: "0.95rem", fontWeight: 600, lineHeight: 1.35 },
+      body1: { fontSize: "1rem", lineHeight: 1.5 },
+      body2: { fontSize: "0.875rem", lineHeight: 1.45 },
+      button: { fontWeight: 600, letterSpacing: "0.01em" },
     },
     breakpoints: {
       values: { xs: 0, sm: 600, md: 900, lg: 1200, xl: 1536 },
     },
     shape: {
-      borderRadius: 8,
+      borderRadius: 10,
     },
     shadows: base.shadows.map((s, i) => {
       if (i === 0) return "none";

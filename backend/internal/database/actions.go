@@ -2,10 +2,12 @@ package database
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"time"
 
 	"github.com/google/uuid"
+	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
@@ -55,6 +57,14 @@ func (m *ActionModel) Get(userId, videoId uuid.UUID) (*Action, error) {
 	row := m.Pool.QueryRow(ctx, query, userId, videoId)
 	err := row.Scan(&a.UserId, &a.VideoId, &a.Reaction, &a.CreatedAt)
 	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return &Action{
+				UserId:    userId,
+				VideoId:   videoId,
+				Reaction:  nil,
+				CreatedAt: time.Time{},
+			}, nil
+		}
 		return nil, fmt.Errorf("failed get action:%w", err)
 	}
 	return &a, nil
@@ -88,15 +98,16 @@ func (m *ActionModel) UpdateReaction(userId, videoId uuid.UUID, reaction string)
 
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
-	var newReaction *string
-	current, _ := m.Get(userId, videoId)
-	if current != nil && current.Reaction != nil && *current.Reaction == reaction {
-		newReaction = nil
-	} else {
-		newReaction = &reaction
-	}
-	query := "UPDATE user_video_actions SET reaction = $3::reaction WHERE user_id=$1 AND video_id = $2"
-	res, err := m.Pool.Exec(ctx, query, userId, videoId, newReaction)
+	query := `
+		INSERT INTO user_video_actions(user_id, video_id, reaction)
+		VALUES($1, $2, $3::reaction)
+		ON CONFLICT (user_id, video_id) DO UPDATE
+		SET reaction = CASE
+			WHEN user_video_actions.reaction = EXCLUDED.reaction THEN NULL
+			ELSE EXCLUDED.reaction
+		END
+	`
+	res, err := m.Pool.Exec(ctx, query, userId, videoId, reaction)
 	if err != nil {
 		return err
 	}
@@ -207,7 +218,7 @@ func (m *ActionModel) GetWatchedVideo(userId uuid.UUID, limit, offset int) ([]*V
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
 
-	query := `SELECT v.video_id, v.user_id, v.video_url, v.preview_url, v.name, v.created_at, u.username, u.avatar_url, v.views 
+	query := `SELECT v.video_id, v.user_id, v.video_url, v.preview_url, v.name, v.created_at, u.username, u.avatar_url, v.views, COALESCE(v.duration_seconds, 0)
 	FROM user_video_actions uva 
 	INNER JOIN videos v ON v.video_id=uva.video_id 
 	INNER JOIN users u ON u.user_id=v.user_id
@@ -231,6 +242,7 @@ func (m *ActionModel) GetWatchedVideo(userId uuid.UUID, limit, offset int) ([]*V
 			&video.UserName,
 			&video.UserAvatarUrl,
 			&video.Views,
+			&video.DurationSeconds,
 		); err != nil {
 			return nil, fmt.Errorf("failed scan:%w", err)
 		}
@@ -242,7 +254,7 @@ func (m *ActionModel) GetLikedVideo(userId uuid.UUID, limit, offset int) ([]*Vid
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
 
-	query := `SELECT v.video_id, v.user_id, v.video_url, v.preview_url, v.name, v.created_at, u.username, u.avatar_url, v.views 
+	query := `SELECT v.video_id, v.user_id, v.video_url, v.preview_url, v.name, v.created_at, u.username, u.avatar_url, v.views, COALESCE(v.duration_seconds, 0)
 	FROM user_video_actions uva 
 	INNER JOIN videos v ON v.video_id=uva.video_id 
 	INNER JOIN users u ON u.user_id=v.user_id
@@ -266,6 +278,7 @@ func (m *ActionModel) GetLikedVideo(userId uuid.UUID, limit, offset int) ([]*Vid
 			&video.UserName,
 			&video.UserAvatarUrl,
 			&video.Views,
+			&video.DurationSeconds,
 		); err != nil {
 			return nil, fmt.Errorf("failed scan:%w", err)
 		}

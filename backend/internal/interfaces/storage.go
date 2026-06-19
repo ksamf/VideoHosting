@@ -12,6 +12,7 @@ type ObjectStorage interface {
 	GetObjectReader(ctx context.Context, object string) (io.ReadCloser, error)
 	GetObject(object, tmpPath string) error
 	DeleteObject(object string) error
+	DeletePrefix(prefix string) error
 	ExitsObjects(object string) bool
 	GetURL(id uuid.UUID, folder string) string
 }

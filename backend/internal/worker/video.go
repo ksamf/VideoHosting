@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/ksamf/VideoHosting/backend/internal/config"
+	"github.com/ksamf/VideoHosting/backend/internal/database"
 	"github.com/ksamf/VideoHosting/backend/internal/interfaces"
 	"github.com/ksamf/VideoHosting/backend/internal/utils"
 )
@@ -69,7 +70,7 @@ func startProcessorWorker(ctx context.Context, broker interfaces.MessageBroker, 
 			}
 
 			log.Printf("[ProcessorWorker] Job %s failed after %d attempts: %v", vp.VideoID, retries, procErr)
-			if err := db.UpdateStatus(vp.VideoID, "failed"); err != nil {
+			if err := db.UpdateStatus(vp.VideoID, database.VideoStatusFailed); err != nil {
 				log.Printf("[ProcessorWorker] failed to update status for %s: %v", vp.VideoID, err)
 			}
 		}()

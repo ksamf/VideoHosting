@@ -8,14 +8,15 @@ import (
 )
 
 type MockStorage struct {
-	PutObjectFunc    func(fileName string, file io.Reader) error
-	PutObjectWithContextFunc func(ctx context.Context, fileName string, file io.Reader, contentType string) error
+	PutObjectFunc                  func(fileName string, file io.Reader) error
+	PutObjectWithContextFunc       func(ctx context.Context, fileName string, file io.Reader, contentType string) error
 	GetObjectReaderWithContextFunc func(ctx context.Context, object string) (io.ReadCloser, error)
-	GetObjectFunc    func(object, tmpPath string) error
-	DeleteObjectFunc func(object string) error
-	ExitsObjectsFunc func(object string) bool
-	GetURLFunc       func(id uuid.UUID) string
-	GetURLWithFolderFunc func(id uuid.UUID, folder string) string
+	GetObjectFunc                  func(object, tmpPath string) error
+	DeleteObjectFunc               func(object string) error
+	DeletePrefixFunc               func(prefix string) error
+	ExitsObjectsFunc               func(object string) bool
+	GetURLFunc                     func(id uuid.UUID) string
+	GetURLWithFolderFunc           func(id uuid.UUID, folder string) string
 }
 
 func (s3 *MockStorage) PutObject(ctx context.Context, fileName string, file io.Reader, contentType string) error {
@@ -45,6 +46,13 @@ func (s3 *MockStorage) GetObjectReader(ctx context.Context, object string) (io.R
 func (s3 *MockStorage) DeleteObject(object string) error {
 	if s3.DeleteObjectFunc != nil {
 		return s3.DeleteObjectFunc(object)
+	}
+	return nil
+}
+
+func (s3 *MockStorage) DeletePrefix(prefix string) error {
+	if s3.DeletePrefixFunc != nil {
+		return s3.DeletePrefixFunc(prefix)
 	}
 	return nil
 }

@@ -1,4 +1,4 @@
-import { Box, CircularProgress } from "@mui/material";
+import { Box, CircularProgress, Typography } from "@mui/material";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { getVideos } from "../api/videos";
 import VideoGrid from "../components/video/VideoGrid";
@@ -149,7 +149,6 @@ export default function Home() {
     if (error) {
         return <PageError error={error} />;
     }
-
     return (
         <Box sx={pageSx.pageContainer}>
             <VideoGrid videos={videos} />

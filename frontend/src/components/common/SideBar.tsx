@@ -11,10 +11,14 @@ import HistoryIcon from "@mui/icons-material/History";
 import ThumbUpAltIcon from "@mui/icons-material/ThumbUpAlt";
 import PersonIcon from "@mui/icons-material/Person";
 import HandymanIcon from "@mui/icons-material/Handyman";
+import HomeRoundedIcon from "@mui/icons-material/HomeRounded";
+import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
+import KeyboardArrowUpIcon from "@mui/icons-material/KeyboardArrowUp";
+import Typography from "@mui/material/Typography";
 import { ListItemButton } from "@mui/material";
 import Divider from "@mui/material/Divider";
 import LogoutIcon from "@mui/icons-material/Logout";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { getUserSubscriptions } from "../../api/users";
 import { logout } from "../../api/auth";
 import type { User } from "../../types/user";
@@ -34,8 +38,15 @@ export default function SideBar({ user, open, setOpen }: SideBarProps) {
     const [logoutErr, setLogoutErr] = useState<string | null>(null);
 
     const navigate = useNavigate();
+    const location = useLocation();
 
     const visibleSubs = showAllSubs ? subs : subs.slice(0, 5);
+    const channelRoot = user?.user_id ? `/channel/${user.user_id}` : "/";
+
+    const isSelected = (path: string, startsWith = false): boolean => {
+        if (startsWith) return location.pathname.startsWith(path);
+        return location.pathname === path;
+    };
 
     const handleLogout = async () => {
         setLogoutLoading(true);
@@ -82,10 +93,23 @@ export default function SideBar({ user, open, setOpen }: SideBarProps) {
         >
             <Box sx={commonSx.sideBarRoot}>
                 <List sx={commonSx.sideBarList}>
-                    <ListItem>
+                    <ListItem disablePadding>
+                        <ListItemButton
+                            component={Link}
+                            to="/"
+                            selected={isSelected("/")}
+                            onClick={() => setOpen(false)}
+                        >
+                            <HomeRoundedIcon sx={commonSx.sideBarPrimaryIcon} />
+                            <ListItemText primary="Главная" />
+                        </ListItemButton>
+                    </ListItem>
+
+                    <ListItem disablePadding>
                         <ListItemButton
                             component={Link}
                             to={user?.user_id ? `/user/${user.user_id}/sub` : "/"}
+                            selected={isSelected("/user/", true)}
                             onClick={() => setOpen(false)}
                         >
                             <SubscriptionsIcon sx={commonSx.sideBarPrimaryIcon} />
@@ -103,6 +127,7 @@ export default function SideBar({ user, open, setOpen }: SideBarProps) {
                                 <UserAvatar
                                     username={channel.username}
                                     avatar_url={channel.avatar_url}
+                                    size={26}
                                 />
 
                                 <ListItemText
@@ -123,6 +148,7 @@ export default function SideBar({ user, open, setOpen }: SideBarProps) {
                             <ListItemButton
                                 onClick={() => setShowAllSubs(!showAllSubs)}
                             >
+                                {showAllSubs ? <KeyboardArrowUpIcon sx={commonSx.sideBarIcon} /> : <KeyboardArrowDownIcon sx={commonSx.sideBarIcon} />}
                                 <ListItemText
                                     primary={showAllSubs ? "Свернуть" : "Показать все"}
                                     slotProps={{
@@ -137,24 +163,13 @@ export default function SideBar({ user, open, setOpen }: SideBarProps) {
 
                     <Divider sx={commonSx.sideBarDivider} />
 
-                    <ListItem disablePadding>
-                        <ListItemButton component={Link} to="/watched" onClick={() => setOpen(false)}>
-                            <HistoryIcon sx={commonSx.sideBarIcon} />
-                            <ListItemText primary="Просмотренные" />
-                        </ListItemButton>
-                    </ListItem>
-
-                    <ListItem disablePadding>
-                        <ListItemButton component={Link} to="/liked" onClick={() => setOpen(false)}>
-                            <ThumbUpAltIcon sx={commonSx.sideBarIcon} />
-                            <ListItemText primary="Понравившиеся" />
-                        </ListItemButton>
-                    </ListItem>
+                    <Typography sx={commonSx.sideBarSectionTitle}>Вы</Typography>
 
                     <ListItem disablePadding>
                         <ListItemButton
                             component={Link}
-                            to={user?.user_id ? `/channel/${user.user_id}` : "/"}
+                            to={channelRoot}
+                            selected={isSelected(channelRoot)}
                             onClick={() => setOpen(false)}
                         >
                             <PersonIcon sx={commonSx.sideBarIcon} />
@@ -163,11 +178,27 @@ export default function SideBar({ user, open, setOpen }: SideBarProps) {
                     </ListItem>
 
                     <ListItem disablePadding>
-                        <ListItemButton component={Link} to="/studio" onClick={() => setOpen(false)}>
+                        <ListItemButton component={Link} to="/watched" selected={isSelected("/watched")} onClick={() => setOpen(false)}>
+                            <HistoryIcon sx={commonSx.sideBarIcon} />
+                            <ListItemText primary="История" />
+                        </ListItemButton>
+                    </ListItem>
+
+                    <ListItem disablePadding>
+                        <ListItemButton component={Link} to="/liked" selected={isSelected("/liked")} onClick={() => setOpen(false)}>
+                            <ThumbUpAltIcon sx={commonSx.sideBarIcon} />
+                            <ListItemText primary="Понравившиеся" />
+                        </ListItemButton>
+                    </ListItem>
+
+                    <ListItem disablePadding>
+                        <ListItemButton component={Link} to="/studio" selected={isSelected("/studio", true)} onClick={() => setOpen(false)}>
                             <HandymanIcon sx={commonSx.sideBarIcon} />
                             <ListItemText primary="Студия" />
                         </ListItemButton>
                     </ListItem>
+
+                    <Divider sx={commonSx.sideBarDivider} />
 
                     <ListItem disablePadding>
                         <ListItemButton
@@ -196,5 +227,4 @@ export default function SideBar({ user, open, setOpen }: SideBarProps) {
         </Drawer >
     );
 }
-
 

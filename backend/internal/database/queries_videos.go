@@ -30,7 +30,7 @@ agg AS (
   FROM videos v
   LEFT JOIN video_view_events e
     ON e.video_id = v.video_id
-   AND e.created_at >= NOW() - INTERVAL '7 day'
+    AND e.created_at >= NOW() - INTERVAL '7 day'
   WHERE v.video_id = (SELECT video_id FROM ins LIMIT 1)
   GROUP BY v.video_id
 )
@@ -54,10 +54,11 @@ SELECT
 	v.created_at,
 	u.username,
 	u.avatar_url,
-	v.views
+	v.views,
+	COALESCE(v.duration_seconds, 0)
 FROM videos v
 INNER JOIN users u ON u.user_id = v.user_id
-WHERE v.status IN ('uploaded', 'processed')
+WHERE v.status = 'uploaded'
   AND (
 	v.name ILIKE '%' || $1 || '%'
 	OR EXISTS (

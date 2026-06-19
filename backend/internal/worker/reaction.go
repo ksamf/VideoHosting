@@ -6,28 +6,29 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/ksamf/VideoHosting/backend/internal/broker"
+	"github.com/ksamf/VideoHosting/backend/internal/cacheutil"
 	"github.com/ksamf/VideoHosting/backend/internal/interfaces"
 )
 
-func StartReaction(message interfaces.MessageBroker, action interfaces.Action, video interfaces.Video) {
+func StartReaction(message interfaces.MessageBroker, action interfaces.Action, video interfaces.Video, cache interfaces.Cache) {
 	batch := make([]*broker.Reaction, 0, 100)
 	for {
 		msg, err := message.ReadReaction()
 		if err != nil {
-			processBatch(video, action, batch)
+			processBatch(video, action, cache, batch)
 			batch = batch[:0]
 			time.Sleep(200 * time.Millisecond)
 			continue
 		}
 		batch = append(batch, msg)
 		if len(batch) >= 100 {
-			processBatch(video, action, batch)
+			processBatch(video, action, cache, batch)
 			batch = batch[:0]
 		}
 	}
 }
 
-func processBatch(video interfaces.Video, action interfaces.Action, batch []*broker.Reaction) {
+func processBatch(video interfaces.Video, action interfaces.Action, cache interfaces.Cache, batch []*broker.Reaction) {
 	if len(batch) == 0 {
 		return
 	}
@@ -38,9 +39,14 @@ func processBatch(video interfaces.Video, action interfaces.Action, batch []*bro
 	}
 
 	last := make(map[key]string)
+	affectedUsers := make(map[uuid.UUID]struct{})
 
 	for _, r := range batch {
+		if r == nil {
+			continue
+		}
 		last[key{r.VideoID, r.UserID}] = r.Reaction
+		affectedUsers[r.UserID] = struct{}{}
 	}
 
 	for k, reaction := range last {
@@ -73,4 +79,10 @@ func processBatch(video interfaces.Video, action interfaces.Action, batch []*bro
 			log.Println("refresh video_stats reactions error:", err)
 		}
 	}
+
+	userIDs := make([]uuid.UUID, 0, len(affectedUsers))
+	for userID := range affectedUsers {
+		userIDs = append(userIDs, userID)
+	}
+	cacheutil.InvalidateRecommendations(cache, userIDs...)
 }

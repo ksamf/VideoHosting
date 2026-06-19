@@ -6,27 +6,28 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/ksamf/VideoHosting/backend/internal/broker"
+	"github.com/ksamf/VideoHosting/backend/internal/cacheutil"
 	"github.com/ksamf/VideoHosting/backend/internal/interfaces"
 )
 
-func StartView(message interfaces.MessageBroker, action interfaces.Action, video interfaces.Video, user interfaces.User) {
+func StartView(message interfaces.MessageBroker, action interfaces.Action, video interfaces.Video, user interfaces.User, cache interfaces.Cache) {
 	batch := make([]*broker.View, 0, 100)
 	for {
 		msg, err := message.ReadView()
 		if err != nil {
-			processBatchView(video, user, action, batch)
+			processBatchView(video, user, action, cache, batch)
 			batch = batch[:0]
 			time.Sleep(200 * time.Millisecond)
 			continue
 		}
 		batch = append(batch, msg)
 		if len(batch) >= 100 {
-			processBatchView(video, user, action, batch)
+			processBatchView(video, user, action, cache, batch)
 			batch = batch[:0]
 		}
 	}
 }
-func processBatchView(video interfaces.Video, user interfaces.User, action interfaces.Action, batch []*broker.View) {
+func processBatchView(video interfaces.Video, user interfaces.User, action interfaces.Action, cache interfaces.Cache, batch []*broker.View) {
 	if len(batch) == 0 {
 		return
 	}
@@ -39,6 +40,7 @@ func processBatchView(video interfaces.Video, user interfaces.User, action inter
 	}
 
 	last := make(map[key]int)
+	affectedUsers := make(map[uuid.UUID]struct{})
 	for _, r := range batch {
 		if r == nil || r.VideoId == uuid.Nil {
 			continue
@@ -60,6 +62,7 @@ func processBatchView(video interfaces.Video, user interfaces.User, action inter
 			watchedSeconds = 1
 		}
 		if !k.anon {
+			affectedUsers[k.actor] = struct{}{}
 			for i := 0; i < v; i++ {
 				if err := user.UpsertAffinitiesFromView(k.actor, k.video, watchedSeconds); err != nil {
 					log.Println("upsert affinities from view error:", err)
@@ -81,4 +84,14 @@ func processBatchView(video interfaces.Video, user interfaces.User, action inter
 		}
 
 	}
+
+	if len(affectedUsers) == 0 {
+		return
+	}
+
+	userIDs := make([]uuid.UUID, 0, len(affectedUsers))
+	for userID := range affectedUsers {
+		userIDs = append(userIDs, userID)
+	}
+	cacheutil.InvalidateRecommendations(cache, userIDs...)
 }

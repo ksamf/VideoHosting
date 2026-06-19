@@ -63,6 +63,7 @@ export default function UploadVideo() {
                         file={file}
                         defaultPreview={preview}
                         defaultPreviewUrl={previewUrl}
+                        onPublished={() => navigate("/studio")}
                     />
                 )}
             </Box>

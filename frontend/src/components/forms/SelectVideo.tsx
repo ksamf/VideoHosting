@@ -41,25 +41,13 @@ export default function SelectVideo({ onSelect }: SelectVideoProps) {
                 onDrop={handleDrop}
                 onDragOver={handleDragOver}
                 onClick={openFileDialog}
-                sx={(theme) => ({
-                    p: { xs: 2, sm: 4 },
-                    textAlign: "center",
-                    cursor: "pointer",
-                    minHeight: { xs: 140, sm: 200 },
-                    boxShadow: "none",
-                    color: theme.palette.text.primary,
-                })}>
+                sx={formSx.selectVideoDropPaper}>
 
                 <IconButton
-                    sx={(theme) => ({
-                        display: "block",
-                        m: { xs: "24px auto", sm: "48px auto" },
-                        border: `2px solid ${theme.palette.divider}`,
-                        bgcolor: theme.palette.background.default,
-                    })}>
-                    <FileUploadIcon sx={(theme) => ({ color: theme.palette.text.secondary, fontSize: { xs: 72, sm: 150 } })} />
+                    sx={formSx.selectVideoUploadIconButton}>
+                    <FileUploadIcon sx={formSx.selectVideoUploadIcon} />
                 </IconButton  >
-                <Typography variant="body1" align="center" sx={{ mt: { xs: 1, sm: 4 }, color: "text.secondary" }}>
+                <Typography variant="body1" align="center" sx={formSx.selectVideoHint}>
                     Перетащите файлы сюда или нажмите кнопку ниже, чтобы выбрать их на компьютере.
                 </Typography>
             </Paper>

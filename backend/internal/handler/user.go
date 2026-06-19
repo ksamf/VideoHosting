@@ -52,6 +52,7 @@ func (h *UserHandler) Get(c *gin.Context) {
 }
 func (h *UserHandler) SearchChannels(c *gin.Context) {
 	query := strings.TrimSpace(c.Query("q"))
+	query = strings.TrimLeft(query, "@")
 	if query == "" {
 		c.JSON(http.StatusOK, []database.User{})
 		return
@@ -94,6 +95,15 @@ func (h *UserHandler) Delete(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
+	authUserID, ok := currentUserID(c)
+	if !ok {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorized"})
+		return
+	}
+	if authUserID != id {
+		c.JSON(http.StatusForbidden, gin.H{"error": "forbidden"})
+		return
+	}
 	err = h.user.Delete(id)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
@@ -131,12 +141,28 @@ func (h *UserHandler) UploadAvatar(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
+	authUserID, ok := currentUserID(c)
+	if !ok {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorized"})
+		return
+	}
+	if authUserID != userId {
+		c.JSON(http.StatusForbidden, gin.H{"error": "forbidden"})
+		return
+	}
+	if !requirePublicContentConsent(c, c.PostForm("public_content_consent")) {
+		return
+	}
 	avatar, avatarHeader, err := c.Request.FormFile("avatar")
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "avatar is required"})
 		return
 	}
 	defer avatar.Close()
+	if err := validateImageUpload(avatarHeader); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
 	ext := strings.ToLower(filepath.Ext(avatarHeader.Filename))
 
 	key := fmt.Sprintf("user/%s/original%s", userId, ext)
@@ -144,6 +170,7 @@ func (h *UserHandler) UploadAvatar(c *gin.Context) {
 	err = h.s3.PutObject(c, key, avatar, avatarHeader.Header.Get("Content-Type"))
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "failed upload to s3"})
+		return
 	}
 	err = h.user.UpdateAvatar(userId, avatar_url)
 	if err != nil {
@@ -202,6 +229,9 @@ func (h *UserHandler) GetSubscriptions(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
+	if !requireOwnUser(c, userId) {
+		return
+	}
 	subs, err := h.user.GetSubscriptions(userId)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
@@ -213,6 +243,9 @@ func (h *UserHandler) GetSubscriptionsVideo(c *gin.Context) {
 	userId, err := uuid.Parse(c.Param("id"))
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	if !requireOwnUser(c, userId) {
 		return
 	}
 	limit, err := strconv.Atoi(c.DefaultQuery("limit", "20"))
@@ -240,6 +273,9 @@ func (h *UserHandler) GetWatchedVideo(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
+	if !requireOwnUser(c, userId) {
+		return
+	}
 	limit, err := strconv.Atoi(c.DefaultQuery("limit", "20"))
 	if err != nil || limit <= 0 {
 		limit = 20
@@ -263,6 +299,9 @@ func (h *UserHandler) GetLikedVideo(c *gin.Context) {
 	userId, err := uuid.Parse(c.Param("id"))
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	if !requireOwnUser(c, userId) {
 		return
 	}
 	limit, err := strconv.Atoi(c.DefaultQuery("limit", "20"))
@@ -291,10 +330,16 @@ func (h *UserHandler) Videos(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
+	if !requireOwnUser(c, userId) {
+		return
+	}
 	videos, err := h.user.Videos(userId)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
+	}
+	if videos == nil {
+		videos = []*database.Video{}
 	}
 	c.JSON(http.StatusOK, videos)
 }
@@ -365,6 +410,7 @@ func (h *UserHandler) ViewVideo(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to process view"})
 		return
 	}
+	invalidateRecommendationCache(h.redis, userId)
 	c.JSON(http.StatusOK, gin.H{"message": "successful"})
 }
 
@@ -418,4 +464,37 @@ func (h *UserHandler) GetRecommendation(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, videos)
+}
+
+func currentUserID(c *gin.Context) (uuid.UUID, bool) {
+	userValue, exists := c.Get("user")
+	if !exists {
+		return uuid.Nil, false
+	}
+
+	switch user := userValue.(type) {
+	case *database.User:
+		if user != nil && user.UserId != uuid.Nil {
+			return user.UserId, true
+		}
+	case database.User:
+		if user.UserId != uuid.Nil {
+			return user.UserId, true
+		}
+	}
+
+	return uuid.Nil, false
+}
+
+func requireOwnUser(c *gin.Context, requestedUserID uuid.UUID) bool {
+	authUserID, ok := currentUserID(c)
+	if !ok {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorized"})
+		return false
+	}
+	if authUserID != requestedUserID {
+		c.JSON(http.StatusForbidden, gin.H{"error": "forbidden"})
+		return false
+	}
+	return true
 }

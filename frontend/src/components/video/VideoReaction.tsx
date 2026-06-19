@@ -36,7 +36,7 @@ export default function VideoReaction({ video, isAuth }: VideoReactionProps) {
         };
     }, []);
 
-    const scheduleReaction = (value: string, onFail?: () => void) => {
+    const scheduleReaction = (value: "like" | "dislike", onFail?: () => void) => {
         if (sendTimerRef.current) {
             clearTimeout(sendTimerRef.current);
         }
@@ -52,7 +52,7 @@ export default function VideoReaction({ video, isAuth }: VideoReactionProps) {
         }, 1000);
     };
 
-    const handleLike = async () => {
+    const handleLike = () => {
         if (reactionLoading) return;
         const prev = {
             like,
@@ -83,14 +83,14 @@ export default function VideoReaction({ video, isAuth }: VideoReactionProps) {
         setDislike(nextDislike);
         setCurrentLikes(nextLikes);
         setCurrentDislikes(nextDislikes);
-        scheduleReaction(nextLike ? "like" : "", () => {
+        scheduleReaction("like", () => {
             setLike(prev.like);
             setDislike(prev.dislike);
             setCurrentLikes(prev.likes);
             setCurrentDislikes(prev.dislikes);
         });
     };
-    const handleDislike = async () => {
+    const handleDislike = () => {
         if (reactionLoading) return;
         const prev = {
             like,
@@ -120,7 +120,7 @@ export default function VideoReaction({ video, isAuth }: VideoReactionProps) {
         setDislike(nextDislike);
         setCurrentLikes(nextLikes);
         setCurrentDislikes(nextDislikes);
-        scheduleReaction(nextDislike ? "dislike" : "", () => {
+        scheduleReaction("dislike", () => {
             setLike(prev.like);
             setDislike(prev.dislike);
             setCurrentLikes(prev.likes);

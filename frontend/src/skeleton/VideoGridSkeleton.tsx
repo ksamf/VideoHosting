@@ -14,12 +14,13 @@ export default function VideoGridSkeleton({ items = 10 }: HomeSkeletonProps) {
                         <Skeleton variant="rounded" sx={skeletonSx.videoPreview} />
                     </Box>
                     <Box sx={skeletonSx.videoMetaRow}>
-                        <Skeleton variant="circular" width={40} height={40} />
-                        <Box sx={{ flex: 1 }}>
+                        <Skeleton variant="circular" width={36} height={36} />
+                        <Box sx={skeletonSx.videoMetaTextCol}>
                             <Skeleton variant="text" width="92%" height={20} />
                             <Skeleton variant="text" width="65%" height={18} />
                             <Skeleton variant="text" width="55%" height={16} />
                         </Box>
+                        <Skeleton variant="circular" sx={skeletonSx.videoMetaAction} />
                     </Box>
                 </Box>
             ))}

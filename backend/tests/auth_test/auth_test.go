@@ -18,27 +18,81 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
+func TestAuth_GenerateJWT_RejectsEmptySecret(t *testing.T) {
+	t.Parallel()
+
+	a := auth.New(&testutil.MockUser{}, &config.Config{
+		Jwt: config.JwtConfig{Key: ""},
+	})
+
+	token, err := a.GenerateJWT(uuid.New())
+
+	assert.Error(t, err)
+	assert.Empty(t, token)
+}
+
 func TestAuth_Signup_Success(t *testing.T) {
 	t.Parallel()
+	consentRecorded := false
 	conf := &config.Config{}
 	mockDB := testutil.MockUser{
-		InsertFunc:     func(userId uuid.UUID, username, email, hash string) error { return nil },
+		InsertFunc: func(userId uuid.UUID, username, email, hash string) error { return nil },
+		RecordPersonalDataConsentFunc: func(userId uuid.UUID, version, ip string) error {
+			consentRecorded = true
+			assert.Equal(t, "personal-data-policy-v1", version)
+			assert.Equal(t, "192.0.2.10", ip)
+			return nil
+		},
 		GetByEmailFunc: func(email string) (*database.User, error) { return nil, nil },
 	}
 	a := auth.New(&mockDB, conf)
 	r := gin.New()
 	r.POST("/signup", a.Signup)
-	signupBody := database.User{
-		Email:    "test@example.com",
-		Password: "123456",
+	signupBody := map[string]any{
+		"username":              "tester",
+		"email":                 "test@example.com",
+		"password":              "123456",
+		"personal_data_consent": true,
+	}
+	b, _ := json.Marshal(signupBody)
+	w := httptest.NewRecorder()
+	req, _ := http.NewRequest("POST", "/signup", bytes.NewBuffer(b))
+	req.Header.Set("Content-Type", "application/json")
+	req.RemoteAddr = "192.0.2.10:1234"
+	r.ServeHTTP(w, req)
+	assert.Equal(t, http.StatusOK, w.Code)
+	assert.Contains(t, w.Body.String(), "signup successful")
+	assert.True(t, consentRecorded)
+}
+
+func TestAuth_Signup_RejectsMissingPersonalDataConsent(t *testing.T) {
+	t.Parallel()
+
+	insertCalled := false
+	conf := &config.Config{}
+	mockDB := testutil.MockUser{
+		InsertFunc: func(userId uuid.UUID, username, email, hash string) error {
+			insertCalled = true
+			return nil
+		},
+		GetByEmailFunc: func(email string) (*database.User, error) { return nil, nil },
+	}
+	a := auth.New(&mockDB, conf)
+	r := gin.New()
+	r.POST("/signup", a.Signup)
+	signupBody := map[string]any{
+		"username": "tester",
+		"email":    "test@example.com",
+		"password": "123456",
 	}
 	b, _ := json.Marshal(signupBody)
 	w := httptest.NewRecorder()
 	req, _ := http.NewRequest("POST", "/signup", bytes.NewBuffer(b))
 	req.Header.Set("Content-Type", "application/json")
 	r.ServeHTTP(w, req)
-	assert.Equal(t, http.StatusOK, w.Code)
-	assert.Contains(t, w.Body.String(), "signup successful")
+	assert.Equal(t, http.StatusBadRequest, w.Code)
+	assert.Contains(t, w.Body.String(), "personal data consent is required")
+	assert.False(t, insertCalled)
 }
 
 func TestAuth_Signup_EmailExist(t *testing.T) {
@@ -59,9 +113,10 @@ func TestAuth_Signup_EmailExist(t *testing.T) {
 	a := auth.New(&mockDB, conf)
 	r := gin.New()
 	r.POST("/signup", a.Signup)
-	signupBody := database.User{
-		Email:    "test@example.com",
-		Password: "123456",
+	signupBody := map[string]any{
+		"email":                 "test@example.com",
+		"password":              "123456",
+		"personal_data_consent": true,
 	}
 	b, _ := json.Marshal(signupBody)
 	w := httptest.NewRecorder()
@@ -96,7 +151,7 @@ func TestAuth_Signup_EmptyBody(t *testing.T) {
 	req.Header.Set("Content-Type", "application/json")
 	r.ServeHTTP(w, req)
 	assert.Equal(t, http.StatusBadRequest, w.Code)
-	assert.Contains(t, w.Body.String(), "email already registered")
+	assert.Contains(t, w.Body.String(), "personal data consent is required")
 }
 func TestAuth_Login_Success(t *testing.T) {
 	t.Parallel()

@@ -55,7 +55,7 @@ func (m *VideoModel) GetAll(limit, offset int) ([]*Video, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
-	query := "SELECT v.video_id, v.user_id, v.video_url, v.preview_url, v.name, v.created_at, u.username, u.avatar_url, v.views FROM videos v INNER JOIN users u ON u.user_id=v.user_id WHERE v.status='uploaded' LIMIT $1 OFFSET $2 "
+	query := "SELECT v.video_id, v.user_id, v.video_url, v.preview_url, v.name, v.created_at, u.username, u.avatar_url, v.views, COALESCE(v.duration_seconds, 0) FROM videos v INNER JOIN users u ON u.user_id=v.user_id WHERE v.status='uploaded' LIMIT $1 OFFSET $2 "
 	rows, err := m.Pool.Query(ctx, query, limit, offset)
 	if err != nil {
 		return nil, err
@@ -75,6 +75,7 @@ func (m *VideoModel) GetAll(limit, offset int) ([]*Video, error) {
 			&video.UserName,
 			&video.UserAvatarUrl,
 			&video.Views,
+			&video.DurationSeconds,
 		); err != nil {
 			return nil, err
 		}
@@ -99,11 +100,11 @@ func (m *VideoModel) GetByChannel(channelID uuid.UUID, limit, offset int) ([]*Vi
 	}
 
 	query := `
-	SELECT v.video_id, v.user_id, v.video_url, v.preview_url, v.name, v.created_at, u.username, u.avatar_url, v.views
+	SELECT v.video_id, v.user_id, v.video_url, v.preview_url, v.name, v.created_at, u.username, u.avatar_url, v.views, COALESCE(v.duration_seconds, 0)
 	FROM videos v
 	INNER JOIN users u ON u.user_id = v.user_id
 	WHERE v.user_id = $1
-	  AND v.status IN ('uploaded', 'processed')
+	  AND v.status = 'uploaded'
 	ORDER BY v.created_at DESC, v.video_id DESC
 	LIMIT $2 OFFSET $3
 	`
@@ -126,6 +127,7 @@ func (m *VideoModel) GetByChannel(channelID uuid.UUID, limit, offset int) ([]*Vi
 			&video.UserName,
 			&video.UserAvatarUrl,
 			&video.Views,
+			&video.DurationSeconds,
 		); err != nil {
 			return nil, err
 		}
@@ -363,6 +365,7 @@ func (m *VideoModel) Search(query string, limit, offset int) ([]*Video, error) {
 			&video.UserName,
 			&video.UserAvatarUrl,
 			&video.Views,
+			&video.DurationSeconds,
 		); err != nil {
 			return nil, err
 		}

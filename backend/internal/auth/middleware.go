@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"net/http"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -13,6 +14,10 @@ import (
 )
 
 func (a *Auth) AuthMiddleware(c *gin.Context) {
+	if strings.TrimSpace(a.config.Jwt.Key) == "" {
+		c.AbortWithStatus(http.StatusUnauthorized)
+		return
+	}
 	tokenString, err := c.Cookie("Authorization")
 	if err != nil {
 		c.AbortWithStatus(http.StatusUnauthorized)
@@ -64,6 +69,10 @@ func (a *Auth) AuthMiddleware(c *gin.Context) {
 	}
 }
 func (a *Auth) OptionalAuthMiddleware(c *gin.Context) {
+	if strings.TrimSpace(a.config.Jwt.Key) == "" {
+		c.Next()
+		return
+	}
 	tokenString, err := c.Cookie("Authorization")
 	if err != nil {
 		c.Next()

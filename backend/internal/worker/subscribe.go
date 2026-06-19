@@ -6,28 +6,29 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/ksamf/VideoHosting/backend/internal/broker"
+	"github.com/ksamf/VideoHosting/backend/internal/cacheutil"
 	"github.com/ksamf/VideoHosting/backend/internal/interfaces"
 )
 
-func StartSubscribe(message interfaces.MessageBroker, action interfaces.Action, user interfaces.User) {
+func StartSubscribe(message interfaces.MessageBroker, action interfaces.Action, user interfaces.User, cache interfaces.Cache) {
 	batch := make([]*broker.Subscribe, 0, 100)
 	for {
 		msg, err := message.ReadSubscribe()
 		if err != nil {
-			processBatchSub(user, action, batch)
+			processBatchSub(user, action, cache, batch)
 			batch = batch[:0]
 			time.Sleep(200 * time.Millisecond)
 			continue
 		}
 		batch = append(batch, msg)
 		if len(batch) >= 100 {
-			processBatchSub(user, action, batch)
+			processBatchSub(user, action, cache, batch)
 			batch = batch[:0]
 		}
 	}
 }
 
-func processBatchSub(user interfaces.User, action interfaces.Action, batch []*broker.Subscribe) {
+func processBatchSub(user interfaces.User, action interfaces.Action, cache interfaces.Cache, batch []*broker.Subscribe) {
 	if len(batch) == 0 {
 		return
 	}
@@ -38,12 +39,14 @@ func processBatchSub(user interfaces.User, action interfaces.Action, batch []*br
 	}
 
 	last := make(map[key]string)
+	affectedUsers := make(map[uuid.UUID]struct{})
 
 	for _, r := range batch {
 		if r == nil || (r.Action != "sub" && r.Action != "unsub") {
 			continue
 		}
 		last[key{r.UserID, r.ChannelID}] = r.Action
+		affectedUsers[r.UserID] = struct{}{}
 
 	}
 
@@ -75,4 +78,10 @@ func processBatchSub(user interfaces.User, action interfaces.Action, batch []*br
 		}
 
 	}
+
+	userIDs := make([]uuid.UUID, 0, len(affectedUsers))
+	for userID := range affectedUsers {
+		userIDs = append(userIDs, userID)
+	}
+	cacheutil.InvalidateRecommendations(cache, userIDs...)
 }

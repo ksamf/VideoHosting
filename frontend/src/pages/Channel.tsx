@@ -3,7 +3,8 @@ import { useMemo, useState, useCallback } from "react";
 import { useParams } from "react-router-dom";
 import useAuth from "../hooks/useAuth";
 import VideoGrid from "../components/video/VideoGrid";
-import { getUserById, getUserVideos } from "../api/users";
+import { getUserById } from "../api/users";
+import { getChannelVideos } from "../api/videos";
 import ChannelHeader from "../components/common/ChannelHeader";
 import useFetch from "../hooks/useFetch";
 import { PageError } from "../components/common/PageState";
@@ -26,7 +27,7 @@ export default function Channel() {
         error: userByIdError,
     } = useFetch(fetchUserById);
     const fetchUserVideos = useCallback(
-        () => (channelId ? getUserVideos(channelId) : Promise.resolve([])),
+        () => (channelId ? getChannelVideos(channelId) : Promise.resolve([])),
         [channelId]
     );
 

@@ -5,21 +5,22 @@ import {
     Button,
     Stack,
     Paper,
+    Checkbox,
+    FormControlLabel,
 } from "@mui/material";
 import { useState, useEffect, useMemo, type ChangeEvent } from "react";
 import { uploadVideo } from "../../api/videos";
-import { useNavigate } from "react-router-dom";
 import { formSx } from "../../styles/sx/form";
+import { PUBLIC_CONTENT_CONSENT_TEXT } from "../../utils/privacy";
 
 type SetVideoDetailsProps = {
     file: File;
     defaultPreview: File | null;
     defaultPreviewUrl: string;
+    onPublished: () => void;
 };
 
-export default function VideoDetailsStep({ file, defaultPreview, defaultPreviewUrl }: SetVideoDetailsProps) {
-    const navigate = useNavigate();
-
+export default function VideoDetailsStep({ file, defaultPreview, defaultPreviewUrl, onPublished }: SetVideoDetailsProps) {
     const videoUrl = useMemo(() => {
         return file ? URL.createObjectURL(file) : null;
     }, [file]);
@@ -35,6 +36,7 @@ export default function VideoDetailsStep({ file, defaultPreview, defaultPreviewU
     const [aspectRatio, setAspectRatio] = useState("16 / 9");
     const [videoPreview, setVideoPreview] = useState<string>(defaultPreviewUrl);
     const [uploading, setUploading] = useState(false);
+    const [publicContentConsent, setPublicContentConsent] = useState(false);
 
 
     useEffect(() => {
@@ -69,7 +71,8 @@ export default function VideoDetailsStep({ file, defaultPreview, defaultPreviewU
     const isInvalid =
         name.length < 1 ||
         name.length > 100 ||
-        description.length > 5000;
+        description.length > 5000 ||
+        !publicContentConsent;
 
     const handleUpload = async () => {
         if (uploading) return;
@@ -79,6 +82,7 @@ export default function VideoDetailsStep({ file, defaultPreview, defaultPreviewU
         formData.append("video", file);
         formData.append("name", name);
         formData.append("description", description);
+        formData.append("public_content_consent", String(publicContentConsent));
         if (defaultPreview) {
             formData.append("default_preview", defaultPreview);
         }
@@ -91,7 +95,7 @@ export default function VideoDetailsStep({ file, defaultPreview, defaultPreviewU
         try {
             setUploading(true);
             await uploadVideo(formData);
-            navigate("/studio");
+            onPublished();
         } catch (error) {
             console.error(error);
             alert("Не удалось загрузить видео");
@@ -214,7 +218,22 @@ export default function VideoDetailsStep({ file, defaultPreview, defaultPreviewU
                 </Box>
             </Stack >
 
-            <Stack direction="row" justifyContent="flex-end" sx={formSx.setDetailsActions}>
+            <Stack spacing={1.5} alignItems="flex-end" sx={formSx.setDetailsActions}>
+                <FormControlLabel
+                    control={
+                        <Checkbox
+                            checked={publicContentConsent}
+                            onChange={(e) => setPublicContentConsent(e.target.checked)}
+                            disabled={uploading}
+                        />
+                    }
+                    label={
+                        <Typography fontSize={12} color="text.secondary">
+                            {PUBLIC_CONTENT_CONSENT_TEXT} Видео, описание, теги и превью будут видны в сервисе.
+                        </Typography>
+                    }
+                    sx={{ m: 0, alignItems: "flex-start", maxWidth: 520 }}
+                />
                 <Button
                     variant="contained"
                     onClick={handleUpload}

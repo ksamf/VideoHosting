@@ -4,6 +4,8 @@ import (
 	"os"
 	"strconv"
 	"strings"
+
+	"github.com/joho/godotenv"
 )
 
 type AppConfig struct {
@@ -78,9 +80,7 @@ type Config struct {
 }
 
 func New() *Config {
-	// if err := godotenv.Load(".env.dev"); err != nil {
-	// 	panic(err)
-	// }
+	loadDotEnv()
 	return &Config{
 		App: AppConfig{
 			Host:        getEnv("APP_HOST", "localhost"),
@@ -133,6 +133,41 @@ func New() *Config {
 			Host: getEnv("KAFKA_HOST", "localhost"),
 			Port: getEnvAsInt("KAFKA_PORT", 9092),
 		},
+	}
+}
+
+func loadDotEnv() {
+	candidates := []string{}
+
+	if envFile := strings.TrimSpace(os.Getenv("ENV_FILE")); envFile != "" {
+		candidates = append(candidates, envFile)
+	}
+
+	candidates = append(candidates,
+		"backend/.env",
+		".env",
+		"backend/.env.dev",
+		".env.dev",
+	)
+
+	seen := make(map[string]struct{}, len(candidates))
+	for _, path := range candidates {
+		path = strings.TrimSpace(path)
+		if path == "" {
+			continue
+		}
+		if _, exists := seen[path]; exists {
+			continue
+		}
+		seen[path] = struct{}{}
+
+		if _, err := os.Stat(path); err != nil {
+			continue
+		}
+
+		if err := godotenv.Load(path); err == nil {
+			return
+		}
 	}
 }
 

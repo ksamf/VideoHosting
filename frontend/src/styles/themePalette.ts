@@ -17,6 +17,17 @@ export function getPalette(mode: PaletteMode) {
     text: isLight
       ? { primary: "#111111", secondary: "#4b5563" }
       : { primary: "#ffffff", secondary: "#aaaaaa" },
+    action: isLight
+      ? {
+        hover: "rgba(15, 23, 42, 0.04)",
+        selected: "rgba(15, 23, 42, 0.08)",
+        focus: "rgba(15, 23, 42, 0.16)",
+      }
+      : {
+        hover: "rgba(255, 255, 255, 0.08)",
+        selected: "rgba(255, 255, 255, 0.14)",
+        focus: "rgba(255, 255, 255, 0.2)",
+      },
     divider: isLight ? "#d1d5db" : "#444444",
     common: { black: "#000000" },
     link: { main: isLight ? "#111111" : "#ffffff" },

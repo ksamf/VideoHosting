@@ -18,10 +18,10 @@ export async function logout(): Promise<LogoutResponse> {
     emitAuthChanged();
     return data;
 }
-export async function register(email: string, password: string, username: string): Promise<RegisterResponse> {
+export async function register(email: string, password: string, username: string, personalDataConsent: boolean): Promise<RegisterResponse> {
     return api<RegisterResponse>("/signup", {
         method: "POST",
-        body: JSON.stringify({ email, password, username }),
+        body: JSON.stringify({ email, password, username, personal_data_consent: personalDataConsent }),
     }).then(unwrapApi);
 }
 export async function getMe(): Promise<MeResponse> {

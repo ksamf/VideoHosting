@@ -4,4 +4,5 @@ export interface User {
     email?: string;
     avatar_url?: string;
     subscriptions?: number;
+    videos_count?: number;
 }

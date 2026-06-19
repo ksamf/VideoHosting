@@ -20,6 +20,8 @@ type Auth struct {
 	redis  interfaces.Cache
 }
 
+const personalDataPolicyVersion = "personal-data-policy-v1"
+
 func New(users interfaces.User, conf *config.Config, redis ...interfaces.Cache) *Auth {
 	var cache interfaces.Cache
 	if len(redis) > 0 {
@@ -42,6 +44,9 @@ func (a *Auth) Me(c *gin.Context) {
 }
 
 func (a *Auth) GenerateJWT(userId uuid.UUID) (string, error) {
+	if strings.TrimSpace(a.config.Jwt.Key) == "" {
+		return "", fmt.Errorf("jwt secret is not configured")
+	}
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
 		"sub": userId.String(),
 		"exp": time.Now().Add(time.Hour * 24 * 30).Unix(),
@@ -89,12 +94,17 @@ func (a *Auth) Logout(c *gin.Context) {
 
 func (a *Auth) Signup(c *gin.Context) {
 	var body struct {
-		UserName string `json:"username"`
-		Email    string `json:"email"`
-		Password string `json:"password"`
+		UserName            string `json:"username"`
+		Email               string `json:"email"`
+		Password            string `json:"password"`
+		PersonalDataConsent bool   `json:"personal_data_consent"`
 	}
 	if c.ShouldBindJSON(&body) != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Failed to read body"})
+		return
+	}
+	if !body.PersonalDataConsent {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "personal data consent is required"})
 		return
 	}
 	if existing, _ := a.user.GetByEmail(body.Email); existing != nil {
@@ -110,6 +120,10 @@ func (a *Auth) Signup(c *gin.Context) {
 	err = a.user.Insert(userId, body.UserName, body.Email, string(hash))
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Failed to insert user"})
+		return
+	}
+	if err := a.user.RecordPersonalDataConsent(userId, personalDataPolicyVersion, c.ClientIP()); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Failed to record personal data consent"})
 		return
 	}
 	c.JSON(http.StatusOK, gin.H{"message": "signup successful"})
