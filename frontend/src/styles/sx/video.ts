@@ -239,20 +239,23 @@ export const videoSx: VideoSxStyles = {
   volumeIcon: { color: "#ffffff" },
   volumePopover: (hoveredVolume) => ({
     position: "absolute",
-    bottom: "120%",
+    bottom: "calc(100% + 8px)",
     left: "50%",
     transform: hoveredVolume
-      ? "translateX(10%) translateY(40px)"
-      : "translateX(0%) translateY(40px)",
+      ? "translateX(-50%) translateY(0)"
+      : "translateX(-50%) translateY(6px)",
     opacity: hoveredVolume ? 1 : 0,
     pointerEvents: hoveredVolume ? "auto" : "none",
     transition: "all 0.2s ease",
-    px: 1,
-    py: 0.5,
+    bgcolor: "rgba(0,0,0,0.72)",
+    px: { xs: 1, sm: 1 },
+    py: { xs: 1, sm: 0.5 },
     borderRadius: 1,
+    zIndex: 3,
   }),
   volumeSlider: {
-    width: 100,
+    width: { xs: 28, sm: 100 },
+    height: { xs: 96, sm: "auto" },
     color: "#ffffff",
   },
 };

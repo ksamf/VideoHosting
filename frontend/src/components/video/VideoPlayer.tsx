@@ -132,13 +132,11 @@ export default function VideoPlayer({ src, poster, qualities = [], videoId }: Vi
 
                         <Box sx={{ flexGrow: 1 }} />
 
-                        {!isMobile && (
-                            <SelectSpeed
-                                playbackRate={playbackRate}
-                                setPlaybackRate={setPlaybackRate}
-                                videoRef={videoRef}
-                            />
-                        )}
+                        <SelectSpeed
+                            playbackRate={playbackRate}
+                            setPlaybackRate={setPlaybackRate}
+                            videoRef={videoRef}
+                        />
 
                         <SelectQuality
                             qualities={safeQualities}
