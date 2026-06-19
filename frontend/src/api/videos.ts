@@ -60,9 +60,9 @@ export const getComments = async (
     ));
 };
 
-export const addComment = async (id: string, comment: string, publicContentConsent: boolean): Promise<AddComment> => {
+export const addComment = async (id: string, comment: string): Promise<AddComment> => {
     return unwrapApi(await api<AddComment>(`/video/${id}/comment`,
-        { method: "POST", body: JSON.stringify({ comment, public_content_consent: publicContentConsent }) }
+        { method: "POST", body: JSON.stringify({ comment }) }
     ));
 }
 

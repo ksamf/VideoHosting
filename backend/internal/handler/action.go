@@ -135,16 +135,11 @@ func (h *ActionHandler) AddComment(c *gin.Context) {
 		return
 	}
 	var body struct {
-		Comment              string `json:"comment"`
-		PublicContentConsent bool   `json:"public_content_consent"`
+		Comment string `json:"comment"`
 	}
 
 	if err := c.ShouldBindJSON(&body); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-		return
-	}
-	if !body.PublicContentConsent {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "public content consent is required"})
 		return
 	}
 	if len(body.Comment) == 0 || len(body.Comment) > 2000 {

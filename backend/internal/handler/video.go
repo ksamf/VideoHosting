@@ -75,10 +75,6 @@ func (h *VideoHandler) Upload(c *gin.Context) {
 	description := c.PostForm("description")
 	tags := c.PostFormArray("tags[]")
 
-	if !requirePublicContentConsent(c, c.PostForm("public_content_consent")) {
-		return
-	}
-
 	if name == "" || len(name) > 100 {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid title"})
 		return

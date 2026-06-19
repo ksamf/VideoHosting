@@ -80,7 +80,6 @@ export const getUserViewsCount = async (channelId: string, period: number = 0): 
 export const uploadUserAvatar = async (userId: string, file: File): Promise<UploadAvatarResponse> => {
     const form = new FormData();
     form.append("avatar", file);
-    form.append("public_content_consent", "true");
     return unwrapApi(await api<UploadAvatarResponse>(`/user/${userId}/upload`, { method: "POST", body: form }));
 };
 

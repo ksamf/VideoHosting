@@ -229,7 +229,6 @@ func TestVideoHandler_Upload_Success(t *testing.T) {
 	writer := multipart.NewWriter(body)
 	_ = writer.WriteField("name", "test video")
 	_ = writer.WriteField("description", "desc")
-	_ = writer.WriteField("public_content_consent", "true")
 	part, _ := writer.CreateFormFile("video", "video.mp4")
 	_, _ = part.Write([]byte("fake mp4 data"))
 	_ = writer.Close()
@@ -257,7 +256,7 @@ func TestVideoHandler_Upload_Success(t *testing.T) {
 	assert.Equal(t, database.VideoStatusProcessing, resp["status"])
 }
 
-func TestVideoHandler_Upload_RejectsMissingPublicContentConsent(t *testing.T) {
+func TestVideoHandler_Upload_AllowsAuthenticatedUserWithoutPublicContentConsent(t *testing.T) {
 	t.Parallel()
 
 	userID := uuid.New()
@@ -308,11 +307,10 @@ func TestVideoHandler_Upload_RejectsMissingPublicContentConsent(t *testing.T) {
 	w := httptest.NewRecorder()
 	router.ServeHTTP(w, req)
 
-	assert.Equal(t, http.StatusBadRequest, w.Code)
-	assert.False(t, storageCalled)
-	assert.False(t, dbCalled)
-	assert.False(t, brokerCalled)
-	assert.Contains(t, w.Body.String(), "public content consent is required")
+	assert.Equal(t, http.StatusOK, w.Code)
+	assert.True(t, storageCalled)
+	assert.True(t, dbCalled)
+	assert.True(t, brokerCalled)
 }
 
 func TestVideoHandler_Upload_RejectsInvalidDefaultPreviewFormat(t *testing.T) {
@@ -337,7 +335,6 @@ func TestVideoHandler_Upload_RejectsInvalidDefaultPreviewFormat(t *testing.T) {
 	body := &bytes.Buffer{}
 	writer := multipart.NewWriter(body)
 	_ = writer.WriteField("name", "test video")
-	_ = writer.WriteField("public_content_consent", "true")
 	part, _ := writer.CreateFormFile("video", "video.mp4")
 	_, _ = part.Write([]byte("fake mp4 data"))
 	previewPart, _ := writer.CreateFormFile("default_preview", "preview.html")

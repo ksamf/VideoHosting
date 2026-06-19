@@ -1,4 +1,4 @@
-import { Box, Checkbox, CircularProgress, FormControlLabel, IconButton, Input, Stack, Typography } from "@mui/material";
+import { Box, CircularProgress, IconButton, Input, Stack, Typography } from "@mui/material";
 import SendIcon from "@mui/icons-material/Send";
 import ReactTimeAgo from "react-time-ago";
 import { getComments } from "../../api/videos";
@@ -8,7 +8,6 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { Comment } from "../../types/action";
 import type { VideoDetails } from "../../types/video";
 import type { User } from "../../types/user";
-import { PUBLIC_CONTENT_CONSENT_TEXT } from "../../utils/privacy";
 
 type VideoCommentsProps = {
     video: VideoDetails;
@@ -41,7 +40,6 @@ export default function VideoComments({ video, user, isAuth }: VideoCommentsProp
     const [offset, setOffset] = useState<number>(0);
     const [hasMore, setHasMore] = useState<boolean>(false);
     const [optimistic, setOptimistic] = useState<OptimisticComment[]>([]);
-    const [publicContentConsent, setPublicContentConsent] = useState(false);
 
     const loadFirstPage = useCallback(async () => {
         if (!videoId) {
@@ -159,7 +157,7 @@ export default function VideoComments({ video, user, isAuth }: VideoCommentsProp
         setOptimistic((prev) => [optimisticComment, ...prev]);
         void loadFirstPage();
     });
-    const isSubmitDisabled = isDisabledSend || sendingComment || !publicContentConsent;
+    const isSubmitDisabled = isDisabledSend || sendingComment;
 
     if (loadingInitial) {
         return (
@@ -183,7 +181,7 @@ export default function VideoComments({ video, user, isAuth }: VideoCommentsProp
                     onSubmit={(e) => {
                         e.preventDefault();
                         if (videoId) {
-                            void handleSubmitComment(publicContentConsent);
+                            void handleSubmitComment();
                         }
                     }}
                 >
@@ -216,21 +214,6 @@ export default function VideoComments({ video, user, isAuth }: VideoCommentsProp
                             }
                         />
                     </Stack>
-                    <FormControlLabel
-                        control={
-                            <Checkbox
-                                checked={publicContentConsent}
-                                onChange={(e) => setPublicContentConsent(e.target.checked)}
-                                disabled={sendingComment}
-                            />
-                        }
-                        label={
-                            <Typography fontSize={12} color="text.secondary">
-                                {PUBLIC_CONTENT_CONSENT_TEXT} Комментарий будет виден другим пользователям.
-                            </Typography>
-                        }
-                        sx={{ m: 0, alignItems: "flex-start", pl: { xs: 0, sm: 6 } }}
-                    />
                 </Stack>
             )}
 

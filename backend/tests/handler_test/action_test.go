@@ -138,7 +138,7 @@ func TestActionHandler_AddComment_InvalidVideoID(t *testing.T) {
 	assert.False(t, addCalled)
 }
 
-func TestActionHandler_AddComment_RejectsMissingPublicContentConsent(t *testing.T) {
+func TestActionHandler_AddComment_AllowsAuthenticatedUserWithoutPublicContentConsent(t *testing.T) {
 	t.Parallel()
 
 	userID := uuid.New()
@@ -167,7 +167,6 @@ func TestActionHandler_AddComment_RejectsMissingPublicContentConsent(t *testing.
 	w := httptest.NewRecorder()
 	router.ServeHTTP(w, req)
 
-	assert.Equal(t, http.StatusBadRequest, w.Code)
-	assert.False(t, addCalled)
-	assert.Contains(t, w.Body.String(), "public content consent is required")
+	assert.Equal(t, http.StatusOK, w.Code)
+	assert.True(t, addCalled)
 }

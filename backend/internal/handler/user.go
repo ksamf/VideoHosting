@@ -150,9 +150,6 @@ func (h *UserHandler) UploadAvatar(c *gin.Context) {
 		c.JSON(http.StatusForbidden, gin.H{"error": "forbidden"})
 		return
 	}
-	if !requirePublicContentConsent(c, c.PostForm("public_content_consent")) {
-		return
-	}
 	avatar, avatarHeader, err := c.Request.FormFile("avatar")
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "avatar is required"})
