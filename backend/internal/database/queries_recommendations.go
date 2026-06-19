@@ -7,19 +7,19 @@ WITH candidates AS (
     v.user_id,
     v.video_url,
     v.name,
-    v.description,
-    v.language_id,
-    v.qualities,
-    v.duration_seconds,
-    v.tags,
+    COALESCE(v.description, '') AS description,
+    COALESCE(v.language_id, 0) AS language_id,
+    COALESCE(v.qualities, '{}'::integer[]) AS qualities,
+    COALESCE(v.duration_seconds, 0) AS duration_seconds,
+    COALESCE(v.tags, '{}'::varchar(50)[]) AS tags,
     v.preview_url,
     v.status,
-    v.views,
-    v.likes,
-    v.dislikes,
-    v.upscaled,
-    v.created_at,
-    v.updated_at,
+    COALESCE(v.views, 0) AS views,
+    COALESCE(v.likes, 0) AS likes,
+    COALESCE(v.dislikes, 0) AS dislikes,
+    COALESCE(v.upscaled, false) AS upscaled,
+    COALESCE(v.created_at, NOW()) AS created_at,
+    COALESCE(v.updated_at, v.created_at, NOW()) AS updated_at,
     COALESCE(vs.views_7d, 0)::float8 AS views_7d,
     COALESCE(vs.avg_watch_ratio_7d, 0)::float8 AS watch_ratio_7d,
     COALESCE(uaa.score, 0)::float8 AS author_affinity,
@@ -27,7 +27,7 @@ WITH candidates AS (
       SELECT AVG(uta.score)::float8
       FROM user_tag_affinity uta
       WHERE uta.user_id = $1
-        AND uta.tag = ANY(v.tags)
+        AND uta.tag = ANY(COALESCE(v.tags, '{}'::varchar(50)[]))
     ), 0)::float8 AS tag_affinity
   FROM videos v
   LEFT JOIN video_stats vs ON vs.video_id = v.video_id

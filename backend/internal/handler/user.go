@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"log"
 	"net/http"
 	"path/filepath"
 	"strconv"
@@ -452,6 +453,7 @@ func (h *UserHandler) GetRecommendation(c *gin.Context) {
 
 	videos, err := h.user.GetRecommendations(userID, limit, offset)
 	if err != nil {
+		log.Printf("failed to get recommendations for user %s: %v", userID, err)
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to get recommendations"})
 		return
 	}

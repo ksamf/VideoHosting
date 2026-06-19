@@ -380,7 +380,7 @@ func (db *UserModel) GetRecommendations(userID uuid.UUID, limit, offset int) ([]
 
 	rows, err := db.Pool.Query(ctx, recommendationsQuery, userID, wPersonal, wPopularity, wFreshness, wQuality, limit, offset)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to query recommendations: %w", err)
 	}
 	defer rows.Close()
 
@@ -392,12 +392,12 @@ func (db *UserModel) GetRecommendations(userID uuid.UUID, limit, offset int) ([]
 			&v.Qualities, &v.DurationSeconds, &v.Tags, &v.PreviewUrl, &v.Status,
 			&v.Views, &v.Likes, &v.Dislikes, &v.Upscaled, &v.CreatedAt, &v.UpdatedAt,
 		); err != nil {
-			return nil, err
+			return nil, fmt.Errorf("failed to scan recommendation: %w", err)
 		}
 		out = append(out, &v)
 	}
 	if err := rows.Err(); err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to read recommendations rows: %w", err)
 	}
 	return out, nil
 }
